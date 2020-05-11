@@ -171,9 +171,64 @@ class SignInFormState extends State<SignInForm> {
   final _formKey = GlobalKey<FormState>();
 
   final AuthService _auth = AuthService();
+  final _emailTextController = TextEditingController();
 
-  bool showPassword = false;
+  String email = "";
+  String password = "";
+  String emailValidityText = "";
+  String passwordValidityText = "";
+  RegExp emailValidityRegExp = RegExp(
+      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+  bool hidePassword = true;
   bool isLogIn = true;
+
+  showAlertDialog(BuildContext context) {
+    // set up the buttons
+    Widget cancelButton = FlatButton(
+      child: Text(
+        "Cancel",
+        style: TextStyle(
+          color: Color(0xFF777777),
+        ),
+      ),
+      onPressed: () => Navigator.pop(context),
+    );
+    Widget continueButton = FlatButton(
+      child: Text("Send Email"),
+      onPressed: () async {
+        try {
+          await _auth.sendPasswordResetEmail(email);
+        } catch (e) {
+          if (e.toString().contains("ERROR_USER_NOT_FOUND")) {
+            setState(() {
+              emailValidityText = "• User not found";
+            });
+          }
+          print(e.toString());
+        }
+        Navigator.pop(context);
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Forgot password?"),
+      content:
+          Text("We will send a change password link to your email:\n" + email),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -188,11 +243,21 @@ class SignInFormState extends State<SignInForm> {
                 // Email text
                 margin: EdgeInsets.only(top: 30),
                 alignment: Alignment.centerLeft,
-                child: Text(
-                  "Email",
-                  style: TextStyle(
-                    color: Color(0xFF777777),
-                  ),
+                child: Row(
+                  children: <Widget>[
+                    Text(
+                      "Email ",
+                      style: TextStyle(
+                        color: Color(0xFF777777),
+                      ),
+                    ),
+                    Text(
+                      emailValidityText,
+                      style: TextStyle(
+                        color: Theme.errorColor,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Container(
@@ -209,6 +274,7 @@ class SignInFormState extends State<SignInForm> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     TextFormField(
+                      controller: _emailTextController,
                       style: TextStyle(
                         color: Color(0xFF555555),
                         decoration: TextDecoration.none,
@@ -222,9 +288,19 @@ class SignInFormState extends State<SignInForm> {
                         hintText: "example@email.com",
                         border: InputBorder.none,
                       ),
+                      onChanged: (value) {
+                        setState(() {
+                          email = value;
+                        });
+                      },
                       validator: (value) {
                         if (value.isEmpty) {
-                          return 'Cannot be empty!';
+                          setState(
+                              () => emailValidityText = '• Cannot be empty!');
+                        } else if (!emailValidityRegExp.hasMatch(email)) {
+                          setState(() => emailValidityText = "• Invalid");
+                        } else {
+                          setState(() => emailValidityText = "");
                         }
                         return null;
                       },
@@ -241,11 +317,21 @@ class SignInFormState extends State<SignInForm> {
                 // Password title text
                 margin: EdgeInsets.only(top: 25),
                 alignment: Alignment.centerLeft,
-                child: Text(
-                  "Password",
-                  style: TextStyle(
-                    color: Color(0xFF777777),
-                  ),
+                child: Row(
+                  children: <Widget>[
+                    Text(
+                      "Password ",
+                      style: TextStyle(
+                        color: Color(0xFF777777),
+                      ),
+                    ),
+                    Text(
+                      passwordValidityText,
+                      style: TextStyle(
+                        color: Theme.errorColor,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Stack(
@@ -265,7 +351,7 @@ class SignInFormState extends State<SignInForm> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         TextFormField(
-                          obscureText: showPassword,
+                          obscureText: hidePassword,
                           style: TextStyle(
                             color: Color(0xFF555555),
                             decoration: TextDecoration.none,
@@ -280,11 +366,20 @@ class SignInFormState extends State<SignInForm> {
                             hintText: "pass****",
                             border: InputBorder.none,
                           ),
+                          onChanged: (value) {
+                            setState(() {
+                              password = value;
+                            });
+                          },
                           validator: (value) {
                             if (value.isEmpty) {
-                              return 'Cannot be empty!';
+                              setState(() =>
+                                  passwordValidityText = '• Cannot be empty!');
                             } else if (value.length < 8) {
-                              return "Minimum 8 characters";
+                              setState(() => passwordValidityText =
+                                  "• Minimum 8 characters");
+                            } else {
+                              setState(() => passwordValidityText = "");
                             }
                             return null;
                           },
@@ -298,14 +393,11 @@ class SignInFormState extends State<SignInForm> {
                     height: 32,
                     child: FlatButton(
                       onPressed: () {
-                        setState(() {
-                          showPassword =
-                              !showPassword; // update the state of the class to show color change
-                        });
+                        setState(() => hidePassword = !hidePassword);
                       },
                       padding: EdgeInsets.all(4),
                       child: Image.asset("assets/images/" +
-                          (showPassword ? "Show" : "Hide") +
+                          (hidePassword ? "Show" : "Hide") +
                           "PasswordIcon.png"),
                     ),
                   ),
@@ -316,13 +408,29 @@ class SignInFormState extends State<SignInForm> {
           Container(
             // Forgot Password Blue text
             alignment: Alignment.centerRight,
-            margin: EdgeInsets.only(top: 3),
-            child: Text(
-              "Forgot Password?",
-              style: TextStyle(
+            child: FlatButton(
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              padding: EdgeInsets.all(0),
+              onPressed: () {
+                if (_emailTextController.text.isEmpty) {
+                  setState(() => emailValidityText = '• Cannot be empty!');
+                } else if (!emailValidityRegExp
+                    .hasMatch(_emailTextController.text)) {
+                  setState(() => emailValidityText = "• Invalid");
+                } else {
+                  setState(() => emailValidityText = "");
+                  showAlertDialog(context);
+                }
+              },
+              child: Text(
+                "Forgot Password?",
+                style: TextStyle(
+                  height: 0,
                   decoration: TextDecoration.underline,
                   fontSize: 13,
-                  color: Theme.linkColor),
+                  color: Theme.linkColor,
+                ),
+              ),
             ),
           ),
           Container(
@@ -354,8 +462,42 @@ class SignInFormState extends State<SignInForm> {
                 Container(
                   // Right button default as LOG IN
                   child: OutlineButton(
-                    onPressed: () async {
-                      if (_formKey.currentState.validate()) {}
+                    onPressed: () {
+                      if (_formKey.currentState.validate()) {
+                        try {
+                          if (isLogIn) {
+                            _auth.logInWithEmailAndPassword(email, password);
+                          } else {
+                            _auth.signUpWithEmailAndPassword(email, password);
+                          }
+                        } catch (e) {
+                          if (e.toString().contains("ERROR_USER_NOT_FOUND")) {
+                            setState(() {
+                              emailValidityText = "• User not found";
+                            });
+                          } else if (e
+                              .toString()
+                              .contains("ERROR_INVALID_EMAIL")) {
+                            setState(() {
+                              emailValidityText = "• Invalid";
+                            });
+                          } else if (e
+                              .toString()
+                              .contains("ERROR_WRONG_PASSWORD")) {
+                            setState(() {
+                              passwordValidityText = "• Incorrect";
+                            });
+                          } else if (e
+                              .toString()
+                              .contains("ERROR_TOO_MANY_REQUESTS")) {
+                            setState(() {
+                              passwordValidityText =
+                                  "• Too many attempts, try again later!";
+                            });
+                          }
+                          print(e);
+                        }
+                      }
                     },
                     borderSide: BorderSide(
                       width: 1,

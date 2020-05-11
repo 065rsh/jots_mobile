@@ -47,4 +47,30 @@ class AuthService {
       return null;
     }
   }
+
+  // # Sign Up with Email and Password
+  Future signUpWithEmailAndPassword(String email, String password) async {
+    AuthResult result = await _auth.createUserWithEmailAndPassword(
+        email: email, password: password);
+    FirebaseUser user = result.user;
+    return _userFromFirebaseUser(user);
+  }
+
+  // # LOG IN with Email and Password
+  Future logInWithEmailAndPassword(String email, String password) async {
+    AuthResult result = await _auth.signInWithEmailAndPassword(
+        email: email, password: password);
+    FirebaseUser user = result.user;
+    return _userFromFirebaseUser(user);
+  }
+
+  // # Send password reset Email
+  Future sendPasswordResetEmail(String email) async {
+    return await _auth.sendPasswordResetEmail(email: email);
+  }
+
+  // # Check if user exists
+  // Future<void> checkIfUserExists(String email) async {
+  //   return _auth.
+  // }
 }
