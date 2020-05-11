@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "741448949490",
+    "firebase_url": "https://jots-app.firebaseio.com",
+    "project_id": "jots-app",
+    "storage_bucket": "jots-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:741448949490:android:e6ac5ecab6e28d4aed7a6b",
+        "android_client_info": {
+          "package_name": "com.example.jots_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "741448949490-ihvs2ikb5qh969a5bfh4sel54fbmnfpr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHqc3t-64TEoZRK6eLAMtpu8f_nvjgTiY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "741448949490-jsslaaud1sv26gfds7rgu14ika65h9n1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
