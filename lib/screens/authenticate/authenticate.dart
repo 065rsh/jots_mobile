@@ -5,6 +5,7 @@ import 'package:jots_mobile/services/auth.dart';
 import 'package:jots_mobile/theme.dart' as Theme;
 import 'package:provider/provider.dart';
 import 'package:jots_mobile/main.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Authenticate extends StatefulWidget {
   @override
@@ -108,12 +109,6 @@ class LoginTemplate extends StatefulWidget {
 class LoginTemplateState extends State<LoginTemplate> {
   String templateTitle = "LOG IN";
 
-  changeTemplateTitleCB(isLogIn) {
-    setState(() {
-      templateTitle = isLogIn ? "LOG IN" : "SIGN UP";
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -149,7 +144,7 @@ class LoginTemplateState extends State<LoginTemplate> {
                     ),
                   ),
                 ),
-                SignInForm(changeTemplateTitleCB),
+                SignInForm(),
               ],
             ),
           ),
@@ -160,10 +155,6 @@ class LoginTemplateState extends State<LoginTemplate> {
 }
 
 class SignInForm extends StatefulWidget {
-  final Function(bool) changeTemplateTitleCB;
-
-  SignInForm(this.changeTemplateTitleCB);
-
   SignInFormState createState() {
     return SignInFormState();
   }
@@ -187,7 +178,6 @@ class SignInFormState extends State<SignInForm> {
   RegExp emailValidityRegExp = RegExp(
       r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
   bool hidePassword = true;
-  bool isLogIn = true;
   bool isLoading = false;
   String emailNotVerifiedText = "";
   String emailVerificationText =
@@ -243,8 +233,6 @@ class SignInFormState extends State<SignInForm> {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<FirebaseUser>(context);
-
     return Form(
       key: _formKey,
       child: Column(
@@ -454,210 +442,104 @@ class SignInFormState extends State<SignInForm> {
             margin: EdgeInsets.only(top: 20),
             child: isLoading
                 ? spinkit
-                : user != null && !user.isEmailVerified
-                    ?
-                    // Show email verification buttons
-                    Padding(
-                        padding: const EdgeInsets.only(left: 5, right: 10),
-                        child: Column(
-                          children: <Widget>[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                // left button, default as SIGN UP
-                                Container(
-                                  child: FlatButton(
-                                    onPressed: () async {
-                                      setState(() => isLoading = true);
-                                      try {
-                                        await _auth.sendVerificationEmail(user);
-                                      } catch (e) {
-                                        print(e);
-                                      } finally {
-                                        setState(() => isLoading = false);
-                                      }
-                                    },
-                                    child: Text(
-                                      "Try Again!",
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        letterSpacing: 1,
-                                        fontWeight: FontWeight.w400,
-                                        color: Theme.darkTextColor,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                // Right button default as LOG IN
-                                Container(
-                                  child: OutlineButton(
-                                    onPressed: () async {
-                                      setState(() => isLoading = true);
-                                      try {
-                                        FirebaseUser currentUser =
-                                            await FirebaseAuth.instance
-                                                .currentUser();
-                                        await currentUser.reload();
-                                        if (currentUser.isEmailVerified) {
-                                          setState(() => isLoading = false);
-                                          RestartWidget.restartApp(context);
-                                          print("VERIFIED!");
-                                        } else {
-                                          setState(() => emailNotVerifiedText =
-                                              "Email not verified yet!");
-                                          print("NOT VERIFIED!");
-                                        }
-                                      } catch (e) {
-                                        print(e);
-                                      } finally {
-                                        setState(() => isLoading = false);
-                                      }
-                                    },
-                                    borderSide: BorderSide(
-                                      color: Theme.themeblue,
-                                    ),
-                                    shape: new RoundedRectangleBorder(
-                                      borderRadius:
-                                          new BorderRadius.circular(7.0),
-                                    ),
-                                    child: Text(
-                                      "DONE",
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        letterSpacing: 1,
-                                        fontWeight: FontWeight.w400,
-                                        color: Theme.themeblue,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Container(
-                                  margin: EdgeInsets.only(top: 10),
-                                  width: 200,
-                                  child: Text(
-                                    emailVerificationText,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                                Container(
-                                  margin: EdgeInsets.only(top: 10),
-                                  child: Text(
-                                    emailNotVerifiedText,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(color: Theme.errorColor),
-                                  ),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                      )
-                    :
-                    // Show Login or Signup buttons
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          // left button, default as SIGN UP
-                          Container(
-                            child: FlatButton(
-                              onPressed: () {
-                                setState(() {
-                                  isLogIn = !isLogIn;
-                                });
-                                widget.changeTemplateTitleCB(isLogIn);
-                              },
-                              child: Text(
-                                isLogIn ? "SIGN UP" : "LOG IN",
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  letterSpacing: 1,
-                                  fontWeight: FontWeight.w400,
-                                  color: Theme.linkColor,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
+                :
+                // Show Login or Signup buttons
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      // left button, default as SIGN UP
+                      Container(
+                        child: FlatButton(
+                          onPressed: () {
+                            _launchURL();
+                          },
+                          child: Text(
+                            "SIGN UP",
+                            style: TextStyle(
+                              fontSize: 15,
+                              letterSpacing: 1,
+                              fontWeight: FontWeight.w400,
+                              color: Theme.linkColor,
+                              decoration: TextDecoration.underline,
                             ),
                           ),
-                          // Right button default as LOG IN
-                          Container(
-                            child: OutlineButton(
-                              onPressed: () async {
-                                if (_formKey.currentState.validate()) {
-                                  try {
-                                    setState(() => isLoading = true);
-                                    Future.delayed(const Duration(seconds: 100),
-                                        () {
-                                      setState(() {
-                                        isLoading = false;
-                                      });
-                                    });
-                                    if (isLogIn) {
-                                      await _auth.logInWithEmailAndPassword(
-                                          email, password);
-                                    } else {
-                                      await _auth.signUpWithEmailAndPassword(
-                                          email, password);
-                                    }
-                                    setState(() => isLoading = false);
-                                  } catch (e) {
-                                    if (e
-                                        .toString()
-                                        .contains("ERROR_USER_NOT_FOUND")) {
-                                      setState(() {
-                                        emailValidityText = "• User not found";
-                                      });
-                                    } else if (e
-                                        .toString()
-                                        .contains("ERROR_INVALID_EMAIL")) {
-                                      setState(() {
-                                        emailValidityText = "• Invalid";
-                                      });
-                                    } else if (e
-                                        .toString()
-                                        .contains("ERROR_WRONG_PASSWORD")) {
-                                      setState(() {
-                                        passwordValidityText = "• Incorrect";
-                                      });
-                                    } else if (e
-                                        .toString()
-                                        .contains("ERROR_TOO_MANY_REQUESTS")) {
-                                      setState(() {
-                                        passwordValidityText =
-                                            "• Too many attempts, try again later!";
-                                      });
-                                    }
-                                    print(e);
-                                  } finally {
-                                    setState(() => isLoading = false);
-                                  }
-                                }
-                              },
-                              borderSide: BorderSide(
-                                width: 1,
-                                color: Theme.lightBorderColor,
-                              ),
-                              shape: new RoundedRectangleBorder(
-                                borderRadius: new BorderRadius.circular(7.0),
-                              ),
-                              child: Text(
-                                isLogIn ? "LOG IN" : "SIGN UP",
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  letterSpacing: 1,
-                                  fontWeight: FontWeight.w400,
-                                  color: Theme.darkTextColor,
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
+                        ),
                       ),
+                      // Right button default as LOG IN
+                      Container(
+                        child: OutlineButton(
+                          onPressed: () async {
+                            if (_formKey.currentState.validate()) {
+                              try {
+                                setState(() => isLoading = true);
+                                Future.delayed(const Duration(seconds: 100),
+                                    () {
+                                  setState(() {
+                                    isLoading = false;
+                                  });
+                                });
+                                await _auth.logInWithEmailAndPassword(
+                                    email, password);
+
+                                setState(() => isLoading = false);
+                              } catch (e) {
+                                if (e
+                                    .toString()
+                                    .contains("ERROR_USER_NOT_FOUND")) {
+                                  setState(() {
+                                    emailValidityText = "• User not found";
+                                  });
+                                } else if (e
+                                    .toString()
+                                    .contains("ERROR_INVALID_EMAIL")) {
+                                  setState(() {
+                                    emailValidityText = "• Invalid";
+                                  });
+                                } else if (e
+                                    .toString()
+                                    .contains("ERROR_WRONG_PASSWORD")) {
+                                  setState(() {
+                                    passwordValidityText = "• Incorrect";
+                                  });
+                                } else if (e
+                                    .toString()
+                                    .contains("ERROR_TOO_MANY_REQUESTS")) {
+                                  setState(() {
+                                    passwordValidityText =
+                                        "• Too many attempts, try again later!";
+                                  });
+                                } else if (e
+                                    .toString()
+                                    .contains("ERROR_EMAIL_ALREADY_IN_USE")) {
+                                  setState(() {
+                                    emailValidityText = "• Already in use";
+                                  });
+                                }
+                                print(e);
+                                setState(() => isLoading = false);
+                              }
+                            }
+                          },
+                          borderSide: BorderSide(
+                            width: 1,
+                            color: Theme.lightBorderColor,
+                          ),
+                          shape: new RoundedRectangleBorder(
+                            borderRadius: new BorderRadius.circular(7.0),
+                          ),
+                          child: Text(
+                            "LOG IN",
+                            style: TextStyle(
+                              fontSize: 15,
+                              letterSpacing: 1,
+                              fontWeight: FontWeight.w400,
+                              color: Theme.darkTextColor,
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
           ),
           // Divider
           Container(
@@ -711,5 +593,14 @@ class SignInFormState extends State<SignInForm> {
         ],
       ),
     );
+  }
+}
+
+_launchURL() async {
+  const url = 'https://jots-app.web.app';
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    throw 'Could not launch $url';
   }
 }

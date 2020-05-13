@@ -3,7 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn googleSignIn = GoogleSignIn();
+  final GoogleSignIn googleSignIn = GoogleSignIn(scopes: ['email']);
 
   // Change user object based on FirebaseUser
   // User _userFromFirebaseUser(FirebaseUser user) {
@@ -40,19 +40,12 @@ class AuthService {
 
   Future signOut() async {
     try {
+      await googleSignIn.signOut();
       return await _auth.signOut();
     } catch (e) {
       print(e.toString());
       return null;
     }
-  }
-
-  // # Sign Up with Email and Password
-  Future signUpWithEmailAndPassword(String email, String password) async {
-    AuthResult result = await _auth.createUserWithEmailAndPassword(
-        email: email, password: password);
-    FirebaseUser user = result.user;
-    return user;
   }
 
   // # LOG IN with Email and Password
@@ -66,10 +59,5 @@ class AuthService {
   // # Send password reset Email
   Future sendPasswordResetEmail(String email) async {
     return await _auth.sendPasswordResetEmail(email: email);
-  }
-
-  // # Send Verification Email
-  Future sendVerificationEmail(FirebaseUser user) async {
-    return await user.sendEmailVerification();
   }
 }
