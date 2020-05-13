@@ -1,19 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:jots_mobile/models/user.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn googleSignIn = GoogleSignIn();
 
   // Change user object based on FirebaseUser
-  User _userFromFirebaseUser(FirebaseUser user) {
-    return user != null ? User(uid: user.uid) : null;
-  }
+  // User _userFromFirebaseUser(FirebaseUser user) {
+  //   return user != null ? User(uid: user.uid) : null;
+  // }
 
-  Stream<User> get user {
-    return _auth.onAuthStateChanged.map(_userFromFirebaseUser);
-    // .map((FirebaseUser user) => _userFromFirebaseUser(user));
+  // # User Authentication listener
+  Stream<FirebaseUser> get user {
+    return _auth.onAuthStateChanged.map((FirebaseUser user) => user);
   }
 
   // # Sign in with GOOGLE
@@ -32,7 +31,7 @@ class AuthService {
       AuthResult authResult = await _auth.signInWithCredential(credential);
       FirebaseUser user = authResult.user;
 
-      return _userFromFirebaseUser(user);
+      return user;
     } catch (e) {
       print(e.toString());
       return null;
@@ -53,7 +52,7 @@ class AuthService {
     AuthResult result = await _auth.createUserWithEmailAndPassword(
         email: email, password: password);
     FirebaseUser user = result.user;
-    return _userFromFirebaseUser(user);
+    return user;
   }
 
   // # LOG IN with Email and Password
@@ -61,7 +60,7 @@ class AuthService {
     AuthResult result = await _auth.signInWithEmailAndPassword(
         email: email, password: password);
     FirebaseUser user = result.user;
-    return _userFromFirebaseUser(user);
+    return user;
   }
 
   // # Send password reset Email
@@ -69,8 +68,8 @@ class AuthService {
     return await _auth.sendPasswordResetEmail(email: email);
   }
 
-  // # Check if user exists
-  // Future<void> checkIfUserExists(String email) async {
-  //   return _auth.
-  // }
+  // # Send Verification Email
+  Future sendVerificationEmail(FirebaseUser user) async {
+    return await user.sendEmailVerification();
+  }
 }

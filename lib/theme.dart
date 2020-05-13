@@ -27,6 +27,7 @@ final lightBorderColor = CompanyColors.lightBorderCC;
 final linkColor = CompanyColors.blue;
 final darkTextColor = CompanyColors.dark55;
 final errorColor = CompanyColors.colorRed;
+final themeblue = CompanyColors.colorThemeBlue;
 
 // final ThemeData CompanyThemeData = new ThemeData(
 //   brightness: Brightness.light,
@@ -39,6 +40,7 @@ class CompanyColors {
   static const dark55 = Color(0xFF555555);
   static const lightBorderCC = Color(0xFFCCCCCC);
   static const colorRed = Color(0xFFFF5151);
+  static const colorThemeBlue = Color(0xFF3E9FFF);
 
   // static const Map<int, Color> blue = const <int, Color>{
   //   50: const Color(/* some hex code */),
