@@ -1,10 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:jots_mobile/services/auth.dart';
 import 'package:jots_mobile/theme.dart' as Theme;
-import 'package:provider/provider.dart';
-import 'package:jots_mobile/main.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Authenticate extends StatefulWidget {
@@ -17,82 +14,87 @@ class _AuthenticateState extends State<Authenticate> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomPadding: false,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFFF5137),
-              Color(0xFFFF7F46),
-            ],
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).requestFocus(new FocusNode());
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFFFF5137),
+                Color(0xFFFF7F46),
+              ],
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Stack(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Stack(
-                  children: <Widget>[
-                    Column(
-                      //# Top content
-                      children: <Widget>[
-                        new Container(
-                          alignment: Alignment.centerLeft,
-                          child: new Text(
-                            "JOTS",
-                            style: TextStyle(
-                              fontFamily: 'Bungee',
-                              fontSize: 50,
-                              foreground: Paint()
-                                ..style = PaintingStyle.stroke
-                                ..strokeWidth = 1.5
-                                ..color = Colors.white,
-                              letterSpacing: 3,
+          child: SafeArea(
+            child: Stack(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Stack(
+                    children: <Widget>[
+                      Column(
+                        //# Top content
+                        children: <Widget>[
+                          new Container(
+                            alignment: Alignment.centerLeft,
+                            child: new Text(
+                              "JOTS",
+                              style: TextStyle(
+                                fontFamily: 'Bungee',
+                                fontSize: 50,
+                                foreground: Paint()
+                                  ..style = PaintingStyle.stroke
+                                  ..strokeWidth = 1.5
+                                  ..color = Colors.white,
+                                letterSpacing: 3,
+                              ),
                             ),
                           ),
-                        ),
-                        new Padding(
-                          padding: const EdgeInsets.only(top: 20),
-                          child: new Row(
-                            children: <Widget>[
-                              new Container(
-                                child: new Image.asset(
-                                  'assets/images/TickIcon.png',
-                                  width: 25,
-                                  height: 25,
-                                ),
-                              ),
-                              new Padding(
-                                padding: EdgeInsets.only(
-                                  left: 15,
-                                ),
-                                child: new Text(
-                                  "Only Care about completing the task.",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    letterSpacing: 1,
-                                    fontSize: 16,
+                          new Padding(
+                            padding: const EdgeInsets.only(top: 20),
+                            child: new Row(
+                              children: <Widget>[
+                                new Container(
+                                  child: new Image.asset(
+                                    'assets/images/TickIcon.png',
+                                    width: 25,
+                                    height: 25,
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                    LoginTemplate(),
-                  ],
+                                new Padding(
+                                  padding: EdgeInsets.only(
+                                    left: 15,
+                                  ),
+                                  child: new Text(
+                                    "Only Care about completing the task.",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      letterSpacing: 1,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                      LoginTemplate(),
+                    ],
+                  ),
                 ),
-              ),
-              Container(
-                width: 400,
-                margin: EdgeInsets.only(left: 20, right: 20),
-                alignment: Alignment.bottomCenter,
-                child: Image.asset("assets/images/ThingsIllustration.png"),
-              ),
-            ],
+                Container(
+                  width: 400,
+                  margin: EdgeInsets.only(left: 20, right: 20),
+                  alignment: Alignment.bottomCenter,
+                  child: Image.asset("assets/images/ThingsIllustration.png"),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -179,9 +181,6 @@ class SignInFormState extends State<SignInForm> {
       r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
   bool hidePassword = true;
   bool isLoading = false;
-  String emailNotVerifiedText = "";
-  String emailVerificationText =
-      "Sent verification email.\nClick link in the email to continue.";
 
   showAlertDialog(BuildContext context) {
     // set up the buttons
@@ -272,42 +271,36 @@ class SignInFormState extends State<SignInForm> {
                   ),
                   borderRadius: BorderRadius.circular(5),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    TextFormField(
-                      controller: _emailTextController,
-                      style: TextStyle(
-                        color: Color(0xFF555555),
-                        decoration: TextDecoration.none,
-                      ),
-                      decoration: InputDecoration(
-                        isDense: true,
-                        contentPadding: EdgeInsets.only(
-                          left: 10,
-                          right: 10,
-                        ),
-                        hintText: "example@email.com",
-                        border: InputBorder.none,
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          email = value;
-                        });
-                      },
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          setState(
-                              () => emailValidityText = '• Cannot be empty!');
-                        } else if (!emailValidityRegExp.hasMatch(email)) {
-                          setState(() => emailValidityText = "• Invalid");
-                        } else {
-                          setState(() => emailValidityText = "");
-                        }
-                        return null;
-                      },
+                child: Container(
+                  child: TextFormField(
+                    controller: _emailTextController,
+                    style: TextStyle(
+                      color: Theme.darkTextColor,
+                      decoration: TextDecoration.none,
                     ),
-                  ],
+                    decoration: InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.all(11),
+                      hintText: "example@email.com",
+                      border: InputBorder.none,
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        email = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value.isEmpty) {
+                        setState(
+                            () => emailValidityText = '• Cannot be empty!');
+                      } else if (!emailValidityRegExp.hasMatch(email)) {
+                        setState(() => emailValidityText = "• Invalid");
+                      } else {
+                        setState(() => emailValidityText = "");
+                      }
+                      return null;
+                    },
+                  ),
                 ),
               ),
             ],
@@ -350,44 +343,36 @@ class SignInFormState extends State<SignInForm> {
                       ),
                       borderRadius: BorderRadius.circular(5),
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        TextFormField(
-                          obscureText: hidePassword,
-                          style: TextStyle(
-                            color: Color(0xFF555555),
-                            decoration: TextDecoration.none,
-                            letterSpacing: 2,
-                          ),
-                          decoration: InputDecoration(
-                            isDense: true,
-                            contentPadding: EdgeInsets.only(
-                              left: 10,
-                              right: 50,
-                            ),
-                            hintText: "pass****",
-                            border: InputBorder.none,
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              password = value;
-                            });
-                          },
-                          validator: (value) {
-                            if (value.isEmpty) {
-                              setState(() =>
-                                  passwordValidityText = '• Cannot be empty!');
-                            } else if (value.length < 8) {
-                              setState(() => passwordValidityText =
-                                  "• Minimum 8 characters");
-                            } else {
-                              setState(() => passwordValidityText = "");
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
+                    child: TextFormField(
+                      obscureText: hidePassword,
+                      style: TextStyle(
+                        color: Color(0xFF555555),
+                        decoration: TextDecoration.none,
+                        letterSpacing: 1,
+                      ),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.all(11),
+                        hintText: "pass****",
+                        border: InputBorder.none,
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          password = value;
+                        });
+                      },
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          setState(() =>
+                              passwordValidityText = '• Cannot be empty!');
+                        } else if (value.length < 8) {
+                          setState(() =>
+                              passwordValidityText = "• Minimum 8 characters");
+                        } else {
+                          setState(() => passwordValidityText = "");
+                        }
+                        return null;
+                      },
                     ),
                   ),
                   Container(

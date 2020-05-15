@@ -15,12 +15,32 @@ class WrapperState extends State<Wrapper> {
   Widget build(BuildContext context) {
     // return either home or authenticate widget
 
-    FirebaseUser user = Provider.of<FirebaseUser>(context);
+    return StreamBuilder(
+      stream: FirebaseAuth.instance.onAuthStateChanged,
+      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+        Widget widget;
 
-    if (user != null) {
-      return Home();
-    } else {
-      return Authenticate();
-    }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+            ),
+          );
+        }
+
+        switch (snapshot.hasData) {
+          case (true):
+            widget = Home();
+            break;
+          case (false):
+            widget = Authenticate();
+        }
+
+        return AnimatedSwitcher(
+          duration: Duration(milliseconds: 300),
+          child: widget,
+        );
+      },
+    );
   }
 }
