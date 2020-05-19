@@ -162,7 +162,7 @@ class SignInForm extends StatefulWidget {
   }
 }
 
-const spinkit = SpinKitThreeBounce(
+final spinkit = SpinKitThreeBounce(
   color: Color(0xFF3E9FFF),
   size: 20.0,
 );
@@ -398,6 +398,7 @@ class SignInFormState extends State<SignInForm> {
             // Forgot Password Blue text
             alignment: Alignment.centerRight,
             child: FlatButton(
+              splashColor: Colors.transparent,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               padding: EdgeInsets.all(0),
               onPressed: () {
@@ -543,11 +544,15 @@ class SignInFormState extends State<SignInForm> {
             child: OutlineButton(
               padding: EdgeInsets.only(left: 5, right: 5),
               onPressed: () async {
-                dynamic user = await _auth.signInWithGoogle();
-                if (user != null) {
-                  print("USER: " + user.uid);
-                } else {
-                  print("ERROR!");
+                try {
+                  dynamic user = await _auth.signInWithGoogle();
+                  if (user != null) {
+                    print("USER: " + user.uid);
+                  } else {
+                    print("ERROR!");
+                  }
+                } catch (e) {
+                  print(e.toString());
                 }
               },
               shape: new RoundedRectangleBorder(

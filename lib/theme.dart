@@ -23,11 +23,15 @@
 
 import 'package:flutter/material.dart';
 
+final darkTextColor = Color(0xFF555555);
+final semiDarkTextColor = Color(0xFF777777);
+final semiDarkColor = Color(0xFF777777);
+final lightDarkColor = Color(0xFF999999);
 final lightBorderColor = CompanyColors.lightBorderCC;
 final linkColor = CompanyColors.blue;
-final darkTextColor = CompanyColors.dark55;
-final errorColor = CompanyColors.colorRed;
-final themeblue = CompanyColors.colorThemeBlue;
+final errorColor = CompanyColors.red;
+final warningColor = Color(0xFFFF3333);
+final themeblue = CompanyColors.themeBlue;
 
 // final ThemeData CompanyThemeData = new ThemeData(
 //   brightness: Brightness.light,
@@ -37,10 +41,9 @@ final themeblue = CompanyColors.colorThemeBlue;
 class CompanyColors {
   CompanyColors._(); // this basically makes it so you can instantiate this class
   static const blue = Color(0xFF2382FF);
-  static const dark55 = Color(0xFF555555);
   static const lightBorderCC = Color(0xFFCCCCCC);
-  static const colorRed = Color(0xFFFF5151);
-  static const colorThemeBlue = Color(0xFF3E9FFF);
+  static const red = Color(0xFFFF5151);
+  static const themeBlue = Color(0xFF3E9FFF);
 
   // static const Map<int, Color> blue = const <int, Color>{
   //   50: const Color(/* some hex code */),

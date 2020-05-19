@@ -1,34 +1,16 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:jots_mobile/services/auth.dart';
-import 'package:provider/provider.dart';
+import 'package:jots_mobile/screens/home/profileOptions.dart';
 
-class Home extends StatefulWidget {
-  @override
-  _HomeState createState() => _HomeState();
-}
-
-class _HomeState extends State<Home> {
-  String imageUrl;
-
+class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var user = Provider.of<FirebaseUser>(context);
-
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
       backgroundColor: Colors.brown[50],
       body: SafeArea(
         child: Stack(
           children: <Widget>[
-            Container(
-              child: CircleAvatar(
-                backgroundImage: NetworkImage(
-                  user.photoUrl,
-                ),
-                radius: 30,
-                backgroundColor: Colors.transparent,
-              ),
-            ),
+            ProfileOptions(),
             HomePage(),
           ],
         ),
@@ -48,6 +30,7 @@ class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   AnimationController _controller;
   Animation<Offset> _offsetAnimation;
+  bool isProfileOptionsOpen = true;
 
   @override
   void initState() {
@@ -77,35 +60,52 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
+    _controller.forward();
     return SlideTransition(
-        position: _offsetAnimation,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 20,
-                offset: Offset(3, 7),
-              ),
-            ],
-          ),
-          child: Column(
-            children: <Widget>[
-              Container(
-                alignment: Alignment.topRight,
+      position: _offsetAnimation,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 20,
+              offset: Offset(3, 7),
+            ),
+          ],
+        ),
+        child: Column(
+          children: <Widget>[
+            Container(
+              alignment: Alignment.topRight,
+              child: Container(
+                width: 50,
+                height: 40,
+                margin: EdgeInsets.only(top: 5, right: 5),
+                padding: EdgeInsets.all(10),
                 child: FlatButton(
+                  splashColor: Colors.transparent,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: EdgeInsets.all(0),
                   onPressed: () {
-                    _controller.forward();
+                    if (isProfileOptionsOpen) {
+                      _controller.forward();
+                      setState(() => isProfileOptionsOpen = false);
+                    } else {
+                      _controller.reverse();
+                      setState(() => isProfileOptionsOpen = true);
+                    }
                   },
                   child: Image.asset(
                     "assets/images/DownArrow.png",
                     width: 25,
                   ),
                 ),
-              )
-            ],
-          ),
-        ));
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
