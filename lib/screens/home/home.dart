@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jots_mobile/screens/home/book.dart';
 import 'package:jots_mobile/screens/home/profileOptions.dart';
 
 class Home extends StatelessWidget {
@@ -29,8 +30,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   AnimationController _controller;
+  PageController _pageController = PageController(initialPage: 0);
+
   Animation<Offset> _offsetAnimation;
-  bool isProfileOptionsOpen = true;
+  bool isProfileOptionsClosed = true;
 
   @override
   void initState() {
@@ -43,7 +46,7 @@ class _HomePageState extends State<HomePage>
 
     _offsetAnimation = Tween<Offset>(
       begin: Offset.zero,
-      end: const Offset(0, 0.5),
+      end: const Offset(0, 0.2),
     ).animate(
       CurvedAnimation(
         parent: _controller,
@@ -60,49 +63,87 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    _controller.forward();
     return SlideTransition(
       position: _offsetAnimation,
       child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 20,
-              offset: Offset(3, 7),
-            ),
-          ],
-        ),
-        child: Column(
+        child: Stack(
           children: <Widget>[
+            // main homepage
             Container(
-              alignment: Alignment.topRight,
-              child: Container(
-                width: 50,
-                height: 40,
-                margin: EdgeInsets.only(top: 5, right: 5),
-                padding: EdgeInsets.all(10),
-                child: FlatButton(
-                  splashColor: Colors.transparent,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  padding: EdgeInsets.all(0),
-                  onPressed: () {
-                    if (isProfileOptionsOpen) {
-                      _controller.forward();
-                      setState(() => isProfileOptionsOpen = false);
-                    } else {
-                      _controller.reverse();
-                      setState(() => isProfileOptionsOpen = true);
-                    }
-                  },
-                  child: Image.asset(
-                    "assets/images/DownArrow.png",
-                    width: 25,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 20,
+                    offset: Offset(3, 7),
                   ),
-                ),
+                ],
               ),
-            )
+              child: Column(
+                children: <Widget>[
+                  // head of home
+                  Container(
+                    alignment: Alignment.topRight, // align self
+                    child: Container(
+                      width: 60,
+                      height: 50,
+                      child: FlatButton(
+                        splashColor: Colors.transparent,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        padding: EdgeInsets.all(0),
+                        onPressed: () {
+                          if (isProfileOptionsClosed) {
+                            _controller.forward();
+                            setState(() => isProfileOptionsClosed = false);
+                          } else {
+                            _controller.reverse();
+                            setState(() => isProfileOptionsClosed = true);
+                          }
+                        },
+                        child: Image.asset(
+                          "assets/images/DownArrow.png",
+                          width: 25,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: PageView.builder(
+                      scrollDirection: Axis.horizontal,
+                      controller: _pageController,
+                      itemCount: 2,
+                      itemBuilder: (context, i) => Book(i),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // home overlay to close profile options
+            AnimatedSwitcher(
+              // used AnimatedSwitcher to fade in whities overlay over home page
+              duration: Duration(milliseconds: 200),
+              child: isProfileOptionsClosed
+                  ? Visibility(
+                      visible: false,
+                      child: Container(),
+                    )
+                  : Opacity(
+                      opacity: 0.5,
+                      child: FlatButton(
+                        padding: EdgeInsets.all(0),
+                        splashColor: Colors.transparent,
+                        onPressed: () {
+                          _controller.reverse();
+                          setState(() => isProfileOptionsClosed = true);
+                        },
+                        color: Colors.white,
+                        child: Container(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+            ),
           ],
         ),
       ),
