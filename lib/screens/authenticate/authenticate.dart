@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:jots_mobile/services/auth.dart';
 import 'package:jots_mobile/theme.dart' as Theme;
@@ -12,88 +13,94 @@ class Authenticate extends StatefulWidget {
 class _AuthenticateState extends State<Authenticate> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomPadding: false,
-      body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).requestFocus(new FocusNode());
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFFF5137),
-                Color(0xFFFF7F46),
-              ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Theme.darkTransparentColor,
+        statusBarIconBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        resizeToAvoidBottomPadding: false,
+        body: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).requestFocus(new FocusNode());
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.orangeGradientStartColor,
+                  Theme.orangeGradientEndColor,
+                ],
+              ),
             ),
-          ),
-          child: SafeArea(
-            child: Stack(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Stack(
-                    children: <Widget>[
-                      Column(
-                        //# Top content
-                        children: <Widget>[
-                          new Container(
-                            alignment: Alignment.centerLeft,
-                            child: new Text(
-                              "JOTS",
-                              style: TextStyle(
-                                fontFamily: 'Bungee',
-                                fontSize: 50,
-                                foreground: Paint()
-                                  ..style = PaintingStyle.stroke
-                                  ..strokeWidth = 1.5
-                                  ..color = Colors.white,
-                                letterSpacing: 3,
+            child: SafeArea(
+              child: Stack(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Stack(
+                      children: <Widget>[
+                        Column(
+                          //# Top content
+                          children: <Widget>[
+                            new Container(
+                              alignment: Alignment.centerLeft,
+                              child: new Text(
+                                "JOTS",
+                                style: TextStyle(
+                                  fontFamily: 'Bungee',
+                                  fontSize: 50,
+                                  foreground: Paint()
+                                    ..style = PaintingStyle.stroke
+                                    ..strokeWidth = 1.5
+                                    ..color = Colors.white,
+                                  letterSpacing: 3,
+                                ),
                               ),
                             ),
-                          ),
-                          new Padding(
-                            padding: const EdgeInsets.only(top: 20),
-                            child: new Row(
-                              children: <Widget>[
-                                new Container(
-                                  child: new Image.asset(
-                                    'assets/images/TickIcon.png',
-                                    width: 25,
-                                    height: 25,
-                                  ),
-                                ),
-                                new Padding(
-                                  padding: EdgeInsets.only(
-                                    left: 15,
-                                  ),
-                                  child: new Text(
-                                    "Only Care about completing the task.",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      letterSpacing: 1,
-                                      fontSize: 16,
+                            new Padding(
+                              padding: const EdgeInsets.only(top: 20),
+                              child: new Row(
+                                children: <Widget>[
+                                  new Container(
+                                    child: new Image.asset(
+                                      'assets/images/TickIcon.png',
+                                      width: 25,
+                                      height: 25,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                      LoginTemplate(),
-                    ],
+                                  new Padding(
+                                    padding: EdgeInsets.only(
+                                      left: 15,
+                                    ),
+                                    child: new Text(
+                                      "Only Care about completing the task.",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        letterSpacing: 1,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                        LoginTemplate(),
+                      ],
+                    ),
                   ),
-                ),
-                Container(
-                  width: 400,
-                  margin: EdgeInsets.only(left: 20, right: 20),
-                  alignment: Alignment.bottomCenter,
-                  child: Image.asset("assets/images/ThingsIllustration.png"),
-                ),
-              ],
+                  Container(
+                    width: 400,
+                    margin: EdgeInsets.only(left: 20, right: 20),
+                    alignment: Alignment.bottomCenter,
+                    child: Image.asset("assets/images/ThingsIllustration.png"),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

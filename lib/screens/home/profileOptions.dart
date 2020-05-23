@@ -31,6 +31,12 @@ class _ProfileOptionsState extends State<ProfileOptions> {
     getFirebaseUser();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    displayNameFocusNode.dispose();
+  }
+
   void getFirebaseUser() async {
     await FirebaseAuth.instance.currentUser().then((value) => value.reload());
     FirebaseUser currentUser = await FirebaseAuth.instance.currentUser();
@@ -101,7 +107,7 @@ class _ProfileOptionsState extends State<ProfileOptions> {
           FocusScope.of(context).requestFocus(new FocusNode());
         },
         child: Container(
-          decoration: BoxDecoration(color: Color(0xFFFAFAFA)),
+          decoration: BoxDecoration(color: Colors.white),
           padding: EdgeInsets.all(15),
           child: Column(
             children: <Widget>[

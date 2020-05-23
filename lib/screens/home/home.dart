@@ -1,19 +1,32 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:jots_mobile/screens/home/book.dart';
+import 'package:flutter/services.dart';
+import 'package:jots_mobile/screens/home/bookItem.dart';
 import 'package:jots_mobile/screens/home/profileOptions.dart';
+import 'package:jots_mobile/theme.dart' as Theme;
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomPadding: false,
-      backgroundColor: Colors.brown[50],
-      body: SafeArea(
-        child: Stack(
-          children: <Widget>[
-            ProfileOptions(),
-            HomePage(),
-          ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.white,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        resizeToAvoidBottomPadding: false,
+        backgroundColor: Colors.brown[50],
+        body: SafeArea(
+          child: Stack(
+            children: <Widget>[
+              ProfileOptions(),
+              HomePage(),
+            ],
+          ),
         ),
       ),
     );
@@ -31,13 +44,20 @@ class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   AnimationController _controller;
   PageController _pageController = PageController(initialPage: 0);
+  AutoScrollController bookHeadRowController;
+  StreamSubscription<QuerySnapshot> booksSnapshot;
+  CollectionReference todoCollectionRef;
 
   Animation<Offset> _offsetAnimation;
   bool isProfileOptionsClosed = true;
+  List books = [];
+  int currentBookIndex = 0;
 
   @override
   void initState() {
     super.initState();
+
+    _fetchBooks();
 
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
@@ -53,12 +73,17 @@ class _HomePageState extends State<HomePage>
         curve: Curves.easeInOut,
       ),
     );
+
+    bookHeadRowController = AutoScrollController(
+      axis: Axis.horizontal,
+    );
   }
 
   @override
   void dispose() {
     super.dispose();
     _controller.dispose();
+    booksSnapshot.cancel();
   }
 
   @override
@@ -84,36 +109,74 @@ class _HomePageState extends State<HomePage>
                 children: <Widget>[
                   // head of home
                   Container(
-                    alignment: Alignment.topRight, // align self
-                    child: Container(
-                      width: 60,
-                      height: 50,
-                      child: FlatButton(
-                        splashColor: Colors.transparent,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        padding: EdgeInsets.all(0),
-                        onPressed: () {
-                          if (isProfileOptionsClosed) {
-                            _controller.forward();
-                            setState(() => isProfileOptionsClosed = false);
-                          } else {
-                            _controller.reverse();
-                            setState(() => isProfileOptionsClosed = true);
-                          }
-                        },
-                        child: Image.asset(
-                          "assets/images/DownArrow.png",
-                          width: 25,
+                    margin: EdgeInsets.only(top: 5),
+                    alignment: Alignment.topCenter, // align self
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Expanded(
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            controller: bookHeadRowController,
+                            child: Row(
+                              children: _getBookButtons(),
+                            ),
+                          ),
                         ),
-                      ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Container(
+                              color: Theme.darkLightColor,
+                              height: 35,
+                              width: 0.5,
+                            ),
+                            Container(
+                              alignment: Alignment.centerRight,
+                              width: 60,
+                              height: 50,
+                              child: FlatButton(
+                                splashColor: Colors.transparent,
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                                padding: EdgeInsets.all(0),
+                                onPressed: () {
+                                  if (isProfileOptionsClosed) {
+                                    _controller.forward();
+                                    setState(
+                                        () => isProfileOptionsClosed = false);
+                                  } else {
+                                    _controller.reverse();
+                                    setState(
+                                        () => isProfileOptionsClosed = true);
+                                  }
+                                },
+                                child: Image.asset(
+                                  "assets/images/DownArrow.png",
+                                  width: 25,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
+                  // book PageView
                   Expanded(
                     child: PageView.builder(
                       scrollDirection: Axis.horizontal,
                       controller: _pageController,
-                      itemCount: 2,
-                      itemBuilder: (context, i) => Book(i),
+                      onPageChanged: (bookIndex) {
+                        setState(() => currentBookIndex = bookIndex);
+                        bookHeadRowController.scrollToIndex(
+                          bookIndex,
+                          preferPosition: AutoScrollPosition.middle,
+                        );
+                      },
+                      itemCount: books.length,
+                      itemBuilder: (context, i) =>
+                          BookItem(books[i].documentID, todoCollectionRef),
                     ),
                   ),
                 ],
@@ -148,5 +211,65 @@ class _HomePageState extends State<HomePage>
         ),
       ),
     );
+  }
+
+  _fetchBooks() async {
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+
+    todoCollectionRef = Firestore.instance
+        .collection('Users')
+        .document(user.uid)
+        .collection('Todo');
+
+    booksSnapshot = todoCollectionRef.snapshots().listen((data) {
+      List fetchedBookNames = [];
+
+      data.documents.forEach((doc) {
+        fetchedBookNames.add(doc);
+      });
+
+      setState(() {
+        books = fetchedBookNames;
+      });
+    });
+  }
+
+  _getBookButtons() {
+    List<Widget> bookWidgets = [];
+
+    for (int i = 0; i < books.length; i++) {
+      bookWidgets.add(
+        AutoScrollTag(
+          key: ValueKey(i),
+          controller: bookHeadRowController,
+          index: i,
+          child: Padding(
+            padding: EdgeInsets.only(left: 10, right: 7),
+            child: FlatButton(
+              splashColor: Colors.transparent,
+              onPressed: () {},
+              padding: EdgeInsets.all(0.0),
+              child: Column(
+                children: <Widget>[
+                  Text(
+                    books[i].data["book_name"],
+                    style: TextStyle(
+                      color: currentBookIndex == i
+                          ? Theme.darkTextColor
+                          : Theme.darkLightColor,
+                      fontSize: 27,
+                      fontWeight: currentBookIndex == i
+                          ? FontWeight.w500
+                          : FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    return bookWidgets;
   }
 }
