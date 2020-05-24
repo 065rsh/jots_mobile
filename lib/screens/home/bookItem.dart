@@ -1,7 +1,7 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/screens/home/pageItem.dart';
 import 'package:jots_mobile/theme.dart' as Theme;
 
@@ -43,21 +43,11 @@ class _BookItemState extends State<BookItem> {
         itemBuilder: (BuildContext context, int index) {
           return Column(
             children: <Widget>[
-              // page name
-              Container(
-                margin: EdgeInsets.only(top: 10, bottom: 13),
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  pages[index].data["page_name"],
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Theme.darkTextColor,
-                    letterSpacing: 1,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+              PageItem(
+                pages[index].data["page_name"],
+                pages[index].documentID,
+                pageRef,
               ),
-              PageItem(pages[index].documentID, pageRef),
             ],
           );
         },

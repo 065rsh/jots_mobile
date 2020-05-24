@@ -33,27 +33,31 @@ class _TaskItemState extends State<TaskItem> {
           Container(
             width: 30,
             height: 30,
-            margin: EdgeInsets.only(right: 10),
+            margin: EdgeInsets.only(right: 5),
             child: FlatButton(
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               padding: EdgeInsets.all(0),
               onPressed: () => _toggleTaskCheck(),
               child: Container(
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: isTaskChecked ? Theme.themeblue : Color(0xFFBBBBBB),
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color:
+                          isTaskChecked ? Theme.themeblue : Color(0xFFBBBBBB),
+                    ),
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(5),
+                    ),
+                    color: isTaskChecked ? Theme.themeblue : Colors.white,
                   ),
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(5),
+                  child: Icon(
+                    Icons.check,
+                    size: 14.0,
+                    color: isTaskChecked ? Colors.white : Theme.darkLightColor,
                   ),
-                  color: isTaskChecked ? Theme.themeblue : Colors.white,
-                ),
-                child: Icon(
-                  Icons.check,
-                  size: 14.0,
-                  color: isTaskChecked ? Colors.white : Theme.darkLightColor,
                 ),
               ),
             ),

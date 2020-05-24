@@ -244,7 +244,6 @@ class _ProfileOptionsState extends State<ProfileOptions> {
                           color: isEditingName
                               ? Theme.themeblue
                               : Theme.semiDarkColor,
-                          semanticsLabel: 'Edit Profile Button',
                         ),
                       ),
                     ),

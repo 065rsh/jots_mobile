@@ -31,6 +31,7 @@ final darkLightColor = Color(0xFFBBBBBB);
 final orangeGradientStartColor = Color(0xFFFF5137);
 final orangeGradientEndColor = Color(0xFFFF7F46);
 final darkTransparentColor = Color(0x22000000);
+final lightFadeWhitiseColor = Color(0xBBFFFFFF);
 final lightBorderColor = CompanyColors.lightBorderCC;
 final linkColor = CompanyColors.blue;
 final errorColor = CompanyColors.red;

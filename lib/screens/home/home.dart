@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/screens/home/bookItem.dart';
 import 'package:jots_mobile/screens/home/profileOptions.dart';
 import 'package:jots_mobile/theme.dart' as Theme;
@@ -114,6 +115,7 @@ class _HomePageState extends State<HomePage>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
+                        // Book names
                         Expanded(
                           child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
@@ -126,11 +128,13 @@ class _HomePageState extends State<HomePage>
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
+                            // vertical divider
                             Container(
                               color: Theme.darkLightColor,
                               height: 35,
                               width: 0.5,
                             ),
+                            // book head buttons
                             Container(
                               alignment: Alignment.centerRight,
                               width: 60,
@@ -151,9 +155,12 @@ class _HomePageState extends State<HomePage>
                                         () => isProfileOptionsClosed = true);
                                   }
                                 },
-                                child: Image.asset(
-                                  "assets/images/DownArrow.png",
-                                  width: 25,
+                                child: Container(
+                                  width: 20,
+                                  height: 20,
+                                  child: SvgPicture.asset(
+                                    "assets/vectors/SettingsIcon.svg",
+                                  ),
                                 ),
                               ),
                             ),
@@ -191,19 +198,15 @@ class _HomePageState extends State<HomePage>
                       visible: false,
                       child: Container(),
                     )
-                  : Opacity(
-                      opacity: 0.5,
-                      child: FlatButton(
-                        padding: EdgeInsets.all(0),
-                        splashColor: Colors.transparent,
-                        onPressed: () {
-                          _controller.reverse();
-                          setState(() => isProfileOptionsClosed = true);
-                        },
-                        color: Colors.white,
-                        child: Container(
-                          color: Colors.white,
-                        ),
+                  : FlatButton(
+                      padding: EdgeInsets.all(0),
+                      splashColor: Colors.transparent,
+                      onPressed: () {
+                        _controller.reverse();
+                        setState(() => isProfileOptionsClosed = true);
+                      },
+                      child: Container(
+                        color: Theme.lightFadeWhitiseColor,
                       ),
                     ),
             ),
