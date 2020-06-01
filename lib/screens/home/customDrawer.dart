@@ -11,8 +11,10 @@ import 'package:jots_mobile/theme.dart' as Theme;
 class CustomDrawer extends StatefulWidget {
   final void Function(dynamic) updateSelectedBook;
   final void Function(String) updateHomeBookId;
+  final void Function(bool) toggleDrawer;
 
-  CustomDrawer(this.updateSelectedBook, this.updateHomeBookId);
+  CustomDrawer(
+      this.updateSelectedBook, this.updateHomeBookId, this.toggleDrawer);
 
   @override
   _CustomDrawerState createState() => _CustomDrawerState();
@@ -191,6 +193,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
               onPressed: () {
                 setState(() => selectedBookId = book.documentID);
                 widget.updateSelectedBook(book);
+                widget.toggleDrawer(false);
               },
               child: Row(
                 mainAxisSize: MainAxisSize.min,

@@ -46,8 +46,9 @@ class _HomeState extends State<Home> {
           child: Container(
             child: Stack(
               children: <Widget>[
-                CustomDrawer(_updateSelectedBook, _updateHomeBook),
-                Book(_selectedBook, _homeBookId, _toggleDrawer,
+                CustomDrawer(
+                    _updateSelectedBook, _updateHomeBook, _toggleDrawer),
+                Book(_isDrawerOpen, _selectedBook, _homeBookId, _toggleDrawer,
                     _startEditingBookName),
                 // # Editing book overlay as editing book name background
                 AnimatedSwitcher(
@@ -95,7 +96,8 @@ class _HomeState extends State<Home> {
                                           decoration: InputDecoration(
                                             hintText: "Book name...",
                                             hintStyle: TextStyle(
-                                                color: lightDarkColor),
+                                              color: lightDarkColor,
+                                            ),
                                             isDense: true,
                                             counterText: '',
                                             contentPadding:
