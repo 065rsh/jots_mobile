@@ -156,14 +156,19 @@ class _CustomDrawerState extends State<CustomDrawer> {
         .orderBy("creation_date", descending: true)
         .snapshots()
         .listen((data) {
+      bool selectedBookStillExists = false;
       data.documents.forEach((doc) {
         if (homeBookId == doc.documentID && selectedBookId == "") {
           setState(() => selectedBookId = doc.documentID);
           widget.updateSelectedBook(doc);
         }
+        if (selectedBookId == doc.documentID) {
+          selectedBookStillExists = true;
+        }
       });
 
-      if (data.documents.length != 0 && selectedBookId == "") {
+      if ((data.documents.length != 0 && selectedBookId == "") ||
+          !selectedBookStillExists) {
         setState(() => selectedBookId = data.documents[0].documentID);
         widget.updateSelectedBook(data.documents[0]);
       }

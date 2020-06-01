@@ -49,7 +49,7 @@ class _TaskItemState extends State<TaskItem> {
                           isTaskChecked ? Theme.themeblue : Color(0xFFBBBBBB),
                     ),
                     borderRadius: BorderRadius.all(
-                      Radius.circular(5),
+                      Radius.circular(10),
                     ),
                     color: isTaskChecked ? Theme.themeblue : Colors.white,
                   ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -14,12 +16,16 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   FocusNode editBookNameFocusNode = new FocusNode();
   CollectionReference todoCollectionRef;
+  CollectionReference pageRef;
+  StreamSubscription<QuerySnapshot> pageRefSnapshot;
 
-  bool _isDrawerOpen = true;
+  bool _isDrawerOpen = false;
   dynamic _selectedBook;
   String _homeBookId = "";
   bool _isEditingBookName = false;
   String newBookNameText;
+  bool isRefreshingBook = false;
+  List pages = [];
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
@@ -28,6 +34,13 @@ class _HomeState extends State<Home> {
     super.initState();
 
     editBookNameFocusNode.addListener(_handleEditBookNameFocusNode);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    pageRefSnapshot.cancel();
   }
 
   @override
@@ -48,7 +61,14 @@ class _HomeState extends State<Home> {
               children: <Widget>[
                 CustomDrawer(
                     _updateSelectedBook, _updateHomeBook, _toggleDrawer),
-                Book(_isDrawerOpen, _selectedBook, _homeBookId, _toggleDrawer,
+                Book(
+                    pages,
+                    pageRef,
+                    isRefreshingBook,
+                    _isDrawerOpen,
+                    _selectedBook,
+                    _homeBookId,
+                    _toggleDrawer,
                     _startEditingBookName),
                 // # Editing book overlay as editing book name background
                 AnimatedSwitcher(
@@ -70,7 +90,7 @@ class _HomeState extends State<Home> {
                                   children: <Widget>[
                                     Container(
                                       color: Colors.white,
-                                      height: 50,
+                                      height: 45,
                                       alignment: Alignment.center,
                                       child: ConstrainedBox(
                                         constraints: BoxConstraints(
@@ -101,7 +121,7 @@ class _HomeState extends State<Home> {
                                             isDense: true,
                                             counterText: '',
                                             contentPadding:
-                                                EdgeInsets.only(left: 5),
+                                                EdgeInsets.only(left: 7),
                                             border: InputBorder.none,
                                           ),
                                         ),
@@ -129,7 +149,44 @@ class _HomeState extends State<Home> {
   _updateSelectedBook(selectedBook) {
     setState(() {
       _selectedBook = selectedBook;
+      isRefreshingBook = true;
     });
+
+    _fetchPages();
+
+    Future.delayed(Duration(milliseconds: 50), () {
+      setState(() {
+        isRefreshingBook = false;
+      });
+    });
+  }
+
+  _fetchPages() async {
+    if (_selectedBook != null) {
+      FirebaseUser user = await FirebaseAuth.instance.currentUser();
+
+      CollectionReference todoCollectionRef = Firestore.instance
+          .collection('Users')
+          .document(user.uid)
+          .collection("Todo");
+
+      pageRef = todoCollectionRef
+          .document(_selectedBook.documentID)
+          .collection("Pages");
+
+      pageRefSnapshot =
+          pageRef.orderBy('creation_date').snapshots().listen((data) {
+        List fetchedpages = [];
+
+        data.documents.forEach((doc) {
+          fetchedpages.add(doc);
+        });
+
+        setState(() {
+          pages = fetchedpages;
+        });
+      });
+    }
   }
 
   _updateHomeBook(homeBookId) {

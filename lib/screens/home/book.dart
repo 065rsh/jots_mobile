@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:jots_mobile/screens/home/pageItem.dart';
 import 'package:jots_mobile/theme.dart';
 
 final double maxDrawerDragStartXOffset = 40;
@@ -12,13 +13,23 @@ final double maxDrawerYOffset = 150;
 final double drawerToggleThreshold = 100;
 
 class Book extends StatefulWidget {
+  final List pages;
+  final CollectionReference pageRef;
+  final bool isRefreshingBook;
   final dynamic selectedBook;
   final void Function(bool) toggleDrawer;
   final String homeBookId;
   final void Function() startEditingBookName;
   final bool isDrawerOpen;
 
-  Book(this.isDrawerOpen, this.selectedBook, this.homeBookId, this.toggleDrawer,
+  Book(
+      this.pages,
+      this.pageRef,
+      this.isRefreshingBook,
+      this.isDrawerOpen,
+      this.selectedBook,
+      this.homeBookId,
+      this.toggleDrawer,
       this.startEditingBookName);
 
   @override
@@ -29,16 +40,24 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
   DocumentReference userDetailsRef;
   StreamSubscription<DocumentSnapshot> userDetailsSnapshot;
   AnimationController _drawerAnimationController;
+  AnimationController _bookOptionsAC;
 
   String homeBookId = "";
   bool canSlideOpenDrawer = false;
+  bool isBookOptionsOpen = false;
 
   @override
   void initState() {
     super.initState();
 
     fetchHomeBook();
+
     _initializeDrawerAnimationController();
+    _bookOptionsAC = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+      value: 0.0,
+    );
   }
 
   _initializeDrawerAnimationController() {
@@ -68,6 +87,12 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
         onHorizontalDragStart: (details) => _onDrawerDragStart(details),
         onHorizontalDragUpdate: (details) => _onDrawerDragUpdate(details),
         onHorizontalDragEnd: (details) => _onDrawerDragEnd(details),
+        onTap: () {
+          widget.toggleDrawer(false);
+          _bookOptionsAC.reverse();
+
+          FocusScope.of(context).requestFocus(new FocusNode());
+        },
         child: AnimatedBuilder(
             animation: _drawerAnimationController,
             builder: (context, builderWidget) {
@@ -94,12 +119,12 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                     ],
                     borderRadius: BorderRadius.circular(borderRadius),
                   ),
-                  child: Stack(
+                  child: Column(
                     children: <Widget>[
-                      // # Complete book except FAB
-                      Column(
+                      // # Book head
+                      Stack(
                         children: <Widget>[
-                          // # Book header
+                          // # Book header bar
                           Container(
                             height: 50,
                             padding:
@@ -115,24 +140,22 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                             child: Stack(
                               children: <Widget>[
                                 // # Small hamburger icon
-                                Positioned.fill(
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Container(
-                                      width: 30,
-                                      height: 30,
-                                      child: FlatButton(
-                                        materialTapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
-                                        padding: EdgeInsets.all(0),
-                                        onPressed: () {
-                                          widget.toggleDrawer(true);
-                                        },
-                                        child: Container(
-                                          child: SvgPicture.asset(
-                                            "assets/vectors/SmallHamburgerIcon.svg",
-                                            width: 20,
-                                          ),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Container(
+                                    width: 30,
+                                    height: 30,
+                                    child: FlatButton(
+                                      materialTapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                      padding: EdgeInsets.all(0),
+                                      onPressed: () {
+                                        widget.toggleDrawer(true);
+                                      },
+                                      child: Container(
+                                        child: SvgPicture.asset(
+                                          "assets/vectors/SmallHamburgerIcon.svg",
+                                          width: 20,
                                         ),
                                       ),
                                     ),
@@ -187,6 +210,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                         child: FlatButton(
                                           materialTapTargetSize:
                                               MaterialTapTargetSize.shrinkWrap,
+                                          splashColor: Colors.transparent,
                                           padding: EdgeInsets.all(0),
                                           onPressed: toggleHomeBook,
                                           child: SvgPicture.asset(
@@ -209,7 +233,11 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                           materialTapTargetSize:
                                               MaterialTapTargetSize.shrinkWrap,
                                           padding: EdgeInsets.all(0),
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            setState(
+                                                () => isBookOptionsOpen = true);
+                                            _bookOptionsAC.forward();
+                                          },
                                           child: SvgPicture.asset(
                                             "assets/vectors/KebabPlateIcon.svg",
                                             width: 22,
@@ -218,21 +246,103 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                       ),
                                     ],
                                   ),
-                                )
+                                ),
                               ],
+                            ),
+                          ),
+                          // # Book options dropdown
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: Container(
+                              margin: EdgeInsets.only(top: 10, right: 15),
+                              child: ScaleTransition(
+                                alignment: Alignment.lerp(
+                                    Alignment.topRight, Alignment.topRight, -2),
+                                scale: CurvedAnimation(
+                                  parent: _bookOptionsAC,
+                                  curve: Curves.easeIn,
+                                ),
+                                child: Container(
+                                  padding: EdgeInsets.all(10),
+                                  width: 150,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(2),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.15),
+                                        blurRadius: 4,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      FlatButton(
+                                        onPressed: () {
+                                          _bookOptionsAC.reverse();
+                                          _deleteBook();
+                                        },
+                                        padding: EdgeInsets.all(0),
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        child: Row(
+                                          children: <Widget>[
+                                            Container(
+                                              margin: EdgeInsets.only(
+                                                left: 10,
+                                                right: 10,
+                                              ),
+                                              child: SvgPicture.asset(
+                                                "assets/vectors/DeleteIcon.svg",
+                                                width: 17,
+                                                color: semiDarkColor,
+                                              ),
+                                            ),
+                                            Text(
+                                              "Delete",
+                                              style: TextStyle(
+                                                color: semiDarkColor,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      // close drawer overlay
-                      widget.isDrawerOpen
-                          ? GestureDetector(onTap: () {
-                              widget.toggleDrawer(false);
-
-                              FocusScope.of(context)
-                                  .requestFocus(new FocusNode());
-                            })
-                          : Container(),
+                      // # Book body
+                      widget.isRefreshingBook
+                          ? Container(
+                              color: Colors.white,
+                            )
+                          : Expanded(
+                              child: Container(
+                                padding: EdgeInsets.only(left: 15, right: 13),
+                                child: ListView.builder(
+                                  itemCount: widget.pages.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return Column(
+                                      children: <Widget>[
+                                        PageItem(
+                                          widget.pages[index].data["page_name"],
+                                          widget.pages[index].documentID,
+                                          widget.pageRef,
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
+                            )
                     ],
                   ),
                 ),
@@ -312,5 +422,64 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
     } catch (e) {
       print("ERROR will updating task: " + e.toString());
     }
+  }
+
+  _deleteBook() async {
+    // show the dialog
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+                "Delete \"" + widget.selectedBook.data["book_name"] + "\"?"),
+            content: Text("You cannot recover this book once deleted."),
+            actions: [
+              // # Cancel button
+              FlatButton(
+                child: Text(
+                  "Cancel",
+                  style: TextStyle(
+                    color: semiDarkColor,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              // # Delete button
+              FlatButton(
+                child: Text(
+                  "Delete",
+                  style: TextStyle(
+                    color: warningColor,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                onPressed: () async {
+                  try {
+                    FirebaseUser user =
+                        await FirebaseAuth.instance.currentUser();
+
+                    await Firestore.instance
+                        .collection('Users')
+                        .document(user.uid)
+                        .collection("Todo")
+                        .document(widget.selectedBook.documentID)
+                        .delete();
+
+                    Navigator.of(context).pop();
+                  } catch (e) {
+                    print("ERROR while updating task: " + e.toString());
+                  }
+                },
+              )
+            ],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(7),
+            ),
+          );
+        });
   }
 }
