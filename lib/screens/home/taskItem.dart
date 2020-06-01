@@ -45,8 +45,9 @@ class _TaskItemState extends State<TaskItem> {
                   height: 20,
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color:
-                          isTaskChecked ? Theme.themeblue : Color(0xFFBBBBBB),
+                      color: isTaskChecked
+                          ? Theme.themeblue
+                          : Theme.lightDarkColor,
                     ),
                     borderRadius: BorderRadius.all(
                       Radius.circular(10),
@@ -56,7 +57,7 @@ class _TaskItemState extends State<TaskItem> {
                   child: Icon(
                     Icons.check,
                     size: 14.0,
-                    color: isTaskChecked ? Colors.white : Theme.darkLightColor,
+                    color: isTaskChecked ? Colors.white : Theme.lightDarkColor,
                   ),
                 ),
               ),

@@ -69,7 +69,8 @@ class _HomeState extends State<Home> {
                     _selectedBook,
                     _homeBookId,
                     _toggleDrawer,
-                    _startEditingBookName),
+                    _startEditingBookName,
+                    _refreshBook),
                 // # Editing book overlay as editing book name background
                 AnimatedSwitcher(
                   // used AnimatedSwitcher to fade in whities overlay over home page
@@ -149,10 +150,16 @@ class _HomeState extends State<Home> {
   _updateSelectedBook(selectedBook) {
     setState(() {
       _selectedBook = selectedBook;
-      isRefreshingBook = true;
     });
 
+    _refreshBook();
     _fetchPages();
+  }
+
+  _refreshBook() {
+    setState(() {
+      isRefreshingBook = true;
+    });
 
     Future.delayed(Duration(milliseconds: 50), () {
       setState(() {

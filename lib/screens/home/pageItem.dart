@@ -10,8 +10,9 @@ class PageItem extends StatefulWidget {
   final pageId;
   final pageName;
   final bookRef;
+  final int filterSelected;
 
-  PageItem(this.pageName, this.pageId, this.bookRef);
+  PageItem(this.pageName, this.pageId, this.bookRef, this.filterSelected);
 
   @override
   _PageItemState createState() => _PageItemState();
@@ -86,18 +87,7 @@ class _PageItemState extends State<PageItem> {
 
         showTasks
             ? Container(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: taskValues.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return TaskItem(
-                      taskIds[index],
-                      taskValues[index],
-                      sectionRef,
-                    );
-                  },
-                ),
+                child: filteredTasks(),
               )
             : Container(),
       ],
@@ -126,5 +116,36 @@ class _PageItemState extends State<PageItem> {
         taskIds = fetchedTaskIds;
       });
     });
+  }
+
+  filteredTasks() {
+    List filteredTaskValues = [];
+    List filteredTaskIds = [];
+
+    for (int i = 0; i < taskValues.length; i++) {
+      if (widget.filterSelected == 0 && !taskValues[i]["is_checked"]) {
+        filteredTaskValues.add(taskValues[i]);
+        filteredTaskIds.add(taskIds[i]);
+      } else if (widget.filterSelected == 1 && taskValues[i]["is_checked"]) {
+        filteredTaskValues.add(taskValues[i]);
+        filteredTaskIds.add(taskIds[i]);
+      } else if (widget.filterSelected == 2) {
+        filteredTaskValues.add(taskValues[i]);
+        filteredTaskIds.add(taskIds[i]);
+      }
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: filteredTaskValues.length,
+      itemBuilder: (BuildContext context, int index) {
+        return TaskItem(
+          filteredTaskIds[index],
+          filteredTaskValues[index],
+          sectionRef,
+        );
+      },
+    );
   }
 }

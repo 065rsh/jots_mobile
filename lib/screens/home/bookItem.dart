@@ -44,11 +44,8 @@ class _BookItemState extends State<BookItem>
         itemBuilder: (BuildContext context, int index) {
           return Column(
             children: <Widget>[
-              PageItem(
-                pages[index].data["page_name"],
-                pages[index].documentID,
-                pageRef,
-              ),
+              PageItem(pages[index].data["page_name"], pages[index].documentID,
+                  pageRef, 0),
             ],
           );
         },

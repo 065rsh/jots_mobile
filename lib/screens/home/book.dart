@@ -11,6 +11,11 @@ final double maxDrawerDragStartXOffset = 40;
 final double maxDrawerXOffset = 250;
 final double maxDrawerYOffset = 150;
 final double drawerToggleThreshold = 100;
+final List filterOptionArr = [
+  "Incomplete tasks",
+  "Complete tasks",
+  "All tasks"
+];
 
 class Book extends StatefulWidget {
   final List pages;
@@ -21,6 +26,7 @@ class Book extends StatefulWidget {
   final String homeBookId;
   final void Function() startEditingBookName;
   final bool isDrawerOpen;
+  final void Function() refreshBook;
 
   Book(
       this.pages,
@@ -30,7 +36,8 @@ class Book extends StatefulWidget {
       this.selectedBook,
       this.homeBookId,
       this.toggleDrawer,
-      this.startEditingBookName);
+      this.startEditingBookName,
+      this.refreshBook);
 
   @override
   _BookState createState() => _BookState();
@@ -44,7 +51,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
 
   String homeBookId = "";
   bool canSlideOpenDrawer = false;
-  bool isBookOptionsOpen = false;
+  int filterSelected = 0;
 
   @override
   void initState() {
@@ -119,12 +126,11 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                     ],
                     borderRadius: BorderRadius.circular(borderRadius),
                   ),
-                  child: Column(
+                  child: Stack(
                     children: <Widget>[
-                      // # Book head
-                      Stack(
+                      Column(
                         children: <Widget>[
-                          // # Book header bar
+                          // # Book head
                           Container(
                             height: 50,
                             padding:
@@ -151,11 +157,13 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                       padding: EdgeInsets.all(0),
                                       onPressed: () {
                                         widget.toggleDrawer(true);
+                                        _bookOptionsAC.reverse();
                                       },
                                       child: Container(
                                         child: SvgPicture.asset(
-                                          "assets/vectors/SmallHamburgerIcon.svg",
+                                          "assets/vectors/DrawerIcon.svg",
                                           width: 20,
+                                          color: semiDarkColor,
                                         ),
                                       ),
                                     ),
@@ -234,13 +242,14 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                               MaterialTapTargetSize.shrinkWrap,
                                           padding: EdgeInsets.all(0),
                                           onPressed: () {
-                                            setState(
-                                                () => isBookOptionsOpen = true);
                                             _bookOptionsAC.forward();
                                           },
                                           child: SvgPicture.asset(
                                             "assets/vectors/KebabPlateIcon.svg",
                                             width: 22,
+                                            color: filterSelected == 0
+                                                ? darkTextColor
+                                                : themeblue,
                                           ),
                                         ),
                                       ),
@@ -250,99 +259,158 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                               ],
                             ),
                           ),
-                          // # Book options dropdown
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: Container(
-                              margin: EdgeInsets.only(top: 10, right: 15),
-                              child: ScaleTransition(
-                                alignment: Alignment.lerp(
-                                    Alignment.topRight, Alignment.topRight, -2),
-                                scale: CurvedAnimation(
-                                  parent: _bookOptionsAC,
-                                  curve: Curves.easeIn,
-                                ),
-                                child: Container(
-                                  padding: EdgeInsets.all(10),
-                                  width: 150,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(2),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.15),
-                                        blurRadius: 4,
-                                        offset: Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      FlatButton(
-                                        onPressed: () {
-                                          _bookOptionsAC.reverse();
-                                          _deleteBook();
-                                        },
-                                        padding: EdgeInsets.all(0),
-                                        materialTapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
-                                        child: Row(
+                          // # Book body
+                          widget.isRefreshingBook
+                              ? Container(
+                                  color: Colors.white,
+                                )
+                              : Expanded(
+                                  child: Container(
+                                    padding: EdgeInsets.only(
+                                        left: 15, right: 13, top: 15),
+                                    child: ListView.builder(
+                                      itemCount: widget.pages.length,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        return Column(
                                           children: <Widget>[
-                                            Container(
-                                              margin: EdgeInsets.only(
-                                                left: 10,
-                                                right: 10,
-                                              ),
-                                              child: SvgPicture.asset(
-                                                "assets/vectors/DeleteIcon.svg",
-                                                width: 17,
-                                                color: semiDarkColor,
+                                            PageItem(
+                                                widget.pages[index]
+                                                    .data["page_name"],
+                                                widget.pages[index].documentID,
+                                                widget.pageRef,
+                                                filterSelected),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                        ],
+                      ),
+                      // # Book options dropdown
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: Container(
+                          margin: EdgeInsets.only(top: 10, right: 15),
+                          child: ScaleTransition(
+                            alignment: Alignment.topRight,
+                            scale: CurvedAnimation(
+                              parent: _bookOptionsAC,
+                              curve: Curves.easeIn,
+                            ),
+                            child: Container(
+                              padding: EdgeInsets.all(10),
+                              width: 200,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(2),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.15),
+                                    blurRadius: 4,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  // # Filter Button
+                                  FlatButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        if (filterSelected ==
+                                            filterOptionArr.length - 1)
+                                          filterSelected = 0;
+                                        else
+                                          filterSelected = filterSelected + 1;
+                                      });
+                                      widget.refreshBook();
+                                    },
+                                    padding: EdgeInsets.all(0),
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    child: Row(
+                                      children: <Widget>[
+                                        Container(
+                                          margin: EdgeInsets.only(
+                                            left: 10,
+                                            right: 17,
+                                          ),
+                                          child: SvgPicture.asset(
+                                            "assets/vectors/FilterIcon.svg",
+                                            width: 13,
+                                            color: lightDarkColor,
+                                          ),
+                                        ),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: <Widget>[
+                                            Text(
+                                              "Filter",
+                                              style: TextStyle(
+                                                letterSpacing: 1,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xFF333333),
                                               ),
                                             ),
                                             Text(
-                                              "Delete",
+                                              filterOptionArr[filterSelected],
                                               style: TextStyle(
-                                                color: semiDarkColor,
+                                                fontSize: 11,
+                                                color: themeblue,
+                                                fontWeight: FontWeight.w400,
                                               ),
                                             ),
                                           ],
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
+                                  // # Delete Button
+                                  FlatButton(
+                                    onPressed: () {
+                                      _bookOptionsAC.reverse();
+                                      _deleteBook();
+                                    },
+                                    padding: EdgeInsets.only(top: 5),
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    child: Row(
+                                      children: <Widget>[
+                                        Container(
+                                          margin: EdgeInsets.only(
+                                            left: 10,
+                                            right: 15,
+                                          ),
+                                          child: SvgPicture.asset(
+                                            "assets/vectors/DeleteIcon.svg",
+                                            width: 15,
+                                            color: lightDarkColor,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Delete",
+                                          style: TextStyle(
+                                            letterSpacing: 1,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xFF333333),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                      // # Book body
-                      widget.isRefreshingBook
-                          ? Container(
-                              color: Colors.white,
-                            )
-                          : Expanded(
-                              child: Container(
-                                padding: EdgeInsets.only(left: 15, right: 13),
-                                child: ListView.builder(
-                                  itemCount: widget.pages.length,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return Column(
-                                      children: <Widget>[
-                                        PageItem(
-                                          widget.pages[index].data["page_name"],
-                                          widget.pages[index].documentID,
-                                          widget.pageRef,
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                ),
-                              ),
-                            )
                     ],
                   ),
                 ),
@@ -361,6 +429,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
         maxDrawerDragStartXOffset) {
       canSlideOpenDrawer = true;
     }
+    _bookOptionsAC.reverse();
   }
 
   _onDrawerDragUpdate(details) {
