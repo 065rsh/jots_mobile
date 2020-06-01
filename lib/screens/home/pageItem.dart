@@ -22,12 +22,20 @@ class _PageItemState extends State<PageItem> {
   List taskIds = [];
   DocumentReference sectionRef;
   StreamSubscription<DocumentSnapshot> sectionRefSnapshot;
-  bool showTasks = true;
+  bool showTasks = false;
+  bool showPageHeader = true;
 
   @override
   void initState() {
     super.initState();
     _fetchTasks();
+
+    if (widget.pageName == "General") {
+      setState(() {
+        showTasks = true;
+        showPageHeader = false;
+      });
+    }
   }
 
   @override
@@ -41,37 +49,41 @@ class _PageItemState extends State<PageItem> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Container(
-          margin: EdgeInsets.only(top: 5),
-          alignment: Alignment.centerLeft,
-          child: FlatButton(
-            onPressed: () => setState(() => showTasks = !showTasks),
-            padding: EdgeInsets.only(left: 0),
-            child: Row(
-              children: <Widget>[
-                Container(
-                  margin: EdgeInsets.only(right: 10),
-                  child: Transform.rotate(
-                    angle: showTasks ? 0 : 0.5,
-                    child: SvgPicture.asset(
-                      "assets/vectors/DownArrowIcon.svg",
-                      color: Theme.semiDarkColor,
-                    ),
+        // Page header
+        showPageHeader
+            ? Container(
+                margin: EdgeInsets.only(bottom: 5),
+                alignment: Alignment.centerLeft,
+                child: FlatButton(
+                  onPressed: () => setState(() => showTasks = !showTasks),
+                  padding: EdgeInsets.only(left: 0),
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                        margin: EdgeInsets.only(right: 10),
+                        child: Transform.rotate(
+                          angle: showTasks ? 0 : 0.5,
+                          child: SvgPicture.asset(
+                            "assets/vectors/DownArrowIcon.svg",
+                            color: Theme.semiDarkColor,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        widget.pageName,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Theme.darkTextColor,
+                          letterSpacing: 1,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  widget.pageName,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Theme.darkTextColor,
-                    letterSpacing: 1,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+              )
+            : Container(),
+
         showTasks
             ? Container(
                 child: ListView.builder(
@@ -80,7 +92,10 @@ class _PageItemState extends State<PageItem> {
                   itemCount: taskValues.length,
                   itemBuilder: (BuildContext context, int index) {
                     return TaskItem(
-                        taskIds[index], taskValues[index], sectionRef);
+                      taskIds[index],
+                      taskValues[index],
+                      sectionRef,
+                    );
                   },
                 ),
               )
@@ -100,9 +115,10 @@ class _PageItemState extends State<PageItem> {
       List fetchedTaskIds = [];
 
       doc.data.keys.forEach((taskId) {
-        // if (!doc.data[taskId]["is_checked"])
-        fetchedTaskValues.add(doc.data[taskId]);
-        fetchedTaskIds.add(taskId);
+        if (taskId != "newly_created") {
+          fetchedTaskValues.add(doc.data[taskId]);
+          fetchedTaskIds.add(taskId);
+        }
       });
 
       setState(() {

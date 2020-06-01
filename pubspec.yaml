@@ -34,7 +34,7 @@ dependencies:
   image_picker: ^0.6.6+4
   firebase_storage: ^3.1.5
   scroll_to_index: ^1.0.6
-  flutter_statusbarcolor: ^0.2.3
+  fitted_text_field_container: ^1.1.0
 
 dev_dependencies:
   flutter_test:

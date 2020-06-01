@@ -1,9 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
 import 'package:jots_mobile/services/auth.dart';
 import 'package:jots_mobile/theme.dart' as Theme;
-import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -35,68 +34,6 @@ class _ProfileOptionsState extends State<ProfileOptions> {
   void dispose() {
     super.dispose();
     displayNameFocusNode.dispose();
-  }
-
-  void getFirebaseUser() async {
-    await FirebaseAuth.instance.currentUser().then((value) => value.reload());
-    FirebaseUser currentUser = await FirebaseAuth.instance.currentUser();
-    setState(() => user = currentUser);
-  }
-
-  Future getUserPhoto() async {
-    try {
-      var image = await ImagePicker.pickImage(
-        source: ImageSource.gallery,
-        maxHeight: 200,
-      );
-
-      StorageReference storageReference = FirebaseStorage.instance
-          .ref()
-          .child(user.uid + '/userDetails/profileImages.jpg');
-      StorageUploadTask uploadTask = storageReference.putFile(image);
-      await uploadTask.onComplete;
-
-      storageReference.getDownloadURL().then((fileURL) {
-        setState(() {
-          FirebaseAuth.instance.currentUser().then((val) {
-            UserUpdateInfo updateUser = UserUpdateInfo();
-            updateUser.photoUrl = fileURL;
-            val.updateProfile(updateUser);
-          });
-        });
-      });
-
-      setState(() => userPhoto = image);
-    } catch (e) {
-      Scaffold.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Failed to change your display picture!"),
-        ),
-      );
-      print(e);
-    }
-  }
-
-  void handleDisplayNameFocusNode() {
-    if (!displayNameFocusNode.hasFocus) {
-      if (newDisplayNameText != "") {
-        FirebaseAuth.instance.currentUser().then((val) {
-          UserUpdateInfo updateUser = UserUpdateInfo();
-          updateUser.displayName = newDisplayNameText;
-          val.updateProfile(updateUser);
-        });
-      } else if (newDisplayNameText != null) {
-        Scaffold.of(context).showSnackBar(
-          SnackBar(
-            content: Text("User name cannot be empty!"),
-          ),
-        );
-      }
-
-      setState(() {
-        isEditingName = false;
-      });
-    }
   }
 
   @override
@@ -285,6 +222,68 @@ class _ProfileOptionsState extends State<ProfileOptions> {
       );
     } else {
       return Container();
+    }
+  }
+
+  Future getUserPhoto() async {
+    try {
+      var image = await ImagePicker.pickImage(
+        source: ImageSource.gallery,
+        maxHeight: 200,
+      );
+
+      StorageReference storageReference = FirebaseStorage.instance
+          .ref()
+          .child(user.uid + '/userDetails/profileImages.jpg');
+      StorageUploadTask uploadTask = storageReference.putFile(image);
+      await uploadTask.onComplete;
+
+      storageReference.getDownloadURL().then((fileURL) {
+        setState(() {
+          FirebaseAuth.instance.currentUser().then((val) {
+            UserUpdateInfo updateUser = UserUpdateInfo();
+            updateUser.photoUrl = fileURL;
+            val.updateProfile(updateUser);
+          });
+        });
+      });
+
+      setState(() => userPhoto = image);
+    } catch (e) {
+      Scaffold.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Failed to change your display picture!"),
+        ),
+      );
+      print(e);
+    }
+  }
+
+  void getFirebaseUser() async {
+    await FirebaseAuth.instance.currentUser().then((value) => value.reload());
+    FirebaseUser currentUser = await FirebaseAuth.instance.currentUser();
+    setState(() => user = currentUser);
+  }
+
+  void handleDisplayNameFocusNode() {
+    if (!displayNameFocusNode.hasFocus) {
+      if (newDisplayNameText != "") {
+        FirebaseAuth.instance.currentUser().then((val) {
+          UserUpdateInfo updateUser = UserUpdateInfo();
+          updateUser.displayName = newDisplayNameText;
+          val.updateProfile(updateUser);
+        });
+      } else if (newDisplayNameText != null) {
+        Scaffold.of(context).showSnackBar(
+          SnackBar(
+            content: Text("User name cannot be empty!"),
+          ),
+        );
+      }
+
+      setState(() {
+        isEditingName = false;
+      });
     }
   }
 }
