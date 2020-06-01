@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/screens/home/drawerUserDetails.dart';
 import 'package:jots_mobile/services/auth.dart';
-import 'package:jots_mobile/theme.dart' as Theme;
+import 'package:jots_mobile/theme.dart';
 
 class CustomDrawer extends StatefulWidget {
   final void Function(dynamic) updateSelectedBook;
@@ -25,17 +25,21 @@ class _CustomDrawerState extends State<CustomDrawer> {
   CollectionReference todoCollectionRef;
   StreamSubscription<DocumentSnapshot> userDetailsSnapshot;
   DocumentReference userDetailsRef;
+  FocusNode newBookNameFocusNode = FocusNode();
 
   final AuthService _auth = AuthService();
 
   List books = [];
   String selectedBookId = "";
   String homeBookId = "";
+  bool isAddingBook = false;
+  String addBookNameText;
 
   @override
   void initState() {
     super.initState();
 
+    newBookNameFocusNode.addListener(handleNewBookNameFocusNode);
     fetchHomeBook();
     fetchBooks();
   }
@@ -111,7 +115,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                         child: Text(
                           "LOG OUT",
                           style: TextStyle(
-                            color: Theme.warningColor,
+                            color: warningColor,
                           ),
                         ),
                       ),
@@ -207,7 +211,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: Theme.darkTextColor,
+                        color: darkTextColor,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -229,6 +233,115 @@ class _CustomDrawerState extends State<CustomDrawer> {
       );
     });
 
+    bookWidgets.add(
+      isAddingBook
+          ? ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 180),
+              child: Container(
+                child: TextFormField(
+                  focusNode: newBookNameFocusNode,
+                  onChanged: (text) {
+                    setState(() {
+                      addBookNameText = text;
+                    });
+                  },
+                  style: TextStyle(
+                    color: darkTextColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: "Book name...",
+                    hintStyle: TextStyle(
+                      color: lightDarkColor,
+                    ),
+                    isDense: true,
+                    counterText: '',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.only(bottom: 10, top: 5),
+                  ),
+                ),
+              ),
+            )
+          : Container(),
+    );
+
+    bookWidgets.add(
+      Container(
+        width: 80,
+        height: 35,
+        margin: EdgeInsets.only(top: 5),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: isAddingBook ? themeblue : darkTextColor,
+          ),
+          borderRadius: BorderRadius.circular(7),
+        ),
+        child: FlatButton(
+          padding: EdgeInsets.all(4),
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          onPressed: () {
+            setState(() => isAddingBook = true);
+            newBookNameFocusNode.requestFocus();
+          },
+          child: Text(
+            "+ Book",
+            style: TextStyle(
+              fontSize: 15,
+              color: darkTextColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
     return bookWidgets;
+  }
+
+  addNewBook() async {
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+
+    try {
+      todoCollectionRef = Firestore.instance
+          .collection('Users')
+          .document(user.uid)
+          .collection('Todo');
+
+      todoCollectionRef.add({
+        "book_name": addBookNameText,
+        "creation_date": new DateTime.now(),
+      }).then((bookRef) => bookRef.collection("Pages").add({
+            "page_name": "General",
+            "creation_date": new DateTime.now(),
+          }).then((pageRef) {
+            pageRef
+                .collection("Sections")
+                .document("not_sectioned")
+                .setData({});
+          }));
+    } catch (e) {
+      print("ERROR will updating task: " + e.toString());
+    }
+  }
+
+  handleNewBookNameFocusNode() async {
+    if (!newBookNameFocusNode.hasFocus) {
+      if (addBookNameText != null) {
+        if (addBookNameText != "") {
+          addNewBook();
+        } else {
+          Scaffold.of(context).showSnackBar(
+            new SnackBar(
+              content: new Text(
+                "Book name cannot be empty!",
+              ),
+            ),
+          );
+          newBookNameFocusNode.requestFocus();
+          setState(() => isAddingBook = true);
+        }
+      }
+      setState(() => isAddingBook = false);
+    }
   }
 }

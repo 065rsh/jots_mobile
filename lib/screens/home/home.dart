@@ -15,7 +15,7 @@ class _HomeState extends State<Home> {
   FocusNode editBookNameFocusNode = new FocusNode();
   CollectionReference todoCollectionRef;
 
-  bool _isDrawerOpen = false;
+  bool _isDrawerOpen = true;
   dynamic _selectedBook;
   String _homeBookId = "";
   bool _isEditingBookName = false;
