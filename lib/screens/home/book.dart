@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:jots_mobile/screens/home/addTask.dart';
 import 'package:jots_mobile/screens/home/pageItem.dart';
 import 'package:jots_mobile/theme.dart';
 
@@ -128,13 +129,17 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                   ),
                   child: Stack(
                     children: <Widget>[
+                      // # Book
                       Column(
                         children: <Widget>[
                           // # Book head
                           Container(
                             height: 50,
-                            padding:
-                                EdgeInsets.only(left: 15, right: 10, bottom: 5),
+                            margin: EdgeInsets.only(
+                                top:
+                                    33 * (1 - _drawerAnimationController.value),
+                                bottom: 15),
+                            padding: EdgeInsets.only(left: 15, right: 10),
                             decoration: BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
@@ -266,23 +271,28 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                 )
                               : Expanded(
                                   child: Container(
-                                    padding: EdgeInsets.only(
-                                        left: 15, right: 13, top: 15),
-                                    child: ListView.builder(
-                                      itemCount: widget.pages.length,
-                                      itemBuilder:
-                                          (BuildContext context, int index) {
-                                        return Column(
-                                          children: <Widget>[
-                                            PageItem(
-                                                widget.pages[index]
-                                                    .data["page_name"],
-                                                widget.pages[index].documentID,
-                                                widget.pageRef,
-                                                filterSelected),
-                                          ],
-                                        );
-                                      },
+                                    padding:
+                                        EdgeInsets.only(left: 15, right: 13),
+                                    child: MediaQuery.removePadding(
+                                      context: context,
+                                      removeTop: true,
+                                      child: ListView.builder(
+                                        itemCount: widget.pages.length,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          return Column(
+                                            children: <Widget>[
+                                              PageItem(
+                                                  widget.pages[index]
+                                                      .data["page_name"],
+                                                  widget
+                                                      .pages[index].documentID,
+                                                  widget.pageRef,
+                                                  filterSelected),
+                                            ],
+                                          );
+                                        },
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -292,7 +302,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                       Align(
                         alignment: Alignment.topRight,
                         child: Container(
-                          margin: EdgeInsets.only(top: 10, right: 15),
+                          margin: EdgeInsets.only(top: 45, right: 15),
                           child: ScaleTransition(
                             alignment: Alignment.topRight,
                             scale: CurvedAnimation(
@@ -411,6 +421,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                           ),
                         ),
                       ),
+                      // # Add task container
+                      AddTask(widget.pages, widget.pageRef),
                     ],
                   ),
                 ),

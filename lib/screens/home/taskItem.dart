@@ -33,7 +33,6 @@ class _TaskItemState extends State<TaskItem> {
           Container(
             width: 30,
             height: 30,
-            margin: EdgeInsets.only(right: 5),
             child: FlatButton(
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               padding: EdgeInsets.all(0),
@@ -41,8 +40,8 @@ class _TaskItemState extends State<TaskItem> {
               child: Container(
                 alignment: Alignment.centerLeft,
                 child: Container(
-                  width: 20,
-                  height: 20,
+                  width: 18,
+                  height: 18,
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: isTaskChecked
@@ -56,7 +55,7 @@ class _TaskItemState extends State<TaskItem> {
                   ),
                   child: Icon(
                     Icons.check,
-                    size: 14.0,
+                    size: 13.0,
                     color: isTaskChecked ? Colors.white : Theme.lightDarkColor,
                   ),
                 ),

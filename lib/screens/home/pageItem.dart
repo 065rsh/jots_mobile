@@ -18,13 +18,17 @@ class PageItem extends StatefulWidget {
   _PageItemState createState() => _PageItemState();
 }
 
-class _PageItemState extends State<PageItem> {
+class _PageItemState extends State<PageItem>
+    with AutomaticKeepAliveClientMixin<PageItem> {
   List taskValues = [];
   List taskIds = [];
   DocumentReference sectionRef;
   StreamSubscription<DocumentSnapshot> sectionRefSnapshot;
   bool showTasks = false;
   bool showPageHeader = true;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -48,12 +52,13 @@ class _PageItemState extends State<PageItem> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     return Column(
       children: <Widget>[
         // Page header
         showPageHeader
             ? Container(
-                margin: EdgeInsets.only(bottom: 5),
                 alignment: Alignment.centerLeft,
                 child: FlatButton(
                   onPressed: () => setState(() => showTasks = !showTasks),

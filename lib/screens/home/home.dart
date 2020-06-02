@@ -45,102 +45,97 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    Color statusBarColor = _isDrawerOpen ? drawerBgColor : Colors.white;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
-        statusBarColor: statusBarColor,
+        statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
       ),
       child: Scaffold(
         key: _scaffoldKey,
-        resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomInset: false,
         backgroundColor: drawerBgColor,
-        body: SafeArea(
-          child: Container(
-            child: Stack(
-              children: <Widget>[
-                CustomDrawer(
-                    _updateSelectedBook, _updateHomeBook, _toggleDrawer),
-                Book(
-                    pages,
-                    pageRef,
-                    isRefreshingBook,
-                    _isDrawerOpen,
-                    _selectedBook,
-                    _homeBookId,
-                    _toggleDrawer,
-                    _startEditingBookName,
-                    _refreshBook),
-                // # Editing book overlay as editing book name background
-                AnimatedSwitcher(
-                  // used AnimatedSwitcher to fade in whities overlay over home page
-                  duration: Duration(milliseconds: 200),
-                  child: _isEditingBookName
-                      ? GestureDetector(
-                          onTap: () {
-                            setState(() => _isEditingBookName = false);
-                            FocusScope.of(context)
-                                .requestFocus(new FocusNode());
-                          },
-                          child: Container(
-                            color: lightTransparentColor,
-                            child: Column(
-                              children: <Widget>[
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Container(
-                                      color: Colors.white,
-                                      height: 45,
-                                      alignment: Alignment.center,
-                                      child: ConstrainedBox(
-                                        constraints: BoxConstraints(
-                                          maxWidth: 200,
+        body: Container(
+          child: Stack(
+            children: <Widget>[
+              CustomDrawer(_updateSelectedBook, _updateHomeBook, _toggleDrawer),
+              Book(
+                  pages,
+                  pageRef,
+                  isRefreshingBook,
+                  _isDrawerOpen,
+                  _selectedBook,
+                  _homeBookId,
+                  _toggleDrawer,
+                  _startEditingBookName,
+                  _refreshBook),
+              // # Editing book overlay as editing book name background
+              AnimatedSwitcher(
+                // used AnimatedSwitcher to fade in whities overlay over home page
+                duration: Duration(milliseconds: 200),
+                child: _isEditingBookName
+                    ? GestureDetector(
+                        onTap: () {
+                          setState(() => _isEditingBookName = false);
+                          FocusScope.of(context).requestFocus(new FocusNode());
+                        },
+                        child: Container(
+                          color: lightTransparentColor,
+                          child: Column(
+                            children: <Widget>[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Container(
+                                    color: Colors.white,
+                                    height: 45,
+                                    alignment: Alignment.center,
+                                    child: ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        maxWidth: 200,
+                                      ),
+                                      child: TextFormField(
+                                        autofocus: true,
+                                        initialValue: _selectedBook != null
+                                            ? _selectedBook.data["book_name"]
+                                            : "",
+                                        textAlign: TextAlign.center,
+                                        focusNode: editBookNameFocusNode,
+                                        onChanged: (text) {
+                                          setState(() {
+                                            newBookNameText = text;
+                                          });
+                                        },
+                                        style: TextStyle(
+                                          color: darkTextColor,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 22,
                                         ),
-                                        child: TextFormField(
-                                          autofocus: true,
-                                          initialValue: _selectedBook != null
-                                              ? _selectedBook.data["book_name"]
-                                              : "",
-                                          textAlign: TextAlign.center,
-                                          focusNode: editBookNameFocusNode,
-                                          onChanged: (text) {
-                                            setState(() {
-                                              newBookNameText = text;
-                                            });
-                                          },
-                                          style: TextStyle(
-                                            color: darkTextColor,
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 22,
+                                        decoration: InputDecoration(
+                                          hintText: "Book name...",
+                                          hintStyle: TextStyle(
+                                            color: lightDarkColor,
                                           ),
-                                          decoration: InputDecoration(
-                                            hintText: "Book name...",
-                                            hintStyle: TextStyle(
-                                              color: lightDarkColor,
-                                            ),
-                                            isDense: true,
-                                            counterText: '',
-                                            contentPadding:
-                                                EdgeInsets.only(left: 7),
-                                            border: InputBorder.none,
-                                          ),
+                                          isDense: true,
+                                          counterText: '',
+                                          contentPadding:
+                                              EdgeInsets.only(left: 7),
+                                          border: InputBorder.none,
                                         ),
                                       ),
-                                    )
-                                  ],
-                                ),
-                              ],
-                            ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ],
                           ),
-                        )
-                      : Visibility(
-                          visible: false,
-                          child: Container(),
                         ),
-                ),
-              ],
-            ),
+                      )
+                    : Visibility(
+                        visible: false,
+                        child: Container(),
+                      ),
+              ),
+            ],
           ),
         ),
       ),

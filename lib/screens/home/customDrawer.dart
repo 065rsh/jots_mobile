@@ -59,6 +59,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
       child: Container(
+        margin: EdgeInsets.only(top: 45),
         color: Colors.transparent,
         padding: EdgeInsets.only(
           left: 20,
@@ -157,6 +158,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
         .snapshots()
         .listen((data) {
       bool selectedBookStillExists = false;
+
       data.documents.forEach((doc) {
         if (homeBookId == doc.documentID && selectedBookId == "") {
           setState(() => selectedBookId = doc.documentID);
@@ -192,7 +194,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
     books.forEach((book) {
       bookWidgets.add(
         Container(
-          margin: EdgeInsets.only(top: 5, bottom: 5),
+          margin: EdgeInsets.only(bottom: 10),
           child: ButtonTheme(
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             minWidth: 0,
