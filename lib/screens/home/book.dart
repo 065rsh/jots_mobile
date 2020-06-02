@@ -7,10 +7,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/screens/home/addTask.dart';
 import 'package:jots_mobile/screens/home/pageItem.dart';
 import 'package:jots_mobile/theme.dart';
+import 'editPageSheet.dart';
 
 final double maxDrawerDragStartXOffset = 40;
 final double maxDrawerXOffset = 250;
-final double maxDrawerYOffset = 150;
+final double maxDrawerYOffset = 185;
 final double drawerToggleThreshold = 100;
 final List filterOptionArr = [
   "Incomplete tasks",
@@ -62,7 +63,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
 
     _initializeDrawerAnimationController();
     _bookOptionsAC = AnimationController(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 150),
       vsync: this,
       value: 0.0,
     );
@@ -109,7 +110,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
               double slideY =
                   maxDrawerYOffset * _drawerAnimationController.value;
               double borderRadius = 20 * _drawerAnimationController.value;
-              double scale = 1 - (_drawerAnimationController.value * 0.3);
+              double scale = 1 - (_drawerAnimationController.value * 0.35);
 
               return Transform(
                 transform: Matrix4.identity()
@@ -272,7 +273,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                               : Expanded(
                                   child: Container(
                                     padding:
-                                        EdgeInsets.only(left: 15, right: 13),
+                                        EdgeInsets.only(left: 15, right: 7),
                                     child: MediaQuery.removePadding(
                                       context: context,
                                       removeTop: true,
@@ -288,7 +289,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                                   widget
                                                       .pages[index].documentID,
                                                   widget.pageRef,
-                                                  filterSelected),
+                                                  filterSelected,
+                                                  widget.selectedBook),
                                             ],
                                           );
                                         },
@@ -377,6 +379,37 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                               ),
                                             ),
                                           ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // # Add Page Button
+                                  FlatButton(
+                                    onPressed: openCreatePageSheet,
+                                    padding: EdgeInsets.only(top: 5),
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    child: Row(
+                                      children: <Widget>[
+                                        Container(
+                                          margin: EdgeInsets.only(
+                                            left: 10,
+                                            right: 17,
+                                          ),
+                                          child: SvgPicture.asset(
+                                            "assets/vectors/PageIcon.svg",
+                                            width: 14,
+                                            color: lightDarkColor,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Add page",
+                                          style: TextStyle(
+                                            letterSpacing: 1,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xFF333333),
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -562,5 +595,18 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
             ),
           );
         });
+  }
+
+  openCreatePageSheet() {
+    _bookOptionsAC.reverse();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withAlpha(50),
+      builder: (context) {
+        return EditPageSheet(widget.selectedBook, null, null);
+      },
+    );
   }
 }

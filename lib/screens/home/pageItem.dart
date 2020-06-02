@@ -5,14 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/screens/home/taskItem.dart';
 import 'package:jots_mobile/theme.dart' as Theme;
+import 'editPageSheet.dart';
 
 class PageItem extends StatefulWidget {
   final pageId;
   final pageName;
   final bookRef;
   final int filterSelected;
+  final dynamic selectedBook;
 
-  PageItem(this.pageName, this.pageId, this.bookRef, this.filterSelected);
+  PageItem(this.pageName, this.pageId, this.bookRef, this.filterSelected,
+      this.selectedBook);
 
   @override
   _PageItemState createState() => _PageItemState();
@@ -64,24 +67,42 @@ class _PageItemState extends State<PageItem>
                   onPressed: () => setState(() => showTasks = !showTasks),
                   padding: EdgeInsets.only(left: 0),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Container(
-                        margin: EdgeInsets.only(right: 10),
-                        child: Transform.rotate(
-                          angle: showTasks ? 0 : 0.5,
-                          child: SvgPicture.asset(
-                            "assets/vectors/DownArrowIcon.svg",
-                            color: Theme.semiDarkColor,
+                      Row(
+                        children: <Widget>[
+                          Container(
+                            margin: EdgeInsets.only(right: 10),
+                            child: Transform.rotate(
+                              angle: showTasks ? 0 : 0.5,
+                              child: SvgPicture.asset(
+                                "assets/vectors/DownArrowIcon.svg",
+                                color: Theme.semiDarkColor,
+                              ),
+                            ),
                           ),
-                        ),
+                          Text(
+                            widget.pageName,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Theme.darkTextColor,
+                              letterSpacing: 1,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        widget.pageName,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Theme.darkTextColor,
-                          letterSpacing: 1,
-                          fontWeight: FontWeight.w600,
+                      Container(
+                        width: 40,
+                        height: 30,
+                        child: FlatButton(
+                          padding: EdgeInsets.all(0),
+                          onPressed: openEditPageBottomSheet,
+                          child: SvgPicture.asset(
+                            "assets/vectors/KebabIcon.svg",
+                            color: Theme.semiDarkColor,
+                            width: 15,
+                          ),
                         ),
                       ),
                     ],
@@ -150,6 +171,19 @@ class _PageItemState extends State<PageItem>
           filteredTaskValues[index],
           sectionRef,
         );
+      },
+    );
+  }
+
+  openEditPageBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withAlpha(50),
+      builder: (context) {
+        return EditPageSheet(
+            widget.selectedBook, widget.pageName, widget.pageId);
       },
     );
   }

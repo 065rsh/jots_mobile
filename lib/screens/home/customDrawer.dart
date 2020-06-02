@@ -73,7 +73,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             Container(
               width: 205,
               alignment: Alignment.topLeft,
-              transform: Matrix4.translationValues(0, 150, 0),
+              transform: Matrix4.translationValues(0, 140, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -247,6 +247,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
               child: Container(
                 child: TextFormField(
                   focusNode: newBookNameFocusNode,
+                  textCapitalization: TextCapitalization.sentences,
                   onChanged: (text) {
                     setState(() {
                       addBookNameText = text;

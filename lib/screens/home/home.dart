@@ -80,6 +80,7 @@ class _HomeState extends State<Home> {
                         },
                         child: Container(
                           color: lightTransparentColor,
+                          margin: EdgeInsets.only(top: 35),
                           child: Column(
                             children: <Widget>[
                               Row(
@@ -95,6 +96,8 @@ class _HomeState extends State<Home> {
                                       ),
                                       child: TextFormField(
                                         autofocus: true,
+                                        textCapitalization:
+                                            TextCapitalization.sentences,
                                         initialValue: _selectedBook != null
                                             ? _selectedBook.data["book_name"]
                                             : "",

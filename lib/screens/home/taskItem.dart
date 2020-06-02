@@ -26,7 +26,7 @@ class _TaskItemState extends State<TaskItem> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 10),
+      margin: EdgeInsets.only(bottom: 12),
       child: Row(
         children: <Widget>[
           // checkbox

@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:jots_mobile/theme.dart';
 
@@ -131,7 +129,7 @@ class _TaskAddBottomSheetState extends State<TaskAddBottomSheet> {
 
       try {
         Navigator.pop(context);
-      } catch (w) {
+      } catch (e) {
         print(e.toString());
       }
     }
@@ -178,6 +176,7 @@ class _TaskAddBottomSheetState extends State<TaskAddBottomSheet> {
             widget.pages.length == 1
                 ? Container()
                 : Container(
+                    width: double.infinity,
                     margin: EdgeInsets.only(left: 20, top: 15, right: 20),
                     padding: EdgeInsets.only(bottom: 10),
                     decoration: BoxDecoration(
@@ -215,10 +214,11 @@ class _TaskAddBottomSheetState extends State<TaskAddBottomSheet> {
                   ),
             // # Text form field
             Container(
-              margin: EdgeInsets.only(left: 20, bottom: 10, right: 20, top: 10),
+              margin: EdgeInsets.only(left: 20, bottom: 40, right: 20, top: 10),
               child: TextFormField(
                 autofocus: true,
                 focusNode: addNewTaskFocusNode,
+                textCapitalization: TextCapitalization.sentences,
                 onChanged: (text) {
                   setState(() {
                     newAddTaskName = text;
@@ -238,9 +238,6 @@ class _TaskAddBottomSheetState extends State<TaskAddBottomSheet> {
                   border: InputBorder.none,
                 ),
               ),
-            ),
-            SizedBox(
-              height: 30,
             ),
           ],
         ),
