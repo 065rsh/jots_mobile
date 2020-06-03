@@ -18,38 +18,26 @@ class EditPageSheet extends StatefulWidget {
 class _EditPageSheetState extends State<EditPageSheet> {
   String newPageName;
   FocusNode addNewPageFocusNode = FocusNode();
+  FirebaseUser user;
+  CollectionReference pageColRef;
 
   @override
   void initState() {
     super.initState();
 
+    initFirestore();
     addNewPageFocusNode.addListener(handleAddNewPageFocusNode);
   }
 
   handleAddNewPageFocusNode() async {
-    print(newPageName);
     if (!addNewPageFocusNode.hasFocus &&
         newPageName != null &&
         newPageName != "") {
-      FirebaseUser user = await FirebaseAuth.instance.currentUser();
-
-      CollectionReference bookRef = Firestore.instance
-          .collection("Users")
-          .document(user.uid)
-          .collection("Todo")
-          .document(widget.selectedBook.documentID)
-          .collection("Pages");
-
-      await bookRef.add({
-        "page_name": newPageName,
-        "creation_date": DateTime.now(),
-      }).then((pageRef) =>
-          pageRef.collection("Sections").document("not_sectioned").setData({}));
-
-      try {
-        Navigator.pop(context);
-      } catch (e) {
-        print(e.toString());
+      if (widget.initialPageName != null) {
+        // editing page_name
+        editPageName();
+      } else {
+        addNewPage();
       }
     }
   }
@@ -142,7 +130,10 @@ class _EditPageSheetState extends State<EditPageSheet> {
                           borderRadius: BorderRadius.circular(7),
                         ),
                         child: FlatButton(
-                          onPressed: deletePage,
+                          onPressed: () {
+                            FocusScope.of(context).requestFocus(FocusNode());
+                            deletePage();
+                          },
                           child: Row(
                             children: <Widget>[
                               Container(
@@ -209,6 +200,43 @@ class _EditPageSheetState extends State<EditPageSheet> {
         ),
       ),
     );
+  }
+
+  initFirestore() async {
+    user = await FirebaseAuth.instance.currentUser();
+
+    pageColRef = Firestore.instance
+        .collection("Users")
+        .document(user.uid)
+        .collection("Todo")
+        .document(widget.selectedBook.documentID)
+        .collection("Pages");
+  }
+
+  addNewPage() async {
+    await pageColRef.add({
+      "page_name": newPageName,
+      "creation_date": DateTime.now(),
+    }).then((pageRef) =>
+        pageRef.collection("Sections").document("not_sectioned").setData({}));
+
+    hideModalBottomSheet();
+  }
+
+  editPageName() async {
+    await pageColRef
+        .document(widget.pageId)
+        .setData({"page_name": newPageName}, merge: true);
+
+    hideModalBottomSheet();
+  }
+
+  hideModalBottomSheet() {
+    try {
+      Navigator.pop(context);
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   deletePage() {

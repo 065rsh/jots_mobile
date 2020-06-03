@@ -29,6 +29,7 @@ class Book extends StatefulWidget {
   final void Function() startEditingBookName;
   final bool isDrawerOpen;
   final void Function() refreshBook;
+  final dynamic allTags;
 
   Book(
       this.pages,
@@ -39,7 +40,8 @@ class Book extends StatefulWidget {
       this.homeBookId,
       this.toggleDrawer,
       this.startEditingBookName,
-      this.refreshBook);
+      this.refreshBook,
+      this.allTags);
 
   @override
   _BookState createState() => _BookState();
@@ -272,8 +274,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                 )
                               : Expanded(
                                   child: Container(
-                                    padding:
-                                        EdgeInsets.only(left: 15, right: 7),
+                                    padding: EdgeInsets.only(left: 15),
                                     child: MediaQuery.removePadding(
                                       context: context,
                                       removeTop: true,
@@ -290,7 +291,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                                       .pages[index].documentID,
                                                   widget.pageRef,
                                                   filterSelected,
-                                                  widget.selectedBook),
+                                                  widget.selectedBook,
+                                                  widget.allTags),
                                             ],
                                           );
                                         },

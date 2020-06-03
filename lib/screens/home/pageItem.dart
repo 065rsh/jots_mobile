@@ -13,9 +13,10 @@ class PageItem extends StatefulWidget {
   final bookRef;
   final int filterSelected;
   final dynamic selectedBook;
+  final dynamic allTags;
 
   PageItem(this.pageName, this.pageId, this.bookRef, this.filterSelected,
-      this.selectedBook);
+      this.selectedBook, this.allTags);
 
   @override
   _PageItemState createState() => _PageItemState();
@@ -59,13 +60,13 @@ class _PageItemState extends State<PageItem>
 
     return Column(
       children: <Widget>[
-        // Page header
+        // # Page header
         showPageHeader
             ? Container(
                 alignment: Alignment.centerLeft,
                 child: FlatButton(
                   onPressed: () => setState(() => showTasks = !showTasks),
-                  padding: EdgeInsets.only(left: 0),
+                  padding: EdgeInsets.only(left: 0, right: 10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
@@ -111,6 +112,7 @@ class _PageItemState extends State<PageItem>
               )
             : Container(),
 
+        // # Page tasks list
         showTasks
             ? Container(
                 child: filteredTasks(),
@@ -170,6 +172,7 @@ class _PageItemState extends State<PageItem>
           filteredTaskIds[index],
           filteredTaskValues[index],
           sectionRef,
+          widget.allTags,
         );
       },
     );

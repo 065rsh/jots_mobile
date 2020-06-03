@@ -26,12 +26,15 @@ class _HomeState extends State<Home> {
   String newBookNameText;
   bool isRefreshingBook = false;
   List pages = [];
+  dynamic allTags;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
+
+    _fetchAllTags();
 
     editBookNameFocusNode.addListener(_handleEditBookNameFocusNode);
   }
@@ -67,7 +70,8 @@ class _HomeState extends State<Home> {
                   _homeBookId,
                   _toggleDrawer,
                   _startEditingBookName,
-                  _refreshBook),
+                  _refreshBook,
+                  allTags),
               // # Editing book overlay as editing book name background
               AnimatedSwitcher(
                 // used AnimatedSwitcher to fade in whities overlay over home page
@@ -152,6 +156,17 @@ class _HomeState extends State<Home> {
 
     _refreshBook();
     _fetchPages();
+  }
+
+  _fetchAllTags() async {
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+
+    DocumentReference userRef =
+        Firestore.instance.collection("Users").document(user.uid);
+
+    userRef.snapshots().listen((event) {
+      setState(() => allTags = event.data["tags"]["todo"]);
+    });
   }
 
   _refreshBook() {
