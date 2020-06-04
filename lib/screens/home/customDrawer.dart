@@ -59,7 +59,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
       child: Container(
-        margin: EdgeInsets.only(top: 45),
+        margin: EdgeInsets.only(top: 40),
         color: Colors.transparent,
         padding: EdgeInsets.only(
           left: 20,

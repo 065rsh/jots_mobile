@@ -4,15 +4,16 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/theme.dart';
 
 final priorityArr = ["", "Low", "Medium", "High"];
-final maxTaskXOffset = -60;
 
 class TaskItem extends StatefulWidget {
   final taskId;
   final task;
   final sectionRef;
   final allTags;
+  final showPageHeader;
 
-  TaskItem(this.taskId, this.task, this.sectionRef, this.allTags);
+  TaskItem(this.taskId, this.task, this.sectionRef, this.allTags,
+      this.showPageHeader);
 
   @override
   _TaskItemState createState() => _TaskItemState();
@@ -39,6 +40,8 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final maxTaskXOffset = widget.showPageHeader ? -100 : -65;
+
     return Container(
       color: Colors.white,
       margin: EdgeInsets.only(bottom: 7),
@@ -46,7 +49,8 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
         children: <Widget>[
           // # Complete task
           GestureDetector(
-            onHorizontalDragUpdate: (details) => _onTaskLeftDragUpdate(details),
+            onHorizontalDragUpdate: (details) =>
+                _onTaskLeftDragUpdate(details, maxTaskXOffset),
             onHorizontalDragEnd: (details) => _onTaskDragEnd(details),
             child: Container(
               padding: EdgeInsets.only(right: 10),
@@ -112,7 +116,7 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
                             widget.task["due_date"] != "" ||
                                     widget.task["priority"] != 0
                                 ? Container(
-                                    margin: EdgeInsets.only(top: 5, bottom: 5),
+                                    margin: EdgeInsets.only(top: 5),
                                     child: Row(
                                       children: <Widget>[
                                         // # formatted due date
@@ -161,10 +165,15 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
                                   )
                                 : Container(),
                             // # Tags chips
-                            Wrap(
-                              runSpacing: 5,
-                              children: _getTagChipsList(),
-                            ),
+                            widget.task["tag_ids"].length != 0
+                                ? Container(
+                                    margin: EdgeInsets.only(bottom: 5),
+                                    child: Wrap(
+                                      runSpacing: 5,
+                                      children: _getTagChipsList(),
+                                    ),
+                                  )
+                                : Container(),
                           ],
                         ),
                       ),
@@ -174,11 +183,13 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
               ),
             ),
           ),
+          // # Delete button animation builder
           AnimatedBuilder(
               animation: taskAnimationController,
               builder: (context, builderWidget) {
                 double slideX = maxTaskXOffset * taskAnimationController.value;
 
+                // # Delete button
                 return Container(
                   width: 40,
                   height: 40,
@@ -200,7 +211,7 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
                     padding: EdgeInsets.all(0),
                     child: SvgPicture.asset(
                       "assets/vectors/DeleteIcon.svg",
-                      width: 17,
+                      width: 17 * taskAnimationController.value,
                     ),
                   ),
                 );
@@ -217,7 +228,7 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
     widget.sectionRef.updateData(map);
   }
 
-  _onTaskLeftDragUpdate(details) {
+  _onTaskLeftDragUpdate(details, maxTaskXOffset) {
     double delta = details.primaryDelta / maxTaskXOffset;
     taskAnimationController.value += delta;
   }
@@ -273,8 +284,6 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
       final dueTime =
           (hour + minutes != "0") ? ", " + hour + minutes + meridiem : "";
 
-      print(dueTime);
-
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
       final yesterday = DateTime(now.year, now.month, now.day - 1);
@@ -315,7 +324,7 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
         tagChipsList.add(
           Container(
             padding: EdgeInsets.symmetric(vertical: 1, horizontal: 8),
-            margin: EdgeInsets.only(right: 5),
+            margin: EdgeInsets.only(right: 5, top: 5),
             decoration: BoxDecoration(
               color: tagsColorArr[widget.allTags[tag]["color"]],
               borderRadius: BorderRadius.circular(10),

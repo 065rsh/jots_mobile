@@ -99,7 +99,6 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
         onHorizontalDragUpdate: (details) => _onDrawerDragUpdate(details),
         onHorizontalDragEnd: (details) => _onDrawerDragEnd(details),
         onTap: () {
-          widget.toggleDrawer(false);
           _bookOptionsAC.reverse();
 
           FocusScope.of(context).requestFocus(new FocusNode());
@@ -274,7 +273,6 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                 )
                               : Expanded(
                                   child: Container(
-                                    padding: EdgeInsets.only(left: 15),
                                     child: MediaQuery.removePadding(
                                       context: context,
                                       removeTop: true,
@@ -285,14 +283,17 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                           return Column(
                                             children: <Widget>[
                                               PageItem(
-                                                  widget.pages[index]
-                                                      .data["page_name"],
-                                                  widget
-                                                      .pages[index].documentID,
-                                                  widget.pageRef,
-                                                  filterSelected,
-                                                  widget.selectedBook,
-                                                  widget.allTags),
+                                                widget.pages[index]
+                                                    .data["page_name"],
+                                                widget.pages[index].documentID,
+                                                widget.pageRef,
+                                                filterSelected,
+                                                widget.selectedBook,
+                                                widget.allTags,
+                                                widget.pages.length,
+                                                widget.pages,
+                                                widget.pageRef,
+                                              ),
                                             ],
                                           );
                                         },
@@ -458,6 +459,19 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                       ),
                       // # Add task container
                       AddTask(widget.pages, widget.pageRef),
+                      // # close drawer overlay
+                      widget.isDrawerOpen
+                          ? GestureDetector(
+                              onHorizontalDragStart: (details) =>
+                                  _onDrawerDragStart(details),
+                              onHorizontalDragUpdate: (details) =>
+                                  _onDrawerDragUpdate(details),
+                              onHorizontalDragEnd: (details) =>
+                                  _onDrawerDragEnd(details),
+                              onTap: () {
+                                widget.toggleDrawer(false);
+                              })
+                          : Container(),
                     ],
                   ),
                 ),
@@ -607,7 +621,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withAlpha(50),
       builder: (context) {
-        return EditPageSheet(widget.selectedBook, null, null);
+        return EditPageSheet(widget.selectedBook, null, null, null, null);
       },
     );
   }

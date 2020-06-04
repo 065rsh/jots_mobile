@@ -2,14 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:jots_mobile/screens/home/taskSheet.dart';
 import 'package:jots_mobile/theme.dart';
 
 class EditPageSheet extends StatefulWidget {
   final dynamic selectedBook;
   final String initialPageName;
   final String pageId;
+  final pages;
+  final pageRef;
 
-  EditPageSheet(this.selectedBook, this.initialPageName, this.pageId);
+  EditPageSheet(this.selectedBook, this.initialPageName, this.pageId,
+      this.pages, this.pageRef);
 
   @override
   _EditPageSheetState createState() => _EditPageSheetState();
@@ -167,7 +171,7 @@ class _EditPageSheetState extends State<EditPageSheet> {
                           borderRadius: BorderRadius.circular(7),
                         ),
                         child: FlatButton(
-                          onPressed: () {},
+                          onPressed: showAddTaskSheet,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: <Widget>[
@@ -199,6 +203,20 @@ class _EditPageSheetState extends State<EditPageSheet> {
           ],
         ),
       ),
+    );
+  }
+
+  showAddTaskSheet() {
+    Navigator.of(context).pop();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withAlpha(50),
+      builder: (context) {
+        return TaskSheet(widget.pages, widget.pageRef, widget.pageId);
+      },
     );
   }
 
