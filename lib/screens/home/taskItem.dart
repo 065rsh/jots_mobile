@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:jots_mobile/screens/home/taskSheet.dart';
 import 'package:jots_mobile/theme.dart';
 
 final priorityArr = ["", "Low", "Medium", "High"];
@@ -11,16 +12,26 @@ class TaskItem extends StatefulWidget {
   final sectionRef;
   final allTags;
   final showPageHeader;
+  final pages;
+  final pageRef;
+  final pageId;
 
-  TaskItem(this.taskId, this.task, this.sectionRef, this.allTags,
-      this.showPageHeader);
+  TaskItem(
+    this.taskId,
+    this.task,
+    this.sectionRef,
+    this.allTags,
+    this.showPageHeader,
+    this.pages,
+    this.pageRef,
+    this.pageId,
+  );
 
   @override
   _TaskItemState createState() => _TaskItemState();
 }
 
 class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
-  bool isTaskChecked = false;
   dynamic allTags;
   AnimationController taskAnimationController;
 
@@ -32,10 +43,6 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
       vsync: this,
       duration: Duration(milliseconds: 200),
     );
-
-    setState(() {
-      isTaskChecked = widget.task["is_checked"];
-    });
   }
 
   @override
@@ -73,18 +80,23 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
                           height: 18,
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: isTaskChecked ? themeblue : lightDarkColor,
+                              color: widget.task["is_checked"]
+                                  ? themeblue
+                                  : lightDarkColor,
                             ),
                             borderRadius: BorderRadius.all(
                               Radius.circular(10),
                             ),
-                            color: isTaskChecked ? themeblue : Colors.white,
+                            color: widget.task["is_checked"]
+                                ? themeblue
+                                : Colors.white,
                           ),
                           child: Icon(
                             Icons.check,
                             size: 13.0,
-                            color:
-                                isTaskChecked ? Colors.white : lightDarkColor,
+                            color: widget.task["is_checked"]
+                                ? Colors.white
+                                : lightDarkColor,
                           ),
                         ),
                       ),
@@ -95,7 +107,7 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
                     child: FlatButton(
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       padding: EdgeInsets.only(top: 5, bottom: 5),
-                      onPressed: () {},
+                      onPressed: _openEditTaskSheet,
                       child: Container(
                         alignment: Alignment.centerLeft,
                         child: Column(
@@ -241,11 +253,9 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
   }
 
   _toggleTaskCheck() async {
-    setState(() => isTaskChecked = !isTaskChecked);
+    dynamic taskValues = widget.task;
 
-    dynamic taskValues = await widget.task;
-
-    taskValues["is_checked"] = isTaskChecked;
+    taskValues["is_checked"] = !widget.task["is_checked"];
 
     Map<String, dynamic> map = {widget.taskId: taskValues};
 
@@ -343,5 +353,23 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
     }
 
     return tagChipsList;
+  }
+
+  _openEditTaskSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withAlpha(50),
+      builder: (context) {
+        return TaskSheet(
+          widget.pages,
+          widget.pageRef,
+          widget.pageId,
+          widget.taskId,
+          widget.task,
+        );
+      },
+    );
   }
 }

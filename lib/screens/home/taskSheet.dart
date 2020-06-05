@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,8 +9,16 @@ class TaskSheet extends StatefulWidget {
   final pages;
   final pageRef;
   final selectedPage;
+  final taskId;
+  final task;
 
-  TaskSheet(this.pages, this.pageRef, this.selectedPage);
+  TaskSheet(
+    this.pages,
+    this.pageRef,
+    this.selectedPage,
+    this.taskId,
+    this.task,
+  );
 
   @override
   _TaskSheetState createState() => _TaskSheetState();
@@ -39,8 +48,15 @@ class _TaskSheetState extends State<TaskSheet> {
     if (!addNewTaskFocusNode.hasFocus &&
         newAddTaskName != null &&
         newAddTaskName != "") {
-      var bytes = utf8.encode(hashCode.toString());
-      var randomTaskId = base64.encode(bytes);
+      bool isNewTask = widget.taskId == null;
+
+      var randomTaskId;
+      if (!isNewTask) {
+        randomTaskId = widget.taskId;
+      } else {
+        var bytes = utf8.encode(hashCode.toString());
+        randomTaskId = base64.encode(bytes);
+      }
 
       DocumentReference sectionRef = widget.pageRef
           .document(selectedPageIdToAddTask)
@@ -50,7 +66,8 @@ class _TaskSheetState extends State<TaskSheet> {
       await sectionRef.setData({
         randomTaskId: {
           "completion_date": "",
-          "creation_date": new DateTime.now(),
+          "creation_date":
+              isNewTask ? DateTime.now() : widget.task["creation_date"],
           "due_date": "",
           "is_checked": false,
           "note": "",
@@ -70,6 +87,8 @@ class _TaskSheetState extends State<TaskSheet> {
 
   @override
   Widget build(BuildContext context) {
+    bool isNewTask = widget.taskId == null;
+
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -149,14 +168,18 @@ class _TaskSheetState extends State<TaskSheet> {
             Container(
               margin: EdgeInsets.only(left: 20, bottom: 40, right: 20, top: 10),
               child: TextFormField(
-                autofocus: true,
+                autofocus: isNewTask,
+                initialValue: !isNewTask ? widget.task["task_name"] : "",
                 focusNode: addNewTaskFocusNode,
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
                 textCapitalization: TextCapitalization.sentences,
                 onChanged: (text) {
                   setState(() {
                     newAddTaskName = text;
                   });
                 },
+                maxLength: 100,
                 style: TextStyle(
                   color: darkTextColor,
                   fontSize: 16,
@@ -172,6 +195,42 @@ class _TaskSheetState extends State<TaskSheet> {
                 ),
               ),
             ),
+            // # Action buttons
+            !isNewTask
+                ? Container(
+                    height: 40,
+                    margin: EdgeInsets.only(left: 20, bottom: 20),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: warningColor,
+                      ),
+                      borderRadius: BorderRadius.circular(7),
+                    ),
+                    child: FlatButton(
+                      onPressed: _deleteTask,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Container(
+                            margin: EdgeInsets.only(right: 10),
+                            child: SvgPicture.asset(
+                              "assets/vectors/DeleteIcon.svg",
+                              width: 16,
+                              color: warningColor,
+                            ),
+                          ),
+                          Text(
+                            "Delete",
+                            style: TextStyle(
+                              color: warningColor,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : Container(),
           ],
         ),
       ),
@@ -218,5 +277,17 @@ class _TaskSheetState extends State<TaskSheet> {
     }
 
     return pageButtonWidgets;
+  }
+
+  _deleteTask() {
+    Map<String, dynamic> map = {widget.taskId: FieldValue.delete()};
+
+    widget.pageRef
+        .document(widget.selectedPage)
+        .collection("Sections")
+        .document("not_sectioned")
+        .updateData(map);
+
+    Navigator.of(context).pop();
   }
 }

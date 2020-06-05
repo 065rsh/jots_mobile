@@ -42,10 +42,10 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          // user DP and (Display name and Email)
+          // # user DP and (Display name and Email)
           Row(
             children: <Widget>[
-              // user photo
+              // # user photo
               Stack(
                 children: <Widget>[
                   ClipRRect(
@@ -94,7 +94,7 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
                       : Container()
                 ],
               ),
-              // display name and email
+              // # display name and email
               Container(
                 height: 43,
                 margin: EdgeInsets.only(left: 15),
@@ -142,7 +142,7 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
               ),
             ],
           ),
-          // Edit button
+          // # Edit button
           Container(
             decoration: BoxDecoration(
               border: Border.all(

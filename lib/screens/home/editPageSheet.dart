@@ -215,7 +215,8 @@ class _EditPageSheetState extends State<EditPageSheet> {
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withAlpha(50),
       builder: (context) {
-        return TaskSheet(widget.pages, widget.pageRef, widget.pageId);
+        return TaskSheet(
+            widget.pages, widget.pageRef, widget.pageId, null, null);
       },
     );
   }

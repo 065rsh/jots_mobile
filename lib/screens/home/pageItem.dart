@@ -245,6 +245,9 @@ class _PageItemState extends State<PageItem>
           sectionRef,
           widget.allTags,
           showPageHeader,
+          widget.pages,
+          widget.pageRef,
+          widget.pageId,
         );
       },
     );

@@ -67,7 +67,7 @@ class _AddTaskState extends State<AddTask> {
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withAlpha(50),
       builder: (context) {
-        return TaskSheet(widget.pages, widget.pageRef, null);
+        return TaskSheet(widget.pages, widget.pageRef, null, null, null);
       },
     );
   }
