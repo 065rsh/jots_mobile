@@ -19,7 +19,7 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
   String newDisplayNameText;
   bool isEditingUser = false;
 
-  final String editNameIcon = 'assets/vectors/EditNameIcon.svg';
+  final String editNameIcon = 'assets/vectors/EditIcon.svg';
 
   @override
   void initState() {

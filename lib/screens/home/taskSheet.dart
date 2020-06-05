@@ -96,8 +96,8 @@ class _TaskSheetState extends State<TaskSheet> {
             Align(
               alignment: Alignment.center,
               child: Container(
-                width: 40,
-                height: 5,
+                width: 30,
+                height: 3,
                 margin: EdgeInsets.only(top: 10),
                 decoration: BoxDecoration(
                   color: semiLightColor,

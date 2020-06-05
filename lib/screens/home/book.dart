@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/screens/home/addTask.dart';
 import 'package:jots_mobile/screens/home/pageItem.dart';
 import 'package:jots_mobile/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'editPageSheet.dart';
 
 final double maxDrawerDragStartXOffset = 40;
@@ -32,16 +33,17 @@ class Book extends StatefulWidget {
   final dynamic allTags;
 
   Book(
-      this.pages,
-      this.pageRef,
-      this.isRefreshingBook,
-      this.isDrawerOpen,
-      this.selectedBook,
-      this.homeBookId,
-      this.toggleDrawer,
-      this.startEditingBookName,
-      this.refreshBook,
-      this.allTags);
+    this.pages,
+    this.pageRef,
+    this.isRefreshingBook,
+    this.isDrawerOpen,
+    this.selectedBook,
+    this.homeBookId,
+    this.toggleDrawer,
+    this.startEditingBookName,
+    this.refreshBook,
+    this.allTags,
+  );
 
   @override
   _BookState createState() => _BookState();
@@ -56,12 +58,15 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
   String homeBookId = "";
   bool canSlideOpenDrawer = false;
   int filterSelected = 0;
+  int defaultFilterInt = 0;
 
   @override
   void initState() {
     super.initState();
 
     fetchHomeBook();
+
+    _setLocalDefaultFilter();
 
     _initializeDrawerAnimationController();
     _bookOptionsAC = AnimationController(
@@ -76,6 +81,18 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
+  }
+
+  _setLocalDefaultFilter() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      setState(() {
+        defaultFilterInt = prefs.getInt('default_filter');
+        filterSelected = prefs.getInt('default_filter');
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -254,9 +271,10 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                           child: SvgPicture.asset(
                                             "assets/vectors/KebabPlateIcon.svg",
                                             width: 22,
-                                            color: filterSelected == 0
-                                                ? darkTextColor
-                                                : themeblue,
+                                            color: filterSelected !=
+                                                    defaultFilterInt
+                                                ? themeblue
+                                                : darkTextColor,
                                           ),
                                         ),
                                       ),
@@ -348,40 +366,91 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                     materialTapTargetSize:
                                         MaterialTapTargetSize.shrinkWrap,
                                     child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: <Widget>[
                                         Container(
-                                          margin: EdgeInsets.only(
-                                            left: 10,
-                                            right: 17,
-                                          ),
-                                          child: SvgPicture.asset(
-                                            "assets/vectors/FilterIcon.svg",
-                                            width: 13,
-                                            color: lightDarkColor,
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: <Widget>[
+                                              Container(
+                                                margin: EdgeInsets.only(
+                                                  left: 10,
+                                                  right: 17,
+                                                ),
+                                                child: SvgPicture.asset(
+                                                  "assets/vectors/FilterIcon.svg",
+                                                  width: 13,
+                                                  color: lightDarkColor,
+                                                ),
+                                              ),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: <Widget>[
+                                                  Text(
+                                                    "Filter",
+                                                    style: TextStyle(
+                                                      letterSpacing: 1,
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      color: Color(0xFF333333),
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    filterOptionArr[
+                                                        filterSelected],
+                                                    style: TextStyle(
+                                                      fontSize: 11,
+                                                      color: themeblue,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: <Widget>[
-                                            Text(
-                                              "Filter",
-                                              style: TextStyle(
-                                                letterSpacing: 1,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xFF333333),
-                                              ),
+                                        Container(
+                                          width: 30,
+                                          height: 30,
+                                          child: FlatButton(
+                                            materialTapTargetSize:
+                                                MaterialTapTargetSize
+                                                    .shrinkWrap,
+                                            padding: EdgeInsets.all(0),
+                                            onPressed: () async {
+                                              setState(() {
+                                                defaultFilterInt =
+                                                    filterSelected;
+                                              });
+
+                                              try {
+                                                SharedPreferences tempPref =
+                                                    await SharedPreferences
+                                                        .getInstance();
+                                                tempPref.setInt(
+                                                    "default_filter",
+                                                    filterSelected);
+                                              } catch (e) {
+                                                print(e);
+                                              }
+                                            },
+                                            child: Icon(
+                                              defaultFilterInt == filterSelected
+                                                  ? Icons.radio_button_checked
+                                                  : Icons
+                                                      .radio_button_unchecked,
+                                              size: 20,
+                                              color: defaultFilterInt ==
+                                                      filterSelected
+                                                  ? themeblue
+                                                  : lightDarkColor,
                                             ),
-                                            Text(
-                                              filterOptionArr[filterSelected],
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                color: themeblue,
-                                                fontWeight: FontWeight.w400,
-                                              ),
-                                            ),
-                                          ],
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -389,7 +458,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                   // # Add Page Button
                                   FlatButton(
                                     onPressed: openCreatePageSheet,
-                                    padding: EdgeInsets.only(top: 5),
+                                    padding: EdgeInsets.only(top: 13),
                                     materialTapTargetSize:
                                         MaterialTapTargetSize.shrinkWrap,
                                     child: Row(
@@ -417,13 +486,47 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                       ],
                                     ),
                                   ),
+                                  // # Edit book name Button
+                                  FlatButton(
+                                    onPressed: () {
+                                      _bookOptionsAC.reverse();
+                                      widget.startEditingBookName();
+                                    },
+                                    padding: EdgeInsets.only(top: 15),
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    child: Row(
+                                      children: <Widget>[
+                                        Container(
+                                          margin: EdgeInsets.only(
+                                            left: 10,
+                                            right: 17,
+                                          ),
+                                          child: SvgPicture.asset(
+                                            "assets/vectors/EditIcon.svg",
+                                            width: 14,
+                                            color: lightDarkColor,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Edit book",
+                                          style: TextStyle(
+                                            letterSpacing: 1,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xFF333333),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                   // # Delete Button
                                   FlatButton(
                                     onPressed: () {
                                       _bookOptionsAC.reverse();
                                       _deleteBook();
                                     },
-                                    padding: EdgeInsets.only(top: 5),
+                                    padding: EdgeInsets.only(top: 14),
                                     materialTapTargetSize:
                                         MaterialTapTargetSize.shrinkWrap,
                                     child: Row(
