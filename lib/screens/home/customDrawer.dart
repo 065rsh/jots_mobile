@@ -101,9 +101,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 // log out button
                 FlatButton(
                   padding: EdgeInsets.all(5),
-                  onPressed: () {
-                    _auth.signOut();
-                  },
+                  onPressed: askLogout,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
@@ -129,6 +127,50 @@ class _CustomDrawerState extends State<CustomDrawer> {
         ),
       ),
     );
+  }
+
+  askLogout() {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Log out"),
+            content: Text("Are you sure?"),
+            actions: [
+              // # Cancel button
+              FlatButton(
+                child: Text(
+                  "Cancel",
+                  style: TextStyle(
+                    color: semiDarkColor,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              // # Delete button
+              FlatButton(
+                child: Text(
+                  "Log out",
+                  style: TextStyle(
+                    color: warningColor,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _auth.signOut();
+                },
+              )
+            ],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(7),
+            ),
+          );
+        });
   }
 
   fetchHomeBook() async {
@@ -191,6 +233,41 @@ class _CustomDrawerState extends State<CustomDrawer> {
   parseBooks() {
     List<Widget> bookWidgets = [];
 
+    bookWidgets.add(
+      isAddingBook
+          ? ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 180),
+              child: Container(
+                margin: EdgeInsets.only(bottom: 5),
+                child: TextFormField(
+                  focusNode: newBookNameFocusNode,
+                  textCapitalization: TextCapitalization.sentences,
+                  onChanged: (text) {
+                    setState(() {
+                      addBookNameText = text;
+                    });
+                  },
+                  style: TextStyle(
+                    color: darkTextColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: "Book name...",
+                    hintStyle: TextStyle(
+                      color: lightDarkColor,
+                    ),
+                    isDense: true,
+                    counterText: '',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.only(bottom: 10, top: 5),
+                  ),
+                ),
+              ),
+            )
+          : Container(),
+    );
+
     books.forEach((book) {
       bookWidgets.add(
         Container(
@@ -239,40 +316,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
         ),
       );
     });
-
-    bookWidgets.add(
-      isAddingBook
-          ? ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 180),
-              child: Container(
-                child: TextFormField(
-                  focusNode: newBookNameFocusNode,
-                  textCapitalization: TextCapitalization.sentences,
-                  onChanged: (text) {
-                    setState(() {
-                      addBookNameText = text;
-                    });
-                  },
-                  style: TextStyle(
-                    color: darkTextColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 18,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: "Book name...",
-                    hintStyle: TextStyle(
-                      color: lightDarkColor,
-                    ),
-                    isDense: true,
-                    counterText: '',
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.only(bottom: 10, top: 5),
-                  ),
-                ),
-              ),
-            )
-          : Container(),
-    );
 
     bookWidgets.add(
       Container(

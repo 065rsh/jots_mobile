@@ -459,7 +459,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                   // # Add Page Button
                                   FlatButton(
                                     onPressed: openCreatePageSheet,
-                                    padding: EdgeInsets.only(top: 15),
+                                    padding: EdgeInsets.only(top: 20),
                                     materialTapTargetSize:
                                         MaterialTapTargetSize.shrinkWrap,
                                     child: Row(
@@ -493,7 +493,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                       _bookOptionsAC.reverse();
                                       widget.startEditingBookName();
                                     },
-                                    padding: EdgeInsets.only(top: 15),
+                                    padding: EdgeInsets.only(top: 25),
                                     materialTapTargetSize:
                                         MaterialTapTargetSize.shrinkWrap,
                                     child: Row(
@@ -527,7 +527,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                       _bookOptionsAC.reverse();
                                       _deleteBook();
                                     },
-                                    padding: EdgeInsets.only(top: 15),
+                                    padding: EdgeInsets.only(top: 25),
                                     materialTapTargetSize:
                                         MaterialTapTargetSize.shrinkWrap,
                                     child: Row(
