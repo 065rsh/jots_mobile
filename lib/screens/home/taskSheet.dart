@@ -505,7 +505,9 @@ class _TaskSheetState extends State<TaskSheet> {
     if (widget.taskId != null) {
       bool isTaskNameChanged = widget.task["task_name"] != taskName;
       bool isDueDateChanged = widget.task["due_date"] != ""
-          ? !selectedDate.isAtSameMomentAs(widget.task["due_date"].toDate())
+          ? selectedDate != null
+              ? !selectedDate.isAtSameMomentAs(widget.task["due_date"].toDate())
+              : true
           : selectedDate != null ? true : false;
 
       bool isPriorityChanged = widget.task["priority"] != taskPriority;
