@@ -34,6 +34,7 @@ class _TaskSheetState extends State<TaskSheet> {
   DateTime selectedDate;
   bool isTaskValid = false;
   int taskPriority = 0;
+  String taskNote;
 
   @override
   void initState() {
@@ -49,6 +50,7 @@ class _TaskSheetState extends State<TaskSheet> {
       taskName = widget.taskId != null ? widget.task["task_name"] : null;
       isTaskValid = widget.taskId != null;
       taskPriority = widget.taskId != null ? widget.task["priority"] : 0;
+      taskNote = widget.taskId != null ? widget.task["note"] : "";
     });
   }
 
@@ -302,6 +304,7 @@ class _TaskSheetState extends State<TaskSheet> {
               ),
             ),
             // # Priority Container
+            // priority title text
             Container(
               margin: EdgeInsets.only(left: 20),
               child: Text(
@@ -309,6 +312,7 @@ class _TaskSheetState extends State<TaskSheet> {
                 style: TextStyle(color: lightDarkColor),
               ),
             ),
+            // priority button
             Container(
               height: 40,
               margin: EdgeInsets.only(left: 20, top: 8, bottom: 20),
@@ -346,6 +350,48 @@ class _TaskSheetState extends State<TaskSheet> {
                       fontSize: 13,
                       letterSpacing: taskPriority == 0 ? 0 : 1,
                     ),
+                  ),
+                ),
+              ),
+            ),
+            // # Note container
+            // note title text
+            Container(
+              margin: EdgeInsets.only(left: 20),
+              child: Text(
+                "Note",
+                style: TextStyle(color: lightDarkColor),
+              ),
+            ),
+            // add note button
+            Container(
+              width: double.infinity,
+              margin: EdgeInsets.only(left: 20, top: 8, bottom: 20, right: 20),
+              decoration: BoxDecoration(
+                color: veryLightColor,
+                // border: Border.all(color: lightColor),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Align(
+                alignment: Alignment.center,
+                child: TextFormField(
+                  minLines: 3,
+                  initialValue: taskNote,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 6,
+                  onChanged: (value) => setState(() => taskNote = value),
+                  style: TextStyle(
+                    fontSize: 14,
+                    letterSpacing: 1,
+                    color: darkTextColor,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: "Add a note...",
+                    hintStyle: TextStyle(color: lightDarkColor),
+                    isDense: true,
+                    counterText: '',
+                    contentPadding: EdgeInsets.all(10),
+                    border: InputBorder.none,
                   ),
                 ),
               ),
@@ -463,10 +509,13 @@ class _TaskSheetState extends State<TaskSheet> {
           : selectedDate != null ? true : false;
 
       bool isPriorityChanged = widget.task["priority"] != taskPriority;
-      print(isTaskNameChanged.toString() +
-          isDueDateChanged.toString() +
-          isPriorityChanged.toString());
-      return isTaskNameChanged || isDueDateChanged || isPriorityChanged;
+
+      bool isTaskNoteChanged = widget.task["note"] != taskNote;
+
+      return isTaskNameChanged ||
+          isDueDateChanged ||
+          isPriorityChanged ||
+          isTaskNoteChanged;
     } else
       return false;
   }
@@ -623,7 +672,7 @@ class _TaskSheetState extends State<TaskSheet> {
       randomTaskId: {
         "completion_date": "",
         "due_date": selectedDate ?? "",
-        "note": "",
+        "note": taskNote,
         "priority": taskPriority,
         "tag_ids": [],
         "task_name": taskName,
@@ -643,7 +692,7 @@ class _TaskSheetState extends State<TaskSheet> {
         "creation_date": DateTime.now(),
         "due_date": selectedDate ?? "",
         "is_checked": false,
-        "note": "",
+        "note": taskNote,
         "priority": taskPriority,
         "tag_ids": [],
         "task_name": taskName,
