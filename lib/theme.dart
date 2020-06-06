@@ -38,11 +38,15 @@ final orangeGradientEndColor = Color(0xFFFF7F46);
 final darkTransparentColor = Color(0x22000000);
 final lightSemiTransparentColor = Color(0x88FFFFFF);
 final lightTransparentColor = Color(0xDDFFFFFF);
+final redTransparentColor = Color(0x22FF3333);
 final lightBorderColor = CompanyColors.darkLightColor;
 final linkColor = CompanyColors.blue;
 final errorColor = CompanyColors.semiRed;
 final warningColor = Color(0xFFFF3333);
 final themeblue = CompanyColors.themeBlue;
+// # Button colors
+// Border colors
+final disabledButtonColor = CompanyColors.darkLightColor;
 // # Due date colors
 final nearDueDateColor = CompanyColors.themeBlue;
 final pastDueDateColor = CompanyColors.semiRed;

@@ -356,6 +356,8 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
   }
 
   _openEditTaskSheet() {
+    taskAnimationController.fling(velocity: -1);
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
