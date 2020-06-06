@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/screens/home/taskSheet.dart';
 import 'package:jots_mobile/theme.dart';
-
-final priorityArr = ["", "Low", "Medium", "High"];
+import 'package:jots_mobile/handyArr.dart';
 
 class TaskItem extends StatefulWidget {
   final taskId;

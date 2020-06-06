@@ -12,3 +12,5 @@ final monthsArr = [
   "Nov",
   "Dec"
 ];
+
+final priorityArr = ["None", "Low", "Medium", "High"];

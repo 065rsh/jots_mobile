@@ -29,11 +29,11 @@ class TaskSheet extends StatefulWidget {
 class _TaskSheetState extends State<TaskSheet> {
   String selectedPageIdToAddTask;
   String taskName;
-  bool isTaskChanged = false;
   Color deleteTaskButtonColor = semiDarkColor;
   DateTime dueDate;
   DateTime selectedDate;
   bool isTaskValid = false;
+  int taskPriority = 0;
 
   @override
   void initState() {
@@ -48,6 +48,7 @@ class _TaskSheetState extends State<TaskSheet> {
           : null;
       taskName = widget.taskId != null ? widget.task["task_name"] : null;
       isTaskValid = widget.taskId != null;
+      taskPriority = widget.taskId != null ? widget.task["priority"] : 0;
     });
   }
 
@@ -55,7 +56,7 @@ class _TaskSheetState extends State<TaskSheet> {
   Widget build(BuildContext context) {
     bool isNewTask = widget.taskId == null;
     Color saveChangesButtonColor =
-        isTaskChanged && isTaskValid ? themeblue : disabledButtonColor;
+        _checkTaskChange() && isTaskValid ? themeblue : disabledButtonColor;
     final formattedDueDate = selectedDate != null
         ? _formatDueDate(selectedDate)
         : {"date_time": null, "date": null, "time": null, "color": null};
@@ -150,8 +151,6 @@ class _TaskSheetState extends State<TaskSheet> {
                 onChanged: (text) {
                   setState(() {
                     taskName = text;
-                    isTaskChanged =
-                        !isNewTask && widget.task["task_name"] != text;
                     isTaskValid = text.length > 0;
                   });
                 },
@@ -302,6 +301,55 @@ class _TaskSheetState extends State<TaskSheet> {
                 ],
               ),
             ),
+            // # Priority Container
+            Container(
+              margin: EdgeInsets.only(left: 20),
+              child: Text(
+                "Priority",
+                style: TextStyle(color: lightDarkColor),
+              ),
+            ),
+            Container(
+              height: 40,
+              margin: EdgeInsets.only(left: 20, top: 8, bottom: 20),
+              decoration: BoxDecoration(
+                color: taskPriority == 0 ? Colors.transparent : veryLightColor,
+                borderRadius: BorderRadius.circular(7),
+              ),
+              child: DottedBorder(
+                borderType: BorderType.RRect,
+                strokeWidth: 0.5,
+                dashPattern: [3, 2],
+                color: taskPriority == 0 ? lightDarkColor : Colors.transparent,
+                radius: Radius.circular(7),
+                child: FlatButton(
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: EdgeInsets.all(0),
+                  onPressed: () {
+                    setState(() {
+                      taskPriority = taskPriority == priorityArr.length - 1
+                          ? 0
+                          : taskPriority + 1;
+                    });
+                  },
+                  child: Text(
+                    priorityArr[taskPriority].toUpperCase(),
+                    style: TextStyle(
+                      color: taskPriority == 0
+                          ? lightDarkColor
+                          : taskPriority == 1
+                              ? lowPriorityColor
+                              : taskPriority == 2
+                                  ? mediumPriorityColor
+                                  : highPriorityColor,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 13,
+                      letterSpacing: taskPriority == 0 ? 0 : 1,
+                    ),
+                  ),
+                ),
+              ),
+            ),
             // # Action buttons
             !isNewTask
                 ? Row(
@@ -351,7 +399,7 @@ class _TaskSheetState extends State<TaskSheet> {
                         ),
                         child: FlatButton(
                           onPressed:
-                              isTaskChanged ? _makeChangesInOldTask : null,
+                              _checkTaskChange() ? _makeChangesInOldTask : null,
                           padding: EdgeInsets.symmetric(horizontal: 10),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -407,10 +455,25 @@ class _TaskSheetState extends State<TaskSheet> {
     );
   }
 
+  _checkTaskChange() {
+    if (widget.taskId != null) {
+      bool isTaskNameChanged = widget.task["task_name"] != taskName;
+      bool isDueDateChanged = widget.task["due_date"] != ""
+          ? !selectedDate.isAtSameMomentAs(widget.task["due_date"].toDate())
+          : selectedDate != null ? true : false;
+
+      bool isPriorityChanged = widget.task["priority"] != taskPriority;
+      print(isTaskNameChanged.toString() +
+          isDueDateChanged.toString() +
+          isPriorityChanged.toString());
+      return isTaskNameChanged || isDueDateChanged || isPriorityChanged;
+    } else
+      return false;
+  }
+
   _removeDueDate() {
     setState(() {
       selectedDate = null;
-      isTaskChanged = true;
     });
   }
 
@@ -425,12 +488,6 @@ class _TaskSheetState extends State<TaskSheet> {
 
     setState(() {
       selectedDate = pickedDate ?? selectedDate;
-
-      isTaskChanged = widget.taskId != null
-          ? widget.task["due_date"] != ""
-              ? !selectedDate.isAtSameMomentAs(widget.task["due_date"].toDate())
-              : true
-          : true;
     });
   }
 
@@ -446,11 +503,6 @@ class _TaskSheetState extends State<TaskSheet> {
     setState(() {
       selectedDate = DateTime(selectedDate.year, selectedDate.month,
           selectedDate.day, tempTime.hour, tempTime.minute);
-      isTaskChanged = widget.taskId != null
-          ? widget.task["due_date"] != ""
-              ? !selectedDate.isAtSameMomentAs(widget.task["due_date"].toDate())
-              : true
-          : true;
     });
   }
 
@@ -572,7 +624,7 @@ class _TaskSheetState extends State<TaskSheet> {
         "completion_date": "",
         "due_date": selectedDate ?? "",
         "note": "",
-        "priority": 0,
+        "priority": taskPriority,
         "tag_ids": [],
         "task_name": taskName,
       }
@@ -592,7 +644,7 @@ class _TaskSheetState extends State<TaskSheet> {
         "due_date": selectedDate ?? "",
         "is_checked": false,
         "note": "",
-        "priority": 0,
+        "priority": taskPriority,
         "tag_ids": [],
         "task_name": taskName,
       }
