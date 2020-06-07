@@ -8,26 +8,21 @@ import 'package:jots_mobile/theme.dart' as Theme;
 import 'editPageSheet.dart';
 
 class PageItem extends StatefulWidget {
-  final pageId;
-  final pageName;
-  final bookRef;
+  final int pageIndex;
   final int filterSelected;
   final dynamic selectedBook;
   final dynamic allTags;
-  final int pagesLength;
   final pages;
   final pageRef;
 
   PageItem(
-      this.pageName,
-      this.pageId,
-      this.bookRef,
-      this.filterSelected,
-      this.selectedBook,
-      this.allTags,
-      this.pagesLength,
-      this.pages,
-      this.pageRef);
+    this.pageIndex,
+    this.filterSelected,
+    this.selectedBook,
+    this.allTags,
+    this.pages,
+    this.pageRef,
+  );
 
   @override
   _PageItemState createState() => _PageItemState();
@@ -50,14 +45,14 @@ class _PageItemState extends State<PageItem>
     super.initState();
     _fetchTasks();
 
-    if (widget.pageName == "General") {
+    if (widget.pages[widget.pageIndex]["page_name"] == "General") {
       setState(() {
         showTasks = true;
         showPageHeader = false;
       });
     }
 
-    if (widget.pagesLength == 2) {
+    if (widget.pages.length == 2) {
       setState(() {
         showTasks = true;
       });
@@ -77,10 +72,10 @@ class _PageItemState extends State<PageItem>
 
     return Container(
       margin: EdgeInsets.only(
-        top: showPageHeader ? 15 : 0,
+        top: showPageHeader ? 15 : 10,
         left: 15,
         right: showPageHeader ? 15 : 5,
-        bottom: showPageHeader ? 5 : 5,
+        bottom: widget.pageIndex == widget.pages.length - 1 ? 30 : 5,
       ),
       padding: EdgeInsets.only(
         top: showPageHeader ? 10 : 0,
@@ -91,13 +86,6 @@ class _PageItemState extends State<PageItem>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
         color: Colors.white,
-        // boxShadow: [
-        //   BoxShadow(
-        //     color: Colors.black.withOpacity(showPageHeader ? 0.15 : 0),
-        //     blurRadius: 4,
-        //     offset: Offset(0, 2),
-        //   ),
-        // ],
         border: Border.all(
           width: 0.3,
           color: showPageHeader ? Theme.darkLightColor : Colors.transparent,
@@ -142,7 +130,7 @@ class _PageItemState extends State<PageItem>
                                 ),
                               ),
                               Text(
-                                widget.pageName,
+                                widget.pages[widget.pageIndex]["page_name"],
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Theme.darkTextColor,
@@ -185,8 +173,8 @@ class _PageItemState extends State<PageItem>
   }
 
   _fetchTasks() async {
-    sectionRef = widget.bookRef
-        .document(widget.pageId)
+    sectionRef = widget.pageRef
+        .document(widget.pages[widget.pageIndex].documentID)
         .collection("Sections")
         .document("not_sectioned");
 
@@ -247,7 +235,7 @@ class _PageItemState extends State<PageItem>
           showPageHeader,
           widget.pages,
           widget.pageRef,
-          widget.pageId,
+          widget.pages[widget.pageIndex].documentID,
         );
       },
     );
@@ -260,8 +248,13 @@ class _PageItemState extends State<PageItem>
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withAlpha(50),
       builder: (context) {
-        return EditPageSheet(widget.selectedBook, widget.pageName,
-            widget.pageId, widget.pages, widget.pageRef);
+        return EditPageSheet(
+          widget.selectedBook,
+          widget.pages[widget.pageIndex]["page_name"],
+          widget.pages[widget.pageIndex].documentID,
+          widget.pages,
+          widget.pageRef,
+        );
       },
     );
   }

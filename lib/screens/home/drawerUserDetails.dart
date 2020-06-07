@@ -84,7 +84,7 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
                             child: FlatButton(
                               onPressed: () => getUserPhoto(),
                               child: SvgPicture.asset(
-                                "assets/vectors/EditNameIcon.svg",
+                                "assets/vectors/EditIcon.svg",
                                 width: 20,
                                 color: Colors.white,
                               ),

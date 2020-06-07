@@ -155,9 +155,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                           Container(
                             height: 50,
                             margin: EdgeInsets.only(
-                                top:
-                                    33 * (1 - _drawerAnimationController.value),
-                                bottom: 15),
+                              top: 33 * (1 - _drawerAnimationController.value),
+                            ),
                             padding: EdgeInsets.only(left: 15, right: 10),
                             decoration: BoxDecoration(
                               border: Border(
@@ -298,21 +297,13 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                         itemCount: widget.pages.length,
                                         itemBuilder:
                                             (BuildContext context, int index) {
-                                          return Column(
-                                            children: <Widget>[
-                                              PageItem(
-                                                widget.pages[index]
-                                                    .data["page_name"],
-                                                widget.pages[index].documentID,
-                                                widget.pageRef,
-                                                filterSelected,
-                                                widget.selectedBook,
-                                                widget.allTags,
-                                                widget.pages.length,
-                                                widget.pages,
-                                                widget.pageRef,
-                                              ),
-                                            ],
+                                          return PageItem(
+                                            index,
+                                            filterSelected,
+                                            widget.selectedBook,
+                                            widget.allTags,
+                                            widget.pages,
+                                            widget.pageRef,
                                           );
                                         },
                                       ),
