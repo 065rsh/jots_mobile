@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/screens/home/taskItem.dart';
-import 'package:jots_mobile/theme.dart' as Theme;
 import 'editPageSheet.dart';
 
 class PageItem extends StatefulWidget {
@@ -70,25 +69,28 @@ class _PageItemState extends State<PageItem>
   Widget build(BuildContext context) {
     super.build(context);
 
+    final themex = Theme.of(context);
+
     return Container(
       margin: EdgeInsets.only(
         top: showPageHeader ? 15 : 10,
         left: 15,
         right: showPageHeader ? 15 : 5,
-        bottom: widget.pageIndex == widget.pages.length - 1 ? 30 : 5,
+        bottom: widget.pageIndex == widget.pages.length - 1
+            ? 30
+            : showPageHeader ? 5 : 0,
       ),
       padding: EdgeInsets.only(
         top: showPageHeader ? 10 : 0,
         bottom: showPageHeader ? (!showTasks ? 10 : 0) : 0,
         left: showPageHeader ? 15 : 0,
-        right: showPageHeader ? 15 : 0,
+        right: showPageHeader ? 10 : 0,
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
-        color: Colors.white,
         border: Border.all(
           width: 0.3,
-          color: showPageHeader ? Theme.darkLightColor : Colors.transparent,
+          color: showPageHeader ? themex.hintColor : Colors.transparent,
         ),
       ),
       child: Column(
@@ -108,7 +110,7 @@ class _PageItemState extends State<PageItem>
                         border: Border(
                           bottom: BorderSide(
                             color: showTasks
-                                ? Theme.semiLightColor
+                                ? themex.dividerColor
                                 : Colors.transparent,
                             width: 0.5,
                           ),
@@ -119,13 +121,14 @@ class _PageItemState extends State<PageItem>
                         children: <Widget>[
                           Row(
                             children: <Widget>[
+                              // # page down arrow
                               Container(
                                 margin: EdgeInsets.only(top: 2, right: 10),
                                 child: Transform.rotate(
                                   angle: showTasks ? 0 : 0.5,
                                   child: SvgPicture.asset(
                                     "assets/vectors/DownArrowIcon.svg",
-                                    color: Theme.semiDarkColor,
+                                    color: themex.textTheme.bodyText2.color,
                                   ),
                                 ),
                               ),
@@ -133,7 +136,7 @@ class _PageItemState extends State<PageItem>
                                 widget.pages[widget.pageIndex]["page_name"],
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: Theme.darkTextColor,
+                                  color: themex.textTheme.headline1.color,
                                   letterSpacing: 1,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -148,7 +151,7 @@ class _PageItemState extends State<PageItem>
                               onPressed: openEditPageBottomSheet,
                               child: SvgPicture.asset(
                                 "assets/vectors/KebabIcon.svg",
-                                color: Theme.semiDarkColor,
+                                color: themex.textTheme.bodyText2.color,
                                 width: 15,
                               ),
                             ),

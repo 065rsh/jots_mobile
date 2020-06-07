@@ -4,9 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:jots_mobile/screens/home/settingsSheet.dart';
 import 'package:jots_mobile/screens/home/drawerUserDetails.dart';
 import 'package:jots_mobile/services/auth.dart';
 import 'package:jots_mobile/theme.dart';
+import 'package:provider/provider.dart';
 
 class CustomDrawer extends StatefulWidget {
   final void Function(dynamic) updateSelectedBook;
@@ -35,6 +37,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
   bool isAddingBook = false;
   String addBookNameText;
 
+  bool _darkTheme = true;
+
   @override
   void initState() {
     super.initState();
@@ -54,13 +58,18 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
+    _darkTheme = (themeNotifier.getTheme() == darkTheme);
+
+    final themex = Theme.of(context);
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
       child: Container(
-        margin: EdgeInsets.only(top: 40),
         color: Colors.transparent,
+        margin: EdgeInsets.only(top: 40),
         padding: EdgeInsets.only(
           left: 20,
           top: 10,
@@ -96,30 +105,59 @@ class _CustomDrawerState extends State<CustomDrawer> {
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                // User DP, Name, email & Edit button
+                // # User DP, Name, email & Edit button
                 DrawerUserDetails(),
-                // log out button
-                FlatButton(
-                  padding: EdgeInsets.all(5),
-                  onPressed: askLogout,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Image.asset(
-                        "assets/images/LogOutIcon.png",
-                        width: 20,
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(left: 10),
-                        child: Text(
-                          "LOG OUT",
-                          style: TextStyle(
-                            color: warningColor,
+                // # log out & settings button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    // # Log out button
+                    FlatButton(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      onPressed: askLogout,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          SvgPicture.asset(
+                            "assets/vectors/LogOutIcon.svg",
+                            width: 20,
                           ),
-                        ),
+                          Container(
+                            margin: EdgeInsets.only(left: 10),
+                            child: Text(
+                              "LOG OUT",
+                              style: TextStyle(
+                                color: warningColor,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    // # Settings button
+                    FlatButton(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      onPressed: openSettings,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Icon(
+                            Icons.settings,
+                            color: themex.textTheme.bodyText2.color,
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(left: 10),
+                            child: Text(
+                              "SETTINGS",
+                              style: TextStyle(
+                                color: themex.textTheme.bodyText2.color,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -129,14 +167,36 @@ class _CustomDrawerState extends State<CustomDrawer> {
     );
   }
 
+  openSettings() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withAlpha(50),
+      builder: (context) {
+        return SettingsSheet(_darkTheme);
+      },
+    );
+  }
+
   askLogout() {
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Log out"),
-            content: Text("Are you sure?"),
+            title: Text(
+              "Log out",
+              style: TextStyle(
+                color: Theme.of(context).textTheme.headline1.color,
+              ),
+            ),
+            content: Text(
+              "Are you sure?",
+              style: TextStyle(
+                color: Theme.of(context).textTheme.headline2.color,
+              ),
+            ),
             actions: [
               // # Cancel button
               FlatButton(
@@ -231,6 +291,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   // this will set the 'selectedBook'
   parseBooks() {
+    final themex = Theme.of(context);
+
     List<Widget> bookWidgets = [];
 
     bookWidgets.add(
@@ -248,7 +310,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     });
                   },
                   style: TextStyle(
-                    color: darkTextColor,
+                    color: themex.textTheme.bodyText2.color,
                     fontWeight: FontWeight.w600,
                     fontSize: 18,
                   ),
@@ -295,7 +357,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: darkTextColor,
+                        color: themex.textTheme.headline1.color,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -324,7 +386,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
         margin: EdgeInsets.only(top: 5),
         decoration: BoxDecoration(
           border: Border.all(
-            color: isAddingBook ? themeblue : darkTextColor,
+            color: isAddingBook ? themeblue : themex.textTheme.headline1.color,
           ),
           borderRadius: BorderRadius.circular(7),
         ),
@@ -339,7 +401,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             "+ Book",
             style: TextStyle(
               fontSize: 15,
-              color: darkTextColor,
+              color: themex.textTheme.headline1.color,
             ),
           ),
         ),

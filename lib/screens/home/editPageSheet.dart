@@ -48,6 +48,8 @@ class _EditPageSheetState extends State<EditPageSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final themex = Theme.of(context);
+
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -55,7 +57,7 @@ class _EditPageSheetState extends State<EditPageSheet> {
       child: Container(
         margin: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: themex.dialogBackgroundColor,
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
@@ -86,7 +88,7 @@ class _EditPageSheetState extends State<EditPageSheet> {
               margin: EdgeInsets.only(left: 20, bottom: 25, right: 20, top: 15),
               padding: EdgeInsets.only(top: 10, bottom: 10),
               decoration: BoxDecoration(
-                color: lightColor,
+                color: Color(0x11000000),
                 borderRadius: BorderRadius.circular(7),
               ),
               child: TextFormField(
@@ -102,7 +104,7 @@ class _EditPageSheetState extends State<EditPageSheet> {
                   });
                 },
                 style: TextStyle(
-                  color: darkTextColor,
+                  color: themex.textTheme.headline1.color,
                   fontSize: 17,
                   fontWeight: FontWeight.w500,
                 ),
@@ -166,7 +168,7 @@ class _EditPageSheetState extends State<EditPageSheet> {
                         margin: EdgeInsets.only(left: 20, bottom: 20),
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: semiDarkColor,
+                            color: themex.textTheme.headline1.color,
                           ),
                           borderRadius: BorderRadius.circular(7),
                         ),
@@ -181,7 +183,7 @@ class _EditPageSheetState extends State<EditPageSheet> {
                                   "+",
                                   style: TextStyle(
                                     fontSize: 25,
-                                    color: darkTextColor,
+                                    color: themex.textTheme.headline1.color,
                                     fontWeight: FontWeight.w400,
                                   ),
                                 ),
@@ -189,7 +191,7 @@ class _EditPageSheetState extends State<EditPageSheet> {
                               Text(
                                 "New Task",
                                 style: TextStyle(
-                                  color: darkTextColor,
+                                  color: themex.textTheme.headline1.color,
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
@@ -216,7 +218,12 @@ class _EditPageSheetState extends State<EditPageSheet> {
       barrierColor: Colors.black.withAlpha(50),
       builder: (context) {
         return TaskSheet(
-            widget.pages, widget.pageRef, widget.pageId, null, null);
+          widget.pages,
+          widget.pageRef,
+          widget.pageId,
+          null,
+          null,
+        );
       },
     );
   }
@@ -264,8 +271,18 @@ class _EditPageSheetState extends State<EditPageSheet> {
         barrierDismissible: false,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Delete \"" + widget.initialPageName + "\"?"),
-            content: Text("You cannot recover this page once deleted."),
+            title: Text(
+              "Delete \"" + widget.initialPageName + "\"?",
+              style: TextStyle(
+                color: Theme.of(context).textTheme.headline1.color,
+              ),
+            ),
+            content: Text(
+              "You cannot recover this page once deleted.",
+              style: TextStyle(
+                color: Theme.of(context).textTheme.headline2.color,
+              ),
+            ),
             actions: [
               // # Cancel button
               FlatButton(

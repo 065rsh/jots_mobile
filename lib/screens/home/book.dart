@@ -10,7 +10,7 @@ import 'package:jots_mobile/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'editPageSheet.dart';
 
-final double maxDrawerDragStartXOffset = 40;
+final double maxDrawerDragStartXOffset = 50;
 final double maxDrawerXOffset = 250;
 final double maxDrawerYOffset = 185;
 final double drawerToggleThreshold = 100;
@@ -104,6 +104,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final themex = Theme.of(context);
+
     if (widget.isDrawerOpen) {
       _drawerAnimationController.fling(velocity: 10.0);
     } else {
@@ -136,7 +138,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                   ..scale(scale),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: themex.primaryColor,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.12),
@@ -162,7 +164,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                               border: Border(
                                 bottom: BorderSide(
                                   width: 0.5,
-                                  color: Color(0xFFdddddd),
+                                  color: themex.dividerColor,
                                 ),
                               ),
                             ),
@@ -186,7 +188,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                         child: SvgPicture.asset(
                                           "assets/vectors/DrawerIcon.svg",
                                           width: 20,
-                                          color: semiDarkColor,
+                                          color:
+                                              themex.textTheme.headline2.color,
                                         ),
                                       ),
                                     ),
@@ -218,7 +221,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                                 : "NaN",
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
-                                              color: darkTextColor,
+                                              color: themex
+                                                  .textTheme.headline1.color,
                                               fontWeight: FontWeight.w500,
                                               fontSize: 22,
                                             ),
@@ -273,7 +277,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                             color: filterSelected !=
                                                     defaultFilterInt
                                                 ? themeblue
-                                                : darkTextColor,
+                                                : themex
+                                                    .textTheme.headline2.color,
                                           ),
                                         ),
                                       ),
@@ -328,7 +333,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                   top: 10, right: 10, bottom: 20, left: 10),
                               width: 200,
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: themex.dialogBackgroundColor,
                                 borderRadius: BorderRadius.circular(2),
                                 boxShadow: [
                                   BoxShadow(
@@ -388,7 +393,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                                       fontSize: 14,
                                                       fontWeight:
                                                           FontWeight.w400,
-                                                      color: Color(0xFF333333),
+                                                      color: themex.textTheme
+                                                          .headline1.color,
                                                     ),
                                                   ),
                                                   Text(
@@ -472,7 +478,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                             letterSpacing: 1,
                                             fontSize: 14,
                                             fontWeight: FontWeight.w400,
-                                            color: Color(0xFF333333),
+                                            color: themex
+                                                .textTheme.headline1.color,
                                           ),
                                         ),
                                       ],
@@ -506,7 +513,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                             letterSpacing: 1,
                                             fontSize: 14,
                                             fontWeight: FontWeight.w400,
-                                            color: Color(0xFF333333),
+                                            color: themex
+                                                .textTheme.headline1.color,
                                           ),
                                         ),
                                       ],
@@ -540,7 +548,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                             letterSpacing: 1,
                                             fontSize: 14,
                                             fontWeight: FontWeight.w400,
-                                            color: Color(0xFF333333),
+                                            color: themex
+                                                .textTheme.headline1.color,
                                           ),
                                         ),
                                       ],
@@ -589,10 +598,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
   }
 
   _onDrawerDragUpdate(details) {
-    if (canSlideOpenDrawer) {
-      double delta = details.primaryDelta / maxDrawerXOffset;
-      _drawerAnimationController.value += delta;
-    } else if (widget.isDrawerOpen) {
+    if (canSlideOpenDrawer || widget.isDrawerOpen) {
       double delta = details.primaryDelta / maxDrawerXOffset;
       _drawerAnimationController.value += delta;
     }
@@ -600,8 +606,11 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
 
   _onDrawerDragEnd(details) {
     double dragVelocity = details.velocity.pixelsPerSecond.dx;
-    if (dragVelocity.abs() >= 365.0) {
+
+    if (dragVelocity.abs() >= 365.0 &&
+        (canSlideOpenDrawer || widget.isDrawerOpen)) {
       double visualVelocity = dragVelocity / MediaQuery.of(context).size.width;
+
       _drawerAnimationController.fling(velocity: visualVelocity);
 
       if (dragVelocity > 0) {
@@ -657,8 +666,17 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text(
-                "Delete \"" + widget.selectedBook.data["book_name"] + "\"?"),
-            content: Text("You cannot recover this book once deleted."),
+              "Delete \"" + widget.selectedBook.data["book_name"] + "\"?",
+              style: TextStyle(
+                color: Theme.of(context).textTheme.headline1.color,
+              ),
+            ),
+            content: Text(
+              "You cannot recover this book once deleted.",
+              style: TextStyle(
+                color: Theme.of(context).textTheme.headline2.color,
+              ),
+            ),
             actions: [
               // # Cancel button
               FlatButton(

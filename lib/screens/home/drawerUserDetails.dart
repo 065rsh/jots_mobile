@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:jots_mobile/theme.dart' as Theme;
+import 'package:jots_mobile/theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -18,8 +18,6 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
 
   String newDisplayNameText;
   bool isEditingUser = false;
-
-  final String editNameIcon = 'assets/vectors/EditIcon.svg';
 
   @override
   void initState() {
@@ -38,6 +36,8 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
 
   @override
   Widget build(BuildContext context) {
+    final themex = Theme.of(context);
+
     if (user != null) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -119,11 +119,11 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
                           fontWeight: FontWeight.w600,
                           fontSize: 17,
                           letterSpacing: 1,
-                          color: Theme.darkTextColor,
+                          color: themex.textTheme.headline1.color,
                         ),
                         decoration: InputDecoration(
                           hintText: "Set user name...",
-                          hintStyle: TextStyle(color: Theme.lightDarkColor),
+                          hintStyle: TextStyle(color: lightDarkColor),
                           isDense: true,
                           counterText: '',
                           contentPadding: EdgeInsets.all(0),
@@ -134,7 +134,7 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
                     Text(
                       user.email,
                       style: TextStyle(
-                        color: Theme.semiDarkTextColor,
+                        color: semiDarkTextColor,
                       ),
                     ),
                   ],
@@ -146,7 +146,7 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
           Container(
             decoration: BoxDecoration(
               border: Border.all(
-                color: isEditingUser ? Theme.themeblue : Color(0xFFBBBBBB),
+                color: isEditingUser ? themeblue : lightDarkColor,
               ),
               borderRadius: BorderRadius.circular(10),
             ),
@@ -161,8 +161,8 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
                 displayNameFocusNode.requestFocus();
               },
               child: SvgPicture.asset(
-                editNameIcon,
-                color: isEditingUser ? Theme.themeblue : Theme.semiDarkColor,
+                "assets/vectors/EditIcon.svg",
+                color: isEditingUser ? themeblue : lightDarkColor,
               ),
             ),
           ),

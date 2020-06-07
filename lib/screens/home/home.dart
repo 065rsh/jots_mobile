@@ -48,15 +48,17 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    final themex = Theme.of(context);
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
+        statusBarIconBrightness: themex.brightness,
       ),
       child: Scaffold(
         key: _scaffoldKey,
         resizeToAvoidBottomInset: false,
-        backgroundColor: drawerBgColor,
+        backgroundColor: themex.backgroundColor,
         body: Container(
           child: Stack(
             children: <Widget>[
@@ -113,7 +115,8 @@ class _HomeState extends State<Home> {
                                           });
                                         },
                                         style: TextStyle(
-                                          color: darkTextColor,
+                                          color:
+                                              themex.textTheme.headline1.color,
                                           fontWeight: FontWeight.w500,
                                           fontSize: 22,
                                         ),

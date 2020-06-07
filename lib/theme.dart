@@ -1,26 +1,3 @@
-/*
- * Creating custom color palettes is part of creating a custom app. The idea is to create
- * your class of custom colors, in this case `CompanyColors` and then create a `ThemeData`
- * object with those colors you just defined.
- *
- * Resource:
- * A good resource would be this website: http://mcg.mbitson.com/
- * You simply need to put in the colour you wish to use, and it will generate all shades
- * for you. Your primary colour will be the `500` value.
- *
- * Colour Creation:
- * In order to create the custom colours you need to create a `Map<int, Color>` object
- * which will have all the shade values. `const Color(0xFF...)` will be how you create
- * the colours. The six character hex code is what follows. If you wanted the colour
- * #114488 or #D39090 as primary colours in your theme, then you would have
- * `const Color(0x114488)` and `const Color(0xD39090)`, respectively.
- *
- * Usage:
- * In order to use this newly created theme or even the colours in it, you would just
- * `import` this file in your project, anywhere you needed it.
- * `import 'path/to/theme.dart';`
- */
-
 import 'package:flutter/material.dart';
 
 final drawerBgColor = CompanyColors.veryLightColor;
@@ -75,11 +52,6 @@ final tagsColorArr = [
   Color(0xFF93B2B7),
 ];
 
-// final ThemeData CompanyThemeData = new ThemeData(
-//   brightness: Brightness.light,
-//   primarySwatch: CompanyColors.blue,
-// );
-
 class CompanyColors {
   CompanyColors._(); // this basically makes it so you can instantiate this class
   static const blue = Color(0xFF2382FF);
@@ -94,9 +66,69 @@ class CompanyColors {
   static const semiLightColor = Color(0xFFDDDDDD);
   static const lightYellowColor = Color(0xFFFFCC00);
   static const mediumOrangeColor = Color(0xFFFF6F00);
+}
 
-  // static const Map<int, Color> blue = const <int, Color>{
-  //   50: const Color(/* some hex code */),
-  // };
+final darkTheme = ThemeData(
+  primaryColor: Color(0xFF1A1A1A),
+  brightness: Brightness.light,
+  backgroundColor: Color(0xFF222222),
+  dividerColor: Color(0x22FFFFFF),
+  hintColor: Color(0xFF555555),
+  dialogBackgroundColor: Color(0xFF292929),
+  textTheme: TextTheme(
+    headline1: TextStyle(
+      color: Color(0xFFDDDDDD),
+    ),
+    headline2: TextStyle(
+      color: Color(0xFFAAAAAA),
+    ),
+    headline3: TextStyle(
+      color: Color(0xFF999999),
+    ),
+    bodyText1: TextStyle(
+      color: Colors.white,
+    ),
+    bodyText2: TextStyle(
+      color: Color(0xFFDDDDDD),
+    ),
+  ),
+);
 
+final lightTheme = ThemeData(
+  primaryColor: Colors.white,
+  brightness: Brightness.dark,
+  backgroundColor: Color(0xFFF5F5F5),
+  dividerColor: Color(0xFFDDDDDD),
+  hintColor: Color(0xFFBBBBBB),
+  dialogBackgroundColor: Colors.white,
+  textTheme: TextTheme(
+    headline1: TextStyle(
+      color: Color(0xFF555555),
+    ),
+    headline2: TextStyle(
+      color: Color(0xFF555555),
+    ),
+    headline3: TextStyle(
+      color: Color(0xFF777777),
+    ),
+    bodyText1: TextStyle(
+      color: Color(0xFF555555),
+    ),
+    bodyText2: TextStyle(
+      color: Color(0xFF777777),
+    ),
+  ),
+);
+
+class ThemeNotifier with ChangeNotifier {
+  ThemeData _themeData;
+
+  ThemeNotifier(this._themeData);
+
+  getTheme() => _themeData;
+
+  setTheme(ThemeData themeData) async {
+    _themeData = themeData;
+    notifyListeners();
+  }
 }

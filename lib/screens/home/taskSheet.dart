@@ -29,7 +29,6 @@ class TaskSheet extends StatefulWidget {
 class _TaskSheetState extends State<TaskSheet> {
   String selectedPageIdToAddTask;
   String taskName;
-  Color deleteTaskButtonColor = semiDarkColor;
   DateTime dueDate;
   DateTime selectedDate;
   bool isTaskValid = false;
@@ -57,14 +56,14 @@ class _TaskSheetState extends State<TaskSheet> {
   @override
   Widget build(BuildContext context) {
     bool isNewTask = widget.taskId == null;
-    Color saveChangesButtonColor =
-        _checkTaskChange() && isTaskValid ? themeblue : disabledButtonColor;
+    bool isTaskChangedAndIsValid = _checkTaskChange() && isTaskValid;
     final formattedDueDate = selectedDate != null
         ? _formatDueDate(selectedDate)
         : {"date_time": null, "date": null, "time": null, "color": null};
     bool isTimeNotAval = formattedDueDate["time"] == "" ||
         formattedDueDate["time"] == ", " ||
         formattedDueDate["time"] == null;
+    final themex = Theme.of(context);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -73,7 +72,7 @@ class _TaskSheetState extends State<TaskSheet> {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: themex.dialogBackgroundColor,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.2),
@@ -96,7 +95,7 @@ class _TaskSheetState extends State<TaskSheet> {
                 height: 3,
                 margin: EdgeInsets.only(top: 10),
                 decoration: BoxDecoration(
-                  color: semiLightColor,
+                  color: themex.hintColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -158,7 +157,7 @@ class _TaskSheetState extends State<TaskSheet> {
                 },
                 maxLength: 100,
                 style: TextStyle(
-                  color: darkTextColor,
+                  color: themex.textTheme.headline3.color,
                   fontSize: 16,
                 ),
                 decoration: InputDecoration(
@@ -205,7 +204,7 @@ class _TaskSheetState extends State<TaskSheet> {
                         decoration: BoxDecoration(
                           color: formattedDueDate["date"] == null
                               ? Colors.transparent
-                              : veryLightColor,
+                              : Color(0x11000000),
                           borderRadius: BorderRadius.circular(7),
                         ),
                         child: DottedBorder(
@@ -239,7 +238,7 @@ class _TaskSheetState extends State<TaskSheet> {
                                 border: Border.all(color: Colors.transparent),
                                 color: isTimeNotAval
                                     ? Colors.transparent
-                                    : veryLightColor,
+                                    : Color(0x11000000),
                                 borderRadius: BorderRadius.circular(7),
                               ),
                               child: DottedBorder(
@@ -275,7 +274,7 @@ class _TaskSheetState extends State<TaskSheet> {
                               height: 30,
                               margin: EdgeInsets.only(left: 20),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: themex.dialogBackgroundColor,
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
@@ -317,7 +316,8 @@ class _TaskSheetState extends State<TaskSheet> {
               height: 40,
               margin: EdgeInsets.only(left: 20, top: 8, bottom: 20),
               decoration: BoxDecoration(
-                color: taskPriority == 0 ? Colors.transparent : veryLightColor,
+                color:
+                    taskPriority == 0 ? Colors.transparent : Color(0x11000000),
                 borderRadius: BorderRadius.circular(7),
               ),
               child: DottedBorder(
@@ -368,7 +368,7 @@ class _TaskSheetState extends State<TaskSheet> {
               width: double.infinity,
               margin: EdgeInsets.only(left: 20, top: 8, bottom: 20, right: 20),
               decoration: BoxDecoration(
-                color: veryLightColor,
+                color: Color(0x11000000),
                 // border: Border.all(color: lightColor),
                 borderRadius: BorderRadius.circular(5),
               ),
@@ -383,7 +383,7 @@ class _TaskSheetState extends State<TaskSheet> {
                   style: TextStyle(
                     fontSize: 14,
                     letterSpacing: 1,
-                    color: darkTextColor,
+                    color: themex.textTheme.headline3.color,
                   ),
                   decoration: InputDecoration(
                     hintText: "Add a note...",
@@ -397,15 +397,42 @@ class _TaskSheetState extends State<TaskSheet> {
               ),
             ),
             // # Action buttons
-            !isNewTask
-                ? Row(
+            isNewTask
+                ? Opacity(
+                    opacity: isTaskValid ? 1 : 0.5,
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 20),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        border: Border(
+                          top: BorderSide(color: themex.dividerColor),
+                        ),
+                      ),
+                      child: FlatButton(
+                        onPressed: () {
+                          if (isTaskValid) {
+                            _createNewTask();
+                          }
+                        },
+                        child: Text(
+                          "CREATE",
+                          style: TextStyle(
+                            color: isTaskValid ? themeblue : lightDarkColor,
+                            letterSpacing: 1,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : Row(
                     children: <Widget>[
                       Container(
                         height: 40,
                         margin: EdgeInsets.only(left: 20, bottom: 20),
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: deleteTaskButtonColor,
+                            color: themex.textTheme.headline1.color,
                           ),
                           borderRadius: BorderRadius.circular(7),
                         ),
@@ -419,13 +446,13 @@ class _TaskSheetState extends State<TaskSheet> {
                                 child: SvgPicture.asset(
                                   "assets/vectors/DeleteIcon.svg",
                                   width: 16,
-                                  color: deleteTaskButtonColor,
+                                  color: themex.textTheme.headline1.color,
                                 ),
                               ),
                               Text(
                                 "Delete",
                                 style: TextStyle(
-                                  color: deleteTaskButtonColor,
+                                  color: themex.textTheme.headline1.color,
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
@@ -434,66 +461,52 @@ class _TaskSheetState extends State<TaskSheet> {
                         ),
                       ),
                       // # save changes button
-                      Container(
-                        height: 40,
-                        margin: EdgeInsets.only(left: 20, bottom: 20),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: saveChangesButtonColor,
+                      Opacity(
+                        opacity: isTaskChangedAndIsValid ? 1 : 0.5,
+                        child: Container(
+                          height: 40,
+                          margin: EdgeInsets.only(left: 20, bottom: 20),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: isTaskChangedAndIsValid
+                                  ? themeblue
+                                  : lightDarkColor,
+                            ),
+                            borderRadius: BorderRadius.circular(7),
                           ),
-                          borderRadius: BorderRadius.circular(7),
-                        ),
-                        child: FlatButton(
-                          onPressed:
-                              _checkTaskChange() ? _makeChangesInOldTask : null,
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Container(
-                                margin: EdgeInsets.only(right: 10),
-                                child: Icon(
-                                  Icons.check,
-                                  color: saveChangesButtonColor,
-                                  size: 20,
+                          child: FlatButton(
+                            onPressed: _checkTaskChange()
+                                ? _makeChangesInOldTask
+                                : null,
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Container(
+                                  margin: EdgeInsets.only(right: 10),
+                                  child: Icon(
+                                    Icons.check,
+                                    color: isTaskChangedAndIsValid
+                                        ? themeblue
+                                        : lightDarkColor,
+                                    size: 20,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                "Save changes",
-                                style: TextStyle(
-                                  color: saveChangesButtonColor,
-                                  fontWeight: FontWeight.w400,
+                                Text(
+                                  "Save changes",
+                                  style: TextStyle(
+                                    color: isTaskChangedAndIsValid
+                                        ? themeblue
+                                        : lightDarkColor,
+                                    fontWeight: FontWeight.w400,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ],
-                  )
-                : Container(
-                    margin: EdgeInsets.symmetric(horizontal: 20),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      border: Border(
-                        top: BorderSide(color: lightColor),
-                      ),
-                    ),
-                    child: FlatButton(
-                      onPressed: () {
-                        if (isTaskValid) {
-                          addNewTask();
-                        }
-                      },
-                      child: Text(
-                        "CREATE",
-                        style: TextStyle(
-                          color: isTaskValid ? themeblue : semiLightColor,
-                          letterSpacing: 1,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
                   ),
           ],
         ),
@@ -504,6 +517,7 @@ class _TaskSheetState extends State<TaskSheet> {
   _checkTaskChange() {
     if (widget.taskId != null) {
       bool isTaskNameChanged = widget.task["task_name"] != taskName;
+
       bool isDueDateChanged = widget.task["due_date"] != ""
           ? selectedDate != null
               ? !selectedDate.isAtSameMomentAs(widget.task["due_date"].toDate())
@@ -514,10 +528,14 @@ class _TaskSheetState extends State<TaskSheet> {
 
       bool isTaskNoteChanged = widget.task["note"] != taskNote;
 
+      bool isTaskAddPageChanged =
+          widget.selectedPage != selectedPageIdToAddTask;
+
       return isTaskNameChanged ||
           isDueDateChanged ||
           isPriorityChanged ||
-          isTaskNoteChanged;
+          isTaskNoteChanged ||
+          isTaskAddPageChanged;
     } else
       return false;
   }
@@ -529,13 +547,27 @@ class _TaskSheetState extends State<TaskSheet> {
   }
 
   _selectDate() async {
+    FocusScope.of(context).requestFocus(new FocusNode());
+
     final initiallySelectedDate = selectedDate ?? DateTime.now();
 
     final DateTime pickedDate = await showDatePicker(
-        context: context,
-        initialDate: initiallySelectedDate,
-        firstDate: DateTime(DateTime.now().year - 1),
-        lastDate: DateTime(DateTime.now().year + 1));
+      context: context,
+      initialDate: initiallySelectedDate,
+      firstDate: DateTime(DateTime.now().year - 1),
+      lastDate: DateTime(DateTime.now().year + 1),
+      builder: (BuildContext context, Widget child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+              //OK/Cancel button text color
+              primaryColor: const Color(0xFF4A5BF6), //Head background
+              accentColor: const Color(0xFF4A5BF6) //selection color
+              //dialogBackgroundColor: Colors.white,//Background color
+              ),
+          child: child,
+        );
+      },
+    );
 
     setState(() {
       selectedDate = pickedDate ?? selectedDate;
@@ -543,11 +575,26 @@ class _TaskSheetState extends State<TaskSheet> {
   }
 
   _selectTime() async {
+    FocusScope.of(context).requestFocus(new FocusNode());
+
     final initiallySelectedTime =
         TimeOfDay.fromDateTime(selectedDate) ?? TimeOfDay.now();
 
     final TimeOfDay pickedTime = await showTimePicker(
-        context: context, initialTime: initiallySelectedTime);
+      context: context,
+      initialTime: initiallySelectedTime,
+      builder: (BuildContext context, Widget child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+              //OK/Cancel button text color
+              primaryColor: const Color(0xFF4A5BF6), //Head background
+              accentColor: const Color(0xFF4A5BF6) //selection color
+              //dialogBackgroundColor: Colors.white,//Background color
+              ),
+          child: child,
+        );
+      },
+    );
 
     final tempTime = pickedTime ?? TimeOfDay.fromDateTime(selectedDate);
 
@@ -616,6 +663,7 @@ class _TaskSheetState extends State<TaskSheet> {
   }
 
   parsePageButtons() {
+    final themex = Theme.of(context);
     List<Widget> pageButtonWidgets = [];
 
     if (selectedPageIdToAddTask == null) {
@@ -643,7 +691,9 @@ class _TaskSheetState extends State<TaskSheet> {
               child: Text(
                 i == 0 ? "None" : widget.pages[i].data["page_name"],
                 style: TextStyle(
-                  color: isSelectedPage ? darkTextColor : darkLightColor,
+                  color: isSelectedPage
+                      ? themex.textTheme.headline1.color
+                      : themex.hintColor,
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
                 ),
@@ -657,49 +707,82 @@ class _TaskSheetState extends State<TaskSheet> {
     return pageButtonWidgets;
   }
 
-  addNewTask() async {
+  changeTaskPage() async {}
+
+  _makeChangesInOldTask() async {
+    bool isTaskAddPageChanged = widget.selectedPage != selectedPageIdToAddTask;
+
+    if (isTaskAddPageChanged) {
+      var bytes = utf8.encode(hashCode.toString());
+      var randomTaskId = base64.encode(bytes);
+
+      DocumentReference sectionRef = widget.pageRef
+          .document(selectedPageIdToAddTask)
+          .collection("Sections")
+          .document("not_sectioned");
+
+      await sectionRef.setData({
+        randomTaskId: {
+          "completion_date": "",
+          "creation_date": DateTime.now(),
+          "due_date": selectedDate ?? "",
+          "is_checked": false,
+          "note": taskNote,
+          "priority": taskPriority,
+          "tag_ids": [],
+          "task_name": taskName,
+        }
+      }, merge: true);
+
+      Map<String, dynamic> map = {widget.taskId: FieldValue.delete()};
+
+      widget.pageRef
+          .document(widget.selectedPage)
+          .collection("Sections")
+          .document("not_sectioned")
+          .updateData(map);
+
+      Navigator.of(context).pop();
+    } else {
+      var randomTaskId = widget.taskId;
+
+      Map<String, dynamic> tempTaskMap = {
+        randomTaskId: {
+          "completion_date": "",
+          "due_date": selectedDate ?? "",
+          "note": taskNote,
+          "priority": taskPriority,
+          "tag_ids": [],
+          "task_name": taskName,
+        }
+      };
+
+      _uploadTaskDetails(tempTaskMap);
+    }
+  }
+
+  _createNewTask() async {
     if (widget.pages.length == 1) {
       setState(() => selectedPageIdToAddTask = widget.pages[0].documentID);
     }
 
     if (taskName != null && taskName != "" && widget.taskId == null) {
-      _createNewTask();
+      var bytes = utf8.encode(hashCode.toString());
+      var randomTaskId = base64.encode(bytes);
+
+      await _uploadTaskDetails({
+        randomTaskId: {
+          "completion_date": "",
+          "creation_date": DateTime.now(),
+          "due_date": selectedDate ?? "",
+          "is_checked": false,
+          "note": taskNote,
+          "priority": taskPriority,
+          "tag_ids": [],
+          "task_name": taskName,
+        }
+      });
     }
-  }
-
-  _makeChangesInOldTask() {
-    var randomTaskId = widget.taskId;
-
-    Map<String, dynamic> tempTaskMap = {
-      randomTaskId: {
-        "completion_date": "",
-        "due_date": selectedDate ?? "",
-        "note": taskNote,
-        "priority": taskPriority,
-        "tag_ids": [],
-        "task_name": taskName,
-      }
-    };
-
-    _uploadTaskDetails(tempTaskMap);
-  }
-
-  _createNewTask() {
-    var bytes = utf8.encode(hashCode.toString());
-    var randomTaskId = base64.encode(bytes);
-
-    _uploadTaskDetails({
-      randomTaskId: {
-        "completion_date": "",
-        "creation_date": DateTime.now(),
-        "due_date": selectedDate ?? "",
-        "is_checked": false,
-        "note": taskNote,
-        "priority": taskPriority,
-        "tag_ids": [],
-        "task_name": taskName,
-      }
-    });
   }
 
   _uploadTaskDetails(taskObject) async {
