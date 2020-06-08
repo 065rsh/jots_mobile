@@ -4,11 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/screens/home/taskItem.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'editPageSheet.dart';
 
 class PageItem extends StatefulWidget {
   final int pageIndex;
   final int filterSelected;
+  final int sortBySelected;
   final selectedBook;
   final allTags;
   final pages;
@@ -17,6 +19,7 @@ class PageItem extends StatefulWidget {
   PageItem(
     this.pageIndex,
     this.filterSelected,
+    this.sortBySelected,
     this.selectedBook,
     this.allTags,
     this.pages,
@@ -44,17 +47,33 @@ class _PageItemState extends State<PageItem>
     super.initState();
     _fetchTasks();
 
+    if (widget.pages.length == 2) {
+      setState(() {
+        showTasks = true;
+      });
+    }
+
+    _setPageCollapseValue();
+
     if (widget.pages[widget.pageIndex]["page_name"] == "General") {
       setState(() {
         showTasks = true;
         showPageHeader = false;
       });
     }
+  }
 
-    if (widget.pages.length == 2) {
+  _setPageCollapseValue() async {
+    try {
+      SharedPreferences tempPref = await SharedPreferences.getInstance();
+
       setState(() {
-        showTasks = true;
+        showTasks = !tempPref.getBool(
+                widget.pages[widget.pageIndex].documentID + "_is_collapsed") ??
+            false;
       });
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -192,6 +211,34 @@ class _PageItemState extends State<PageItem>
         return a[a.keys.first]["creation_date"]
             .compareTo(b[b.keys.first]["creation_date"]);
       });
+
+      if (widget.sortBySelected == 1) {
+        fetchedTasks.sort((a, b) {
+          final taskDate1 = a[a.keys.first]["due_date"];
+          final taskDate2 = b[b.keys.first]["due_date"];
+
+          final taskDate11 =
+              taskDate1 == "" ? DateTime(2099) : taskDate1.toDate();
+          final taskDate22 =
+              taskDate2 == "" ? DateTime(2099) : taskDate2.toDate();
+
+          return (taskDate11).compareTo(taskDate22);
+        });
+      } else if (widget.sortBySelected == 2) {
+        fetchedTasks.sort((a, b) {
+          final taskDate2 = a[a.keys.first]["priority"];
+          final taskDate1 = b[b.keys.first]["priority"];
+
+          return (taskDate1).compareTo(taskDate2);
+        });
+      } else if (widget.sortBySelected == 3) {
+        fetchedTasks.sort((a, b) {
+          final taskDate1 = a[a.keys.first]["task_name"];
+          final taskDate2 = b[b.keys.first]["task_name"];
+
+          return (taskDate1).compareTo(taskDate2);
+        });
+      }
 
       fetchedTasks.forEach((task) {
         final taskId = task.keys.first;

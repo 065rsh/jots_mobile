@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:jots_mobile/handyArr.dart';
 import 'package:jots_mobile/screens/home/addTask.dart';
 import 'package:jots_mobile/screens/home/pageItem.dart';
 import 'package:jots_mobile/theme.dart';
@@ -14,11 +15,6 @@ final double maxDrawerDragStartXOffset = 50;
 final double maxDrawerXOffset = 250;
 final double maxDrawerYOffset = 185;
 final double drawerToggleThreshold = 100;
-final List filterOptionArr = [
-  "Incomplete tasks",
-  "Complete tasks",
-  "All tasks"
-];
 
 class Book extends StatefulWidget {
   final List pages;
@@ -59,6 +55,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
   bool canSlideOpenDrawer = false;
   int filterSelected = 0;
   int defaultFilterInt = 0;
+  int sortBySelected = 0;
+  int defaultSortByInt = 0;
 
   @override
   void initState() {
@@ -67,6 +65,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
     fetchHomeBook();
 
     _setLocalDefaultFilter();
+    _setLocalDefaultSortBy();
 
     _initializeDrawerAnimationController();
     _bookOptionsAC = AnimationController(
@@ -87,8 +86,20 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       setState(() {
-        defaultFilterInt = prefs.getInt('default_filter');
-        filterSelected = prefs.getInt('default_filter');
+        defaultFilterInt = prefs.getInt('default_filter') ?? 0;
+        filterSelected = prefs.getInt('default_filter') ?? 0;
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  _setLocalDefaultSortBy() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      setState(() {
+        defaultSortByInt = prefs.getInt('default_sort_by') ?? 0;
+        sortBySelected = prefs.getInt('default_sort_by') ?? 0;
       });
     } catch (e) {
       print(e);
@@ -305,6 +316,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                           return PageItem(
                                             index,
                                             filterSelected,
+                                            sortBySelected,
                                             widget.selectedBook,
                                             widget.allTags,
                                             widget.pages,
@@ -331,10 +343,10 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                             child: Container(
                               padding: EdgeInsets.only(
                                   top: 10, right: 10, bottom: 20, left: 10),
-                              width: 200,
+                              width: 210,
                               decoration: BoxDecoration(
                                 color: themex.dialogBackgroundColor,
-                                borderRadius: BorderRadius.circular(2),
+                                borderRadius: BorderRadius.circular(3),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.15),
@@ -451,6 +463,125 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                           ),
                                         ),
                                       ],
+                                    ),
+                                  ),
+                                  // # Sort Button
+                                  Container(
+                                    margin: EdgeInsets.only(top: 10),
+                                    padding: EdgeInsets.only(bottom: 10),
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        bottom: BorderSide(
+                                          color: themex.dividerColor,
+                                          width: 0.5,
+                                        ),
+                                      ),
+                                    ),
+                                    child: FlatButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          if (sortBySelected ==
+                                              sortByArr.length - 1)
+                                            sortBySelected = 0;
+                                          else
+                                            sortBySelected = sortBySelected + 1;
+                                        });
+                                        widget.refreshBook();
+                                      },
+                                      padding: EdgeInsets.all(0),
+                                      materialTapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          Container(
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                Container(
+                                                  margin: EdgeInsets.only(
+                                                    left: 10,
+                                                    right: 13,
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.sort,
+                                                    size: 17,
+                                                    color: lightDarkColor,
+                                                  ),
+                                                ),
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: <Widget>[
+                                                    Text(
+                                                      "Sort by",
+                                                      style: TextStyle(
+                                                        letterSpacing: 1,
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        color: themex.textTheme
+                                                            .headline1.color,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      sortByArr[sortBySelected],
+                                                      style: TextStyle(
+                                                        fontSize: 11,
+                                                        color: themeblue,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            width: 30,
+                                            height: 30,
+                                            child: FlatButton(
+                                              materialTapTargetSize:
+                                                  MaterialTapTargetSize
+                                                      .shrinkWrap,
+                                              padding: EdgeInsets.all(0),
+                                              onPressed: () async {
+                                                setState(() {
+                                                  defaultSortByInt =
+                                                      sortBySelected;
+                                                });
+
+                                                try {
+                                                  SharedPreferences tempPref =
+                                                      await SharedPreferences
+                                                          .getInstance();
+                                                  tempPref.setInt(
+                                                      "default_sort_by",
+                                                      sortBySelected);
+                                                } catch (e) {
+                                                  print(e);
+                                                }
+                                              },
+                                              child: Icon(
+                                                defaultSortByInt ==
+                                                        sortBySelected
+                                                    ? Icons.radio_button_checked
+                                                    : Icons
+                                                        .radio_button_unchecked,
+                                                size: 20,
+                                                color: defaultSortByInt ==
+                                                        sortBySelected
+                                                    ? themeblue
+                                                    : lightDarkColor,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                   // # Add Page Button

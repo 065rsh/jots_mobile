@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/screens/home/taskSheet.dart';
 import 'package:jots_mobile/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EditPageSheet extends StatefulWidget {
   final dynamic selectedBook;
@@ -24,16 +25,40 @@ class _EditPageSheetState extends State<EditPageSheet> {
   FocusNode addNewPageFocusNode = FocusNode();
   FirebaseUser user;
   CollectionReference pageColRef;
+  bool isCollapsePageByDefault = true;
 
   @override
   void initState() {
     super.initState();
 
+    _setPageCollapseValue();
     initFirestore();
     addNewPageFocusNode.addListener(handleAddNewPageFocusNode);
   }
 
+  _setPageCollapseValue() async {
+    try {
+      SharedPreferences tempPref = await SharedPreferences.getInstance();
+
+      setState(() {
+        isCollapsePageByDefault =
+            tempPref.getBool(widget.pageId + "_is_collapsed") ?? true;
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
   handleAddNewPageFocusNode() async {
+    try {
+      SharedPreferences tempPref = await SharedPreferences.getInstance();
+      tempPref.setBool(
+          widget.pageId + "_is_collapsed", isCollapsePageByDefault);
+      print(tempPref.getBool(widget.pageId + "_is_collapsed"));
+    } catch (e) {
+      print(e);
+    }
+
     if (!addNewPageFocusNode.hasFocus &&
         newPageName != null &&
         newPageName != "") {
@@ -85,7 +110,7 @@ class _EditPageSheetState extends State<EditPageSheet> {
             ),
             // # Text form field
             Container(
-              margin: EdgeInsets.only(left: 20, bottom: 25, right: 20, top: 15),
+              margin: EdgeInsets.only(left: 20, bottom: 15, right: 20, top: 15),
               padding: EdgeInsets.only(top: 10, bottom: 10),
               decoration: BoxDecoration(
                 color: Color(0x11000000),
@@ -118,6 +143,55 @@ class _EditPageSheetState extends State<EditPageSheet> {
                   counterText: '',
                   border: InputBorder.none,
                 ),
+              ),
+            ),
+            // # Keep page expanded
+            Container(
+              margin: EdgeInsets.only(bottom: 20, left: 20),
+              child: Row(
+                children: <Widget>[
+                  Container(
+                    width: 30,
+                    height: 30,
+                    child: FlatButton(
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      padding: EdgeInsets.all(0),
+                      onPressed: () {
+                        setState(() {
+                          isCollapsePageByDefault = !isCollapsePageByDefault;
+                        });
+                      },
+                      child: Container(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          width: 18,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: lightDarkColor,
+                            ),
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(5),
+                            ),
+                            color: isCollapsePageByDefault
+                                ? lightDarkColor
+                                : Colors.transparent,
+                          ),
+                          child: Icon(
+                            Icons.check,
+                            size: 13.0,
+                            color: isCollapsePageByDefault
+                                ? Colors.white
+                                : lightDarkColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    child: Text("Close page by default"),
+                  )
+                ],
               ),
             ),
             // # Page action buttons
