@@ -6,6 +6,7 @@ import 'package:jots_mobile/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:jots_mobile/handyArr.dart';
+import 'changeBookSheet.dart';
 
 class TaskSheet extends StatefulWidget {
   final pages;
@@ -13,6 +14,7 @@ class TaskSheet extends StatefulWidget {
   final selectedPage;
   final taskId;
   final task;
+  final selectedBook;
 
   TaskSheet(
     this.pages,
@@ -20,13 +22,16 @@ class TaskSheet extends StatefulWidget {
     this.selectedPage,
     this.taskId,
     this.task,
+    this.selectedBook,
   );
 
   @override
   _TaskSheetState createState() => _TaskSheetState();
 }
 
-class _TaskSheetState extends State<TaskSheet> {
+class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
+  AnimationController _taskAboutAC;
+
   String selectedPageIdToAddTask;
   String taskName;
   DateTime dueDate;
@@ -38,6 +43,12 @@ class _TaskSheetState extends State<TaskSheet> {
   @override
   void initState() {
     super.initState();
+
+    _taskAboutAC = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+      value: 0.0,
+    );
 
     setState(() {
       selectedPageIdToAddTask = widget.selectedPage;
@@ -71,6 +82,7 @@ class _TaskSheetState extends State<TaskSheet> {
       ),
       child: Container(
         width: double.infinity,
+        margin: EdgeInsets.only(top: 60),
         decoration: BoxDecoration(
           color: themex.dialogBackgroundColor,
           boxShadow: [
@@ -81,436 +93,671 @@ class _TaskSheetState extends State<TaskSheet> {
             )
           ],
           borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            // # Drag logo
-            Align(
-              alignment: Alignment.center,
-              child: Container(
-                width: 30,
-                height: 3,
-                margin: EdgeInsets.only(top: 10),
-                decoration: BoxDecoration(
-                  color: themex.hintColor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            ),
-            // # Add to page row
-            widget.pages.length == 1
-                ? Container()
-                : Container(
-                    width: double.infinity,
-                    margin: EdgeInsets.only(left: 20, top: 15, right: 20),
-                    padding: EdgeInsets.only(bottom: 10),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          width: 0.5,
-                          color: Color(0xFFdddddd),
-                        ),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Container(
-                          child: Text(
-                            "ADD TO PAGE",
-                            style: TextStyle(
-                              color: lightDarkColor,
-                              fontSize: 10,
-                              letterSpacing: 0.5,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: parsePageButtons(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-            // # Text form field
-            Container(
-              margin: EdgeInsets.only(top: 20, right: 20, left: 20),
-              child: TextFormField(
-                autofocus: isNewTask,
-                initialValue: !isNewTask ? widget.task["task_name"] : "",
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                textCapitalization: TextCapitalization.sentences,
-                onChanged: (text) {
-                  setState(() {
-                    taskName = text;
-                    isTaskValid = text.length > 0;
-                  });
-                },
-                maxLength: 100,
-                style: TextStyle(
-                  color: themex.textTheme.headline3.color,
-                  fontSize: 16,
-                ),
-                decoration: InputDecoration(
-                  hintText: "Task name...",
-                  hintStyle: TextStyle(
-                    color: lightDarkColor,
-                  ),
-                  isDense: true,
-                  counterText: '',
-                  border: InputBorder.none,
-                ),
-              ),
-            ),
-            // # Due Date Container
-            Container(
-              margin: EdgeInsets.only(top: 30, left: 20, bottom: 20),
-              child: Column(
-                children: <Widget>[
-                  // # Due date head
-                  Row(
-                    children: <Widget>[
-                      Text(
-                        "Due date" +
-                            (formattedDueDate["date_time"] == null
-                                ? ""
-                                : "  •  "),
-                        style: TextStyle(color: lightDarkColor),
-                      ),
-                      Text(
-                        formattedDueDate["date_time"] ?? "",
-                        style: TextStyle(
-                          color:
-                              formattedDueDate["color"] ?? Colors.transparent,
-                        ),
-                      ),
-                    ],
-                  ),
-                  // # Due date action buttons
-                  Row(
-                    children: <Widget>[
-                      Container(
-                        height: 40,
-                        margin: EdgeInsets.only(top: 8, right: 20),
+        child: GestureDetector(
+          onHorizontalDragEnd: (details) => _onSheetDragEnd(details),
+          onTap: () {
+            _taskAboutAC.reverse();
+            FocusScope.of(context).requestFocus(new FocusNode());
+          },
+          child: SingleChildScrollView(
+            child: Stack(
+              children: <Widget>[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    // # Drag logo
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        width: 30,
+                        height: 3,
+                        margin: EdgeInsets.only(top: 10),
                         decoration: BoxDecoration(
-                          color: formattedDueDate["date"] == null
-                              ? Colors.transparent
-                              : Color(0x11000000),
-                          borderRadius: BorderRadius.circular(7),
-                        ),
-                        child: DottedBorder(
-                          borderType: BorderType.RRect,
-                          strokeWidth: 0.5,
-                          dashPattern: [3, 2],
-                          color: formattedDueDate["date"] == null
-                              ? lightDarkColor
-                              : Colors.transparent,
-                          radius: Radius.circular(7),
-                          child: FlatButton(
-                            padding: EdgeInsets.symmetric(horizontal: 30),
-                            onPressed: _selectDate,
-                            child: Text(
-                              formattedDueDate["date"] ?? "Select Date",
-                              style: TextStyle(
-                                color: formattedDueDate["date"] == null
-                                    ? lightDarkColor
-                                    : semiDarkColor,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      formattedDueDate["date"] != null
-                          ? Container(
-                              height: 40,
-                              margin: EdgeInsets.only(top: 5),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.transparent),
-                                color: isTimeNotAval
-                                    ? Colors.transparent
-                                    : Color(0x11000000),
-                                borderRadius: BorderRadius.circular(7),
-                              ),
-                              child: DottedBorder(
-                                borderType: BorderType.RRect,
-                                strokeWidth: 0.5,
-                                dashPattern: [3, 2],
-                                color: isTimeNotAval
-                                    ? lightDarkColor
-                                    : Colors.transparent,
-                                radius: Radius.circular(7),
-                                child: FlatButton(
-                                  onPressed: _selectTime,
-                                  padding: EdgeInsets.symmetric(horizontal: 30),
-                                  child: Text(
-                                    isTimeNotAval
-                                        ? "Select Time"
-                                        : formattedDueDate["time"].substring(2),
-                                    style: TextStyle(
-                                      color: isTimeNotAval
-                                          ? lightDarkColor
-                                          : semiDarkColor,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            )
-                          : Container(),
-                      // # clear due date button
-                      formattedDueDate["date"] != null
-                          ? Container(
-                              width: 30,
-                              height: 30,
-                              margin: EdgeInsets.only(left: 20),
-                              decoration: BoxDecoration(
-                                color: themex.dialogBackgroundColor,
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 6,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: FlatButton(
-                                onPressed: _removeDueDate,
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                                padding: EdgeInsets.all(0),
-                                child: Icon(
-                                  Icons.clear,
-                                  color: lightDarkColor,
-                                  size: 20,
-                                ),
-                              ),
-                            )
-                          : Container(),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            // # Priority Container
-            // priority title text
-            Container(
-              margin: EdgeInsets.only(left: 20),
-              child: Text(
-                "Priority",
-                style: TextStyle(color: lightDarkColor),
-              ),
-            ),
-            // priority button
-            Container(
-              height: 40,
-              margin: EdgeInsets.only(left: 20, top: 8, bottom: 20),
-              decoration: BoxDecoration(
-                color:
-                    taskPriority == 0 ? Colors.transparent : Color(0x11000000),
-                borderRadius: BorderRadius.circular(7),
-              ),
-              child: DottedBorder(
-                borderType: BorderType.RRect,
-                strokeWidth: 0.5,
-                dashPattern: [3, 2],
-                color: taskPriority == 0 ? lightDarkColor : Colors.transparent,
-                radius: Radius.circular(7),
-                child: FlatButton(
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  padding: EdgeInsets.all(0),
-                  onPressed: () {
-                    setState(() {
-                      taskPriority = taskPriority == priorityArr.length - 1
-                          ? 0
-                          : taskPriority + 1;
-                    });
-                  },
-                  child: Text(
-                    priorityArr[taskPriority].toUpperCase(),
-                    style: TextStyle(
-                      color: taskPriority == 0
-                          ? lightDarkColor
-                          : taskPriority == 1
-                              ? lowPriorityColor
-                              : taskPriority == 2
-                                  ? mediumPriorityColor
-                                  : highPriorityColor,
-                      fontWeight: FontWeight.w400,
-                      fontSize: 13,
-                      letterSpacing: taskPriority == 0 ? 0 : 1,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // # Note container
-            // note title text
-            Container(
-              margin: EdgeInsets.only(left: 20),
-              child: Text(
-                "Note",
-                style: TextStyle(color: lightDarkColor),
-              ),
-            ),
-            // add note button
-            Container(
-              width: double.infinity,
-              margin: EdgeInsets.only(left: 20, top: 8, bottom: 20, right: 20),
-              decoration: BoxDecoration(
-                color: Color(0x11000000),
-                // border: Border.all(color: lightColor),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Align(
-                alignment: Alignment.center,
-                child: TextFormField(
-                  minLines: 3,
-                  initialValue: taskNote,
-                  keyboardType: TextInputType.multiline,
-                  maxLines: 6,
-                  onChanged: (value) => setState(() => taskNote = value),
-                  style: TextStyle(
-                    fontSize: 14,
-                    letterSpacing: 1,
-                    color: themex.textTheme.headline3.color,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: "Add a note...",
-                    hintStyle: TextStyle(color: lightDarkColor),
-                    isDense: true,
-                    counterText: '',
-                    contentPadding: EdgeInsets.all(10),
-                    border: InputBorder.none,
-                  ),
-                ),
-              ),
-            ),
-            // # Action buttons
-            isNewTask
-                ? Opacity(
-                    opacity: isTaskValid ? 1 : 0.5,
-                    child: Container(
-                      margin: EdgeInsets.symmetric(horizontal: 20),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          top: BorderSide(color: themex.dividerColor),
-                        ),
-                      ),
-                      child: FlatButton(
-                        onPressed: () {
-                          if (isTaskValid) {
-                            _createNewTask();
-                          }
-                        },
-                        child: Text(
-                          "CREATE",
-                          style: TextStyle(
-                            color: isTaskValid ? themeblue : lightDarkColor,
-                            letterSpacing: 1,
-                            fontSize: 15,
-                          ),
+                          color: themex.hintColor,
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                     ),
-                  )
-                : Row(
-                    children: <Widget>[
-                      Container(
-                        height: 40,
-                        margin: EdgeInsets.only(left: 20, bottom: 20),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: themex.textTheme.headline1.color,
-                          ),
-                          borderRadius: BorderRadius.circular(7),
-                        ),
-                        child: FlatButton(
-                          onPressed: _deleteTask,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Container(
-                                margin: EdgeInsets.only(right: 10),
-                                child: SvgPicture.asset(
-                                  "assets/vectors/DeleteIcon.svg",
-                                  width: 16,
-                                  color: themex.textTheme.headline1.color,
+                    // # Add to page row
+                    widget.pages.length == 1
+                        ? Container()
+                        : Container(
+                            width: double.infinity,
+                            margin:
+                                EdgeInsets.only(left: 20, top: 15, right: 20),
+                            padding: EdgeInsets.only(bottom: 10),
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  width: 0.5,
+                                  color: themex.dividerColor,
                                 ),
                               ),
-                              Text(
-                                "Delete",
-                                style: TextStyle(
-                                  color: themex.textTheme.headline1.color,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      // # save changes button
-                      Opacity(
-                        opacity: isTaskChangedAndIsValid ? 1 : 0.5,
-                        child: Container(
-                          height: 40,
-                          margin: EdgeInsets.only(left: 20, bottom: 20),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: isTaskChangedAndIsValid
-                                  ? themeblue
-                                  : lightDarkColor,
                             ),
-                            borderRadius: BorderRadius.circular(7),
-                          ),
-                          child: FlatButton(
-                            onPressed: _checkTaskChange()
-                                ? _makeChangesInOldTask
-                                : null,
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            child: Row(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
                                 Container(
-                                  margin: EdgeInsets.only(right: 10),
-                                  child: Icon(
-                                    Icons.check,
-                                    color: isTaskChangedAndIsValid
-                                        ? themeblue
-                                        : lightDarkColor,
-                                    size: 20,
+                                  child: Text(
+                                    "ADD TO PAGE",
+                                    style: TextStyle(
+                                      color: lightDarkColor,
+                                      fontSize: 10,
+                                      letterSpacing: 0.5,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ),
-                                Text(
-                                  "Save changes",
-                                  style: TextStyle(
-                                    color: isTaskChangedAndIsValid
-                                        ? themeblue
-                                        : lightDarkColor,
-                                    fontWeight: FontWeight.w400,
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: parsePageButtons(),
                                   ),
                                 ),
                               ],
                             ),
                           ),
+                    // # Text form field
+                    Container(
+                      margin: EdgeInsets.only(top: 10, right: 20, left: 20),
+                      child: TextFormField(
+                        autofocus: isNewTask,
+                        initialValue:
+                            !isNewTask ? widget.task["task_name"] : "",
+                        keyboardType: TextInputType.multiline,
+                        maxLines: null,
+                        textCapitalization: TextCapitalization.sentences,
+                        onChanged: (text) {
+                          setState(() {
+                            taskName = text;
+                            isTaskValid = text.length > 0;
+                          });
+                        },
+                        maxLength: 100,
+                        style: TextStyle(
+                          color: themex.textTheme.headline3.color,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: "Task name...",
+                          hintStyle: TextStyle(
+                            color: lightDarkColor,
+                          ),
+                          isDense: true,
+                          counterText: '',
+                          border: InputBorder.none,
                         ),
                       ),
-                    ],
-                  ),
-          ],
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(left: 20, top: 7, right: 20),
+                      child: Expanded(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            SvgPicture.asset(
+                              "assets/vectors/NotesIcon.svg",
+                              width: 17,
+                              color: lightDarkColor.withAlpha(900),
+                            ),
+                            Expanded(
+                              child: Container(
+                                margin: EdgeInsets.only(left: 10, bottom: 10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                child: TextFormField(
+                                  initialValue: taskNote,
+                                  keyboardType: TextInputType.multiline,
+                                  maxLines: null,
+                                  onChanged: (value) =>
+                                      setState(() => taskNote = value),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    letterSpacing: 1,
+                                    color: themex.textTheme.headline3.color
+                                        .withAlpha(950),
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: "Add a note...",
+                                    hintStyle: TextStyle(color: lightDarkColor),
+                                    isDense: true,
+                                    counterText: '',
+                                    contentPadding: EdgeInsets.only(left: 5),
+                                    border: InputBorder.none,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // # Due Date Container
+                    Container(
+                      margin: EdgeInsets.only(top: 30, left: 20, bottom: 20),
+                      child: Column(
+                        children: <Widget>[
+                          // # Due date head
+                          Row(
+                            children: <Widget>[
+                              Text(
+                                "Due date" +
+                                    (formattedDueDate["date_time"] == null
+                                        ? ""
+                                        : "  •  "),
+                                style: TextStyle(color: lightDarkColor),
+                              ),
+                              Text(
+                                formattedDueDate["date_time"] ?? "",
+                                style: TextStyle(
+                                  color: formattedDueDate["color"] ??
+                                      Colors.transparent,
+                                ),
+                              ),
+                            ],
+                          ),
+                          // # Due date action buttons
+                          Row(
+                            children: <Widget>[
+                              Container(
+                                height: 40,
+                                margin: EdgeInsets.only(top: 8, right: 20),
+                                decoration: BoxDecoration(
+                                  color: formattedDueDate["date"] == null
+                                      ? Colors.transparent
+                                      : Color(0x11000000),
+                                  borderRadius: BorderRadius.circular(7),
+                                ),
+                                child: DottedBorder(
+                                  borderType: BorderType.RRect,
+                                  strokeWidth: 0.5,
+                                  dashPattern: [3, 2],
+                                  color: formattedDueDate["date"] == null
+                                      ? lightDarkColor
+                                      : Colors.transparent,
+                                  radius: Radius.circular(7),
+                                  child: FlatButton(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 30),
+                                    onPressed: _selectDate,
+                                    child: Text(
+                                      formattedDueDate["date"] ?? "Select Date",
+                                      style: TextStyle(
+                                        color: formattedDueDate["date"] == null
+                                            ? lightDarkColor
+                                            : semiDarkColor,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              formattedDueDate["date"] != null
+                                  ? Container(
+                                      height: 40,
+                                      margin: EdgeInsets.only(top: 5),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: Colors.transparent),
+                                        color: isTimeNotAval
+                                            ? Colors.transparent
+                                            : Color(0x11000000),
+                                        borderRadius: BorderRadius.circular(7),
+                                      ),
+                                      child: DottedBorder(
+                                        borderType: BorderType.RRect,
+                                        strokeWidth: 0.5,
+                                        dashPattern: [3, 2],
+                                        color: isTimeNotAval
+                                            ? lightDarkColor
+                                            : Colors.transparent,
+                                        radius: Radius.circular(7),
+                                        child: FlatButton(
+                                          onPressed: _selectTime,
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 30),
+                                          child: Text(
+                                            isTimeNotAval
+                                                ? "Select Time"
+                                                : formattedDueDate["time"]
+                                                    .substring(2),
+                                            style: TextStyle(
+                                              color: isTimeNotAval
+                                                  ? lightDarkColor
+                                                  : semiDarkColor,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  : Container(),
+                              // # clear due date button
+                              formattedDueDate["date"] != null
+                                  ? Container(
+                                      width: 30,
+                                      height: 30,
+                                      margin: EdgeInsets.only(left: 20),
+                                      decoration: BoxDecoration(
+                                        color: themex.dialogBackgroundColor,
+                                        borderRadius: BorderRadius.circular(20),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.1),
+                                            blurRadius: 6,
+                                            offset: Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: FlatButton(
+                                        onPressed: _removeDueDate,
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        padding: EdgeInsets.all(0),
+                                        child: Icon(
+                                          Icons.clear,
+                                          color: lightDarkColor,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    )
+                                  : Container(),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    // # Priority Container
+                    // priority title text
+                    Container(
+                      margin: EdgeInsets.only(left: 20),
+                      child: Text(
+                        "Priority",
+                        style: TextStyle(color: lightDarkColor),
+                      ),
+                    ),
+                    // priority button
+                    Container(
+                      height: 40,
+                      margin: EdgeInsets.only(left: 20, top: 8, bottom: 20),
+                      decoration: BoxDecoration(
+                        color: taskPriority == 0
+                            ? Colors.transparent
+                            : Color(0x11000000),
+                        borderRadius: BorderRadius.circular(7),
+                      ),
+                      child: DottedBorder(
+                        borderType: BorderType.RRect,
+                        strokeWidth: 0.5,
+                        dashPattern: [3, 2],
+                        color: taskPriority == 0
+                            ? lightDarkColor
+                            : Colors.transparent,
+                        radius: Radius.circular(7),
+                        child: FlatButton(
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          padding: EdgeInsets.all(0),
+                          onPressed: () {
+                            setState(() {
+                              taskPriority =
+                                  taskPriority == priorityArr.length - 1
+                                      ? 0
+                                      : taskPriority + 1;
+                            });
+                          },
+                          child: Text(
+                            priorityArr[taskPriority].toUpperCase(),
+                            style: TextStyle(
+                              color: taskPriority == 0
+                                  ? lightDarkColor
+                                  : taskPriority == 1
+                                      ? lowPriorityColor
+                                      : taskPriority == 2
+                                          ? mediumPriorityColor
+                                          : highPriorityColor,
+                              fontWeight: FontWeight.w400,
+                              fontSize: 13,
+                              letterSpacing: taskPriority == 0 ? 0 : 1,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // # Copy task container
+                    isNewTask
+                        ? Container()
+                        : Container(
+                            margin: EdgeInsets.only(bottom: 40),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Container(
+                                  alignment: Alignment.centerLeft,
+                                  margin: EdgeInsets.only(bottom: 7, left: 20),
+                                  child: Text(
+                                    "Add to other book",
+                                    style: TextStyle(color: lightDarkColor),
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Container(
+                                      height: 40,
+                                      margin:
+                                          EdgeInsets.only(right: 20, left: 20),
+                                      decoration: BoxDecoration(
+                                        color: themeblue.withAlpha(20),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: FlatButton(
+                                        onPressed: () {
+                                          _openChangeBookSheet(
+                                              themeblue, false);
+                                        },
+                                        child: Text(
+                                          "COPY",
+                                          style: TextStyle(
+                                            color: themeblue,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: warningColor.withAlpha(20),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: FlatButton(
+                                        onPressed: () {
+                                          _openChangeBookSheet(
+                                              warningColor, true);
+                                        },
+                                        child: Text(
+                                          "MOVE",
+                                          style: TextStyle(color: warningColor),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                    // # Action buttons
+                    isNewTask
+                        ? Opacity(
+                            opacity: isTaskValid ? 1 : 0.5,
+                            child: Container(
+                              margin: EdgeInsets.symmetric(horizontal: 20),
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  top: BorderSide(color: themex.dividerColor),
+                                ),
+                              ),
+                              child: FlatButton(
+                                onPressed: () {
+                                  if (isTaskValid) {
+                                    _createNewTask();
+                                  }
+                                },
+                                child: Text(
+                                  "CREATE",
+                                  style: TextStyle(
+                                    color: isTaskValid
+                                        ? themeblue
+                                        : lightDarkColor,
+                                    letterSpacing: 1,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : Container(
+                            margin: EdgeInsets.only(left: 20, bottom: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                Row(
+                                  children: <Widget>[
+                                    Container(
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color:
+                                              themex.textTheme.headline1.color,
+                                        ),
+                                        borderRadius: BorderRadius.circular(7),
+                                      ),
+                                      child: FlatButton(
+                                        onPressed: _deleteTask,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: <Widget>[
+                                            Container(
+                                              margin:
+                                                  EdgeInsets.only(right: 10),
+                                              child: SvgPicture.asset(
+                                                "assets/vectors/DeleteIcon.svg",
+                                                width: 16,
+                                                color: themex
+                                                    .textTheme.headline1.color,
+                                              ),
+                                            ),
+                                            Text(
+                                              "Delete",
+                                              style: TextStyle(
+                                                color: themex
+                                                    .textTheme.headline1.color,
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    // # save changes button
+                                    Opacity(
+                                      opacity:
+                                          isTaskChangedAndIsValid ? 1 : 0.5,
+                                      child: Container(
+                                        height: 40,
+                                        margin: EdgeInsets.only(left: 20),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: isTaskChangedAndIsValid
+                                                ? themeblue
+                                                : lightDarkColor,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(7),
+                                        ),
+                                        child: FlatButton(
+                                          onPressed: _checkTaskChange()
+                                              ? _makeChangesInOldTask
+                                              : null,
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 10),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: <Widget>[
+                                              Container(
+                                                margin:
+                                                    EdgeInsets.only(right: 10),
+                                                child: Icon(
+                                                  Icons.check,
+                                                  color: isTaskChangedAndIsValid
+                                                      ? themeblue
+                                                      : lightDarkColor,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                              Text(
+                                                "Save changes",
+                                                style: TextStyle(
+                                                  color: isTaskChangedAndIsValid
+                                                      ? themeblue
+                                                      : lightDarkColor,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Container(
+                                  child: FlatButton(
+                                    onPressed: () => _taskAboutAC.forward(),
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    child: Icon(
+                                      Icons.info_outline,
+                                      color: themex.textTheme.headline1.color
+                                          .withAlpha(900),
+                                      size: 30,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                  ],
+                ),
+
+                // # About button
+                isNewTask
+                    ? Container()
+                    : Positioned.fill(
+                        child: Align(
+                          alignment: Alignment.bottomRight,
+                          child: Container(
+                            margin: EdgeInsets.only(right: 20, bottom: 20),
+                            child: ScaleTransition(
+                              alignment: Alignment.bottomRight,
+                              scale: CurvedAnimation(
+                                parent: _taskAboutAC,
+                                curve: Curves.easeIn,
+                              ),
+                              child: Container(
+                                alignment: Alignment.topLeft,
+                                width: 200,
+                                height: 130,
+                                padding: EdgeInsets.all(15),
+                                decoration: BoxDecoration(
+                                  color: themex.backgroundColor,
+                                  borderRadius: BorderRadius.circular(3),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 6,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Text(
+                                      "Creation date",
+                                      style: TextStyle(color: lightDarkColor),
+                                    ),
+                                    SizedBox(
+                                      height: 3,
+                                    ),
+                                    Text(
+                                      _formatFullDate(
+                                          widget.task["creation_date"]),
+                                      style: TextStyle(
+                                        color: themex.textTheme.headline1.color,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 20,
+                                    ),
+                                    Text(
+                                      "Completion date",
+                                      style: TextStyle(color: lightDarkColor),
+                                    ),
+                                    SizedBox(
+                                      height: 3,
+                                    ),
+                                    Text(
+                                      _formatFullDate(
+                                          widget.task["completion_date"]),
+                                      style: TextStyle(
+                                        color: themex.textTheme.headline1.color,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+              ],
+            ),
+          ),
         ),
       ),
+    );
+  }
+
+  _onSheetDragEnd(details) {
+    double dragVelocity = details.velocity.pixelsPerSecond.dx;
+    List pageIds = [];
+
+    widget.pages.forEach((page) {
+      pageIds.add(page.documentID);
+    });
+
+    if (dragVelocity.abs() >= 365.0) {
+      int currentPageIndex = pageIds.indexOf(selectedPageIdToAddTask);
+
+      if (dragVelocity < 0 && currentPageIndex != pageIds.length) {
+        setState(() {
+          selectedPageIdToAddTask = pageIds[currentPageIndex + 1];
+        });
+      } else if (currentPageIndex != 0) {
+        setState(() {
+          selectedPageIdToAddTask = pageIds[currentPageIndex - 1];
+        });
+      }
+    }
+  }
+
+  _openChangeBookSheet(selectedBookColor, deleteCurrentTask) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: selectedBookColor.withAlpha(20),
+      builder: (context) {
+        return ChangeBookSheet(widget.selectedBook, selectedBookColor,
+            deleteCurrentTask, widget.task, widget.taskId, widget.selectedPage);
+      },
     );
   }
 
@@ -707,8 +954,6 @@ class _TaskSheetState extends State<TaskSheet> {
     return pageButtonWidgets;
   }
 
-  changeTaskPage() async {}
-
   _makeChangesInOldTask() async {
     bool isTaskAddPageChanged = widget.selectedPage != selectedPageIdToAddTask;
 
@@ -801,14 +1046,101 @@ class _TaskSheetState extends State<TaskSheet> {
   }
 
   _deleteTask() {
-    Map<String, dynamic> map = {widget.taskId: FieldValue.delete()};
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              "Delete task?",
+              style: TextStyle(
+                color: Theme.of(context).textTheme.headline1.color,
+              ),
+            ),
+            content: Text(
+              "You cannot recover this task once deleted.",
+              style: TextStyle(
+                color: Theme.of(context).textTheme.headline2.color,
+              ),
+            ),
+            actions: [
+              // # Cancel button
+              FlatButton(
+                child: Text(
+                  "Cancel",
+                  style: TextStyle(
+                    color: semiDarkColor,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              // # Delete button
+              FlatButton(
+                child: Text(
+                  "Delete",
+                  style: TextStyle(
+                    color: warningColor,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                onPressed: () async {
+                  try {
+                    Map<String, dynamic> map = {
+                      widget.taskId: FieldValue.delete()
+                    };
 
-    widget.pageRef
-        .document(widget.selectedPage)
-        .collection("Sections")
-        .document("not_sectioned")
-        .updateData(map);
+                    widget.pageRef
+                        .document(widget.selectedPage)
+                        .collection("Sections")
+                        .document("not_sectioned")
+                        .updateData(map);
 
-    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                  } catch (e) {
+                    print("ERROR while updating task: " + e.toString());
+                  }
+                },
+              )
+            ],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(7),
+            ),
+          );
+        });
+  }
+
+  _formatFullDate(datex) {
+    if (datex != null && datex != "") {
+      DateTime xdate = datex.toDate();
+
+      String day = xdate.day.toString();
+      String month = monthsArr[xdate.month];
+      String year = xdate.year.toString();
+      String hour = (xdate.hour % 12).toString();
+      String minutes = xdate.minute.toString();
+      String seconds = xdate.second.toString();
+      String meridiem = xdate.hour > 12 ? "PM" : "AM";
+
+      final String formattedFullDate = day +
+          " " +
+          month +
+          ", " +
+          year +
+          "  •  " +
+          hour +
+          ":" +
+          minutes +
+          ":" +
+          seconds +
+          meridiem;
+
+      return formattedFullDate;
+    } else {
+      return "Not available";
+    }
   }
 }

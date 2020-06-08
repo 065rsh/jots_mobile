@@ -520,6 +520,49 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                       ],
                                     ),
                                   ),
+                                  // # Edit book name Button
+                                  FlatButton(
+                                    onPressed: () {
+                                      _bookOptionsAC.reverse();
+                                      _clearCompletedTasks();
+                                    },
+                                    padding: EdgeInsets.only(top: 25),
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    child: Row(
+                                      children: <Widget>[
+                                        Container(
+                                          padding: EdgeInsets.all(1),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            border: Border.all(
+                                              color: lightDarkColor,
+                                            ),
+                                          ),
+                                          margin: EdgeInsets.only(
+                                            left: 8,
+                                            right: 14,
+                                          ),
+                                          child: Icon(
+                                            Icons.clear,
+                                            color: lightDarkColor,
+                                            size: 15,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Clear completed",
+                                          style: TextStyle(
+                                            letterSpacing: 1,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            color: themex
+                                                .textTheme.headline1.color,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                   // # Delete Button
                                   FlatButton(
                                     onPressed: () {
@@ -587,6 +630,86 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
         color: Colors.white,
       );
     }
+  }
+
+  _clearCompletedTasks() {
+    // show the dialog
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              "Delete completed tasks?",
+              style: TextStyle(
+                color: Theme.of(context).textTheme.headline1.color,
+              ),
+            ),
+            content: Text(
+              "You cannot recover these tasks once deleted.",
+              style: TextStyle(
+                color: Theme.of(context).textTheme.headline2.color,
+              ),
+            ),
+            actions: [
+              // # Cancel button
+              FlatButton(
+                child: Text(
+                  "Cancel",
+                  style: TextStyle(
+                    color: semiDarkColor,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              // # Delete button
+              FlatButton(
+                child: Text(
+                  "Delete",
+                  style: TextStyle(
+                    color: warningColor,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                onPressed: () async {
+                  try {
+                    widget.pageRef.getDocuments().then((value) {
+                      value.documents.forEach((page) {
+                        widget.pageRef
+                            .document(page.documentID)
+                            .collection("Sections")
+                            .document("not_sectioned")
+                            .get()
+                            .then((value) {
+                          final taskIds = value.data.keys;
+                          taskIds.forEach((taskId) {
+                            if (value[taskId]["is_checked"]) {
+                              widget.pageRef
+                                  .document(page.documentID)
+                                  .collection("Sections")
+                                  .document("not_sectioned")
+                                  .updateData({taskId: FieldValue.delete()});
+                            }
+                          });
+                        });
+                      });
+                    });
+
+                    Navigator.of(context).pop();
+                  } catch (e) {
+                    print("ERROR while updating task: " + e.toString());
+                  }
+                },
+              )
+            ],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(7),
+            ),
+          );
+        });
   }
 
   _onDrawerDragStart(onHorizontalDragStartDetails) {

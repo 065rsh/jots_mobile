@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/screens/home/taskSheet.dart';
-import 'package:jots_mobile/theme.dart';
-import 'package:provider/provider.dart';
 
 class AddTask extends StatefulWidget {
   final pages;
@@ -20,8 +17,8 @@ class _AddTaskState extends State<AddTask> {
 
   @override
   Widget build(BuildContext context) {
-    final themeNotifier = Provider.of<ThemeNotifier>(context);
-    bool isDarkThemeEnabled = themeNotifier.getTheme() == darkTheme;
+    // final themeNotifier = Provider.of<ThemeNotifier>(context);
+    // bool isDarkThemeEnabled = themeNotifier.getTheme() == darkTheme;
 
     return Stack(
       children: <Widget>[
@@ -37,8 +34,10 @@ class _AddTaskState extends State<AddTask> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    isDarkThemeEnabled ? Color(0xFFDDDDDD) : Color(0xFF3D8BFF),
-                    isDarkThemeEnabled ? Color(0xFFDDDDDD) : Color(0xFF5ABDFF),
+                    // isDarkThemeEnabled ? Color(0xFFDDDDDD) :
+                    Color(0xFF3D8BFF),
+                    // isDarkThemeEnabled ? Color(0xFFDDDDDD) :
+                    Color(0xFF5ABDFF),
                   ],
                 ),
                 boxShadow: [
@@ -51,19 +50,21 @@ class _AddTaskState extends State<AddTask> {
             child: FlatButton(
               splashColor: Colors.transparent,
               onPressed: showAddTaskSheet,
-              child: isDarkThemeEnabled
-                  ? SvgPicture.asset(
-                      "assets/vectors/GradientAddIcon.svg",
-                      width: 20,
-                    )
-                  : Text(
-                      "+",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 35,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
+              child:
+                  // isDarkThemeEnabled
+                  //     ? SvgPicture.asset(
+                  //         "assets/vectors/GradientAddIcon.svg",
+                  //         width: 20,
+                  //       )
+                  //     :
+                  Text(
+                "+",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 35,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
             ),
           ),
         ),
@@ -78,7 +79,7 @@ class _AddTaskState extends State<AddTask> {
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withAlpha(50),
       builder: (context) {
-        return TaskSheet(widget.pages, widget.pageRef, null, null, null);
+        return TaskSheet(widget.pages, widget.pageRef, null, null, null, null);
       },
     );
   }

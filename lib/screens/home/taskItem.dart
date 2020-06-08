@@ -15,6 +15,7 @@ class TaskItem extends StatefulWidget {
   final pages;
   final pageRef;
   final pageId;
+  final selectedBook;
 
   TaskItem(
     this.taskId,
@@ -25,6 +26,7 @@ class TaskItem extends StatefulWidget {
     this.pages,
     this.pageRef,
     this.pageId,
+    this.selectedBook,
   );
 
   @override
@@ -219,37 +221,38 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
           ),
           // # Delete button animation builder
           AnimatedBuilder(
-              animation: taskAnimationController,
-              builder: (context, builderWidget) {
-                double slideX = maxTaskXOffset * taskAnimationController.value;
+            animation: taskAnimationController,
+            builder: (context, builderWidget) {
+              double slideX = maxTaskXOffset * taskAnimationController.value;
 
-                // # Delete button
-                return Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: themex.primaryColor,
-                    border: Border.all(
-                      color: warningColor,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
+              // # Delete button
+              return Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: themex.primaryColor,
+                  border: Border.all(
+                    color: warningColor,
                   ),
-                  margin: EdgeInsets.only(
-                    left: MediaQuery.of(context).size.width - 10 + slideX,
-                    right: 10,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                margin: EdgeInsets.only(
+                  left: MediaQuery.of(context).size.width - 10 + slideX,
+                  right: 10,
+                ),
+                child: FlatButton(
+                  onPressed: _deleteTask,
+                  splashColor: Colors.transparent,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: EdgeInsets.all(0),
+                  child: SvgPicture.asset(
+                    "assets/vectors/DeleteIcon.svg",
+                    width: 17 * taskAnimationController.value,
                   ),
-                  child: FlatButton(
-                    onPressed: _deleteTask,
-                    splashColor: Colors.transparent,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    padding: EdgeInsets.all(0),
-                    child: SvgPicture.asset(
-                      "assets/vectors/DeleteIcon.svg",
-                      width: 17 * taskAnimationController.value,
-                    ),
-                  ),
-                );
-              }),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -278,6 +281,8 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
     dynamic taskValues = widget.task;
 
     taskValues["is_checked"] = !widget.task["is_checked"];
+    taskValues["completion_date"] =
+        taskValues["is_checked"] ? DateTime.now() : "";
 
     Map<String, dynamic> map = {widget.taskId: taskValues};
 
@@ -290,20 +295,6 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
 
   _formatDueDate() {
     if (widget.task["due_date"] != "") {
-      final monthArr = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec"
-      ];
       var timestamp = widget.task["due_date"] as Timestamp;
       final duedate = timestamp.toDate();
 
@@ -337,7 +328,7 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
       }
 
       final day = duedate.day.toString().padLeft(2, '0');
-      final month = monthArr[duedate.month];
+      final month = monthsArr[duedate.month];
 
       final tempFormattedDate = day + " " + month;
 
@@ -355,34 +346,36 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
     List<Widget> tagChipsList = [];
     List fetchedTagsArr = widget.task["tag_ids"];
     if (fetchedTagsArr.length != 0) {
-      fetchedTagsArr.forEach((tag) {
-        tagChipsList.add(
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 1, horizontal: 8),
-            margin: EdgeInsets.only(right: 5, top: 5),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: tagsColorArr[widget.allTags[tag]["color"]],
-                width: 0.5,
-              ),
-              color: isDarkThemeEnabled
-                  ? Colors.transparent
-                  : tagsColorArr[widget.allTags[tag]["color"]],
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              widget.allTags[tag]["tag_name"],
-              style: TextStyle(
-                fontWeight: FontWeight.w400,
+      fetchedTagsArr.forEach(
+        (tag) {
+          tagChipsList.add(
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 1, horizontal: 8),
+              margin: EdgeInsets.only(right: 5, top: 5),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: tagsColorArr[widget.allTags[tag]["color"]],
+                  width: 0.5,
+                ),
                 color: isDarkThemeEnabled
-                    ? tagsColorArr[widget.allTags[tag]["color"]]
-                    : Colors.white,
-                fontSize: 11,
+                    ? Colors.transparent
+                    : tagsColorArr[widget.allTags[tag]["color"]],
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                widget.allTags[tag]["tag_name"],
+                style: TextStyle(
+                  fontWeight: FontWeight.w400,
+                  color: isDarkThemeEnabled
+                      ? tagsColorArr[widget.allTags[tag]["color"]]
+                      : Colors.white,
+                  fontSize: 11,
+                ),
               ),
             ),
-          ),
-        );
-      });
+          );
+        },
+      );
     }
 
     return tagChipsList;
@@ -403,6 +396,7 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
           widget.pageId,
           widget.taskId,
           widget.task,
+          widget.selectedBook,
         );
       },
     );

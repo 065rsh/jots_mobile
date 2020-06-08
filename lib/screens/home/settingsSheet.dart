@@ -62,14 +62,43 @@ class _SettingsSheetState extends State<SettingsSheet> {
               ),
             ),
           ),
+          Container(
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: themex.dividerColor.withAlpha(10)),
+              ),
+            ),
+            padding: EdgeInsets.only(left: 15, top: 20, bottom: 15),
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.settings,
+                  color: themex.textTheme.headline1.color,
+                  size: 22,
+                ),
+                Container(
+                  margin: EdgeInsets.only(left: 6),
+                  child: Text(
+                    "Settings",
+                    style: TextStyle(
+                      color: themex.textTheme.headline1.color,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           // # Change theme button
           Container(
-            margin: EdgeInsets.only(top: 10, bottom: 40),
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(color: themex.dividerColor),
               ),
             ),
+            margin: EdgeInsets.only(top: 10, bottom: 40),
             child: FlatButton(
               onPressed: () {
                 onThemeChanged(!isDarkThemeEnable, themeNotifier);

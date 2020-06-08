@@ -16,6 +16,7 @@ final darkTransparentColor = Color(0x22000000);
 final lightSemiTransparentColor = Color(0x88FFFFFF);
 final lightTransparentColor = Color(0xDDFFFFFF);
 final redTransparentColor = Color(0x22FF3333);
+final themeBlueTransparentColor = Color(0x223E9FFF);
 final lightBorderColor = CompanyColors.darkLightColor;
 final linkColor = CompanyColors.blue;
 final errorColor = CompanyColors.semiRed;

@@ -9,8 +9,8 @@ import 'editPageSheet.dart';
 class PageItem extends StatefulWidget {
   final int pageIndex;
   final int filterSelected;
-  final dynamic selectedBook;
-  final dynamic allTags;
+  final selectedBook;
+  final allTags;
   final pages;
   final pageRef;
 
@@ -239,6 +239,7 @@ class _PageItemState extends State<PageItem>
           widget.pages,
           widget.pageRef,
           widget.pages[widget.pageIndex].documentID,
+          widget.selectedBook,
         );
       },
     );
