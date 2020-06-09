@@ -169,17 +169,9 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
                                                       priorityArr[widget
                                                           .task["priority"]],
                                                       style: TextStyle(
-                                                        color: widget.task[
-                                                                    "priority"] ==
-                                                                1
-                                                            ? lowPriorityColor
-                                                            : widget.task[
-                                                                        "priority"] ==
-                                                                    2
-                                                                ? mediumPriorityColor
-                                                                : highPriorityColor,
-                                                        fontWeight:
-                                                            FontWeight.w400,
+                                                        color: priorityColorsArr[
+                                                            widget.task[
+                                                                "priority"]],
                                                         fontSize: 12,
                                                       ),
                                                     )
@@ -340,8 +332,8 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
   }
 
   _getTagChipsList() {
-    final themeNotifier = Provider.of<ThemeNotifier>(context);
-    final isDarkThemeEnabled = themeNotifier.getTheme() == darkTheme;
+    // final themeNotifier = Provider.of<ThemeNotifier>(context);
+    // final isDarkThemeEnabled = themeNotifier.getTheme() == darkTheme;
 
     List<Widget> tagChipsList = [];
     List fetchedTagsArr = widget.task["tag_ids"];
@@ -351,24 +343,20 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
           tagChipsList.add(
             Container(
               padding: EdgeInsets.symmetric(vertical: 1, horizontal: 8),
-              margin: EdgeInsets.only(right: 5, top: 5),
+              margin: EdgeInsets.only(right: 7, top: 5),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: tagsColorArr[widget.allTags[tag]["color"]],
+                  color: Colors.transparent,
                   width: 0.5,
                 ),
-                color: isDarkThemeEnabled
-                    ? Colors.transparent
-                    : tagsColorArr[widget.allTags[tag]["color"]],
-                borderRadius: BorderRadius.circular(10),
+                color: tagsColorArr[widget.allTags[tag]["color"]].withAlpha(40),
+                borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
                 widget.allTags[tag]["tag_name"],
                 style: TextStyle(
                   fontWeight: FontWeight.w400,
-                  color: isDarkThemeEnabled
-                      ? tagsColorArr[widget.allTags[tag]["color"]]
-                      : Colors.white,
+                  color: tagsColorArr[widget.allTags[tag]["color"]],
                   fontSize: 11,
                 ),
               ),

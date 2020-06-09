@@ -30,6 +30,13 @@ final nearDueDateColor = CompanyColors.themeBlue;
 final pastDueDateColor = CompanyColors.semiRed;
 final futureDueDateColor = CompanyColors.semiDarkColor;
 // # Priority colors
+final priorityColorsArr = [
+  lightDarkColor,
+  CompanyColors.lightYellowColor,
+  CompanyColors.mediumOrangeColor,
+  CompanyColors.red,
+];
+
 final lowPriorityColor = CompanyColors.lightYellowColor;
 final mediumPriorityColor = CompanyColors.mediumOrangeColor;
 final highPriorityColor = CompanyColors.red;

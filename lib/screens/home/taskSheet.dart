@@ -31,6 +31,7 @@ class TaskSheet extends StatefulWidget {
 
 class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
   AnimationController _taskAboutAC;
+  TextEditingController taskNameController, taskNoteController;
 
   String selectedPageIdToAddTask;
   String taskName;
@@ -39,6 +40,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
   bool isTaskValid = false;
   int taskPriority = 0;
   String taskNote;
+  bool closeSheetAfterCreatingTask = true;
 
   @override
   void initState() {
@@ -62,6 +64,18 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
       taskPriority = widget.taskId != null ? widget.task["priority"] : 0;
       taskNote = widget.taskId != null ? widget.task["note"] : "";
     });
+
+    taskNameController = TextEditingController(
+        text: widget.taskId != null ? widget.task["task_name"] : "");
+    taskNoteController = TextEditingController(text: taskNote);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    taskNameController.dispose();
+    taskNoteController.dispose();
   }
 
   @override
@@ -169,9 +183,8 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                     Container(
                       margin: EdgeInsets.only(top: 10, right: 20, left: 20),
                       child: TextFormField(
+                        controller: taskNameController,
                         autofocus: isNewTask,
-                        initialValue:
-                            !isNewTask ? widget.task["task_name"] : "",
                         keyboardType: TextInputType.multiline,
                         maxLines: null,
                         textCapitalization: TextCapitalization.sentences,
@@ -217,7 +230,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                   borderRadius: BorderRadius.circular(5),
                                 ),
                                 child: TextFormField(
-                                  initialValue: taskNote,
+                                  controller: taskNoteController,
                                   keyboardType: TextInputType.multiline,
                                   maxLines: null,
                                   onChanged: (value) =>
@@ -395,7 +408,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                       decoration: BoxDecoration(
                         color: taskPriority == 0
                             ? Colors.transparent
-                            : Color(0x11000000),
+                            : priorityColorsArr[taskPriority].withAlpha(20),
                         borderRadius: BorderRadius.circular(7),
                       ),
                       child: DottedBorder(
@@ -421,14 +434,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                           child: Text(
                             priorityArr[taskPriority].toUpperCase(),
                             style: TextStyle(
-                              color: taskPriority == 0
-                                  ? lightDarkColor
-                                  : taskPriority == 1
-                                      ? lowPriorityColor
-                                      : taskPriority == 2
-                                          ? mediumPriorityColor
-                                          : highPriorityColor,
-                              fontWeight: FontWeight.w400,
+                              color: priorityColorsArr[taskPriority],
                               fontSize: 13,
                               letterSpacing: taskPriority == 0 ? 0 : 1,
                             ),
@@ -436,6 +442,59 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                         ),
                       ),
                     ),
+                    // # Close task sheet after creating
+                    isNewTask
+                        ? Container(
+                            margin: EdgeInsets.only(bottom: 20, left: 20),
+                            child: Row(
+                              children: <Widget>[
+                                Container(
+                                  width: 30,
+                                  height: 30,
+                                  child: FlatButton(
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    padding: EdgeInsets.all(0),
+                                    onPressed: () {
+                                      setState(() {
+                                        closeSheetAfterCreatingTask =
+                                            !closeSheetAfterCreatingTask;
+                                      });
+                                    },
+                                    child: Container(
+                                      alignment: Alignment.centerLeft,
+                                      child: Container(
+                                        width: 18,
+                                        height: 18,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: lightDarkColor,
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(5),
+                                          ),
+                                          color: closeSheetAfterCreatingTask
+                                              ? lightDarkColor
+                                              : Colors.transparent,
+                                        ),
+                                        child: Icon(
+                                          Icons.check,
+                                          size: 13.0,
+                                          color: closeSheetAfterCreatingTask
+                                              ? Colors.white
+                                              : lightDarkColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  child: Text("Close after creating task"),
+                                )
+                              ],
+                            ),
+                          )
+                        : Container(),
                     // # Copy task container
                     isNewTask
                         ? Container()
@@ -473,6 +532,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                           "COPY",
                                           style: TextStyle(
                                             color: themeblue,
+                                            fontWeight: FontWeight.w400,
                                           ),
                                         ),
                                       ),
@@ -490,7 +550,10 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                         },
                                         child: Text(
                                           "MOVE",
-                                          style: TextStyle(color: warningColor),
+                                          style: TextStyle(
+                                            color: warningColor,
+                                            fontWeight: FontWeight.w400,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -644,7 +707,6 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                           ),
                   ],
                 ),
-
                 // # About button
                 isNewTask
                     ? Container()
@@ -1012,10 +1074,11 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
     }
 
     if (taskName != null && taskName != "" && widget.taskId == null) {
-      var bytes = utf8.encode(hashCode.toString());
+      var bytes = utf8.encode(UniqueKey().toString());
       var randomTaskId = base64.encode(bytes);
+      randomTaskId = randomTaskId.substring(0, randomTaskId.length - 1);
 
-      await _uploadTaskDetails({
+      Map<String, dynamic> tempTaskMap = {
         randomTaskId: {
           "completion_date": "",
           "creation_date": DateTime.now(),
@@ -1026,7 +1089,9 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
           "tag_ids": [],
           "task_name": taskName,
         }
-      });
+      };
+
+      await _uploadTaskDetails(tempTaskMap);
     }
   }
 
@@ -1038,10 +1103,24 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
 
     await sectionRef.setData(taskObject, merge: true);
 
-    try {
-      Navigator.pop(context);
-    } catch (e) {
-      print(e.toString());
+    if (closeSheetAfterCreatingTask) {
+      try {
+        Navigator.pop(context);
+      } catch (e) {
+        print(e.toString());
+      }
+    } else {
+      taskNameController.clear();
+      taskNoteController.clear();
+
+      setState(() {
+        taskName = null;
+        dueDate = null;
+        selectedDate = null;
+        isTaskValid = false;
+        taskPriority = 0;
+        taskNote = "";
+      });
     }
   }
 
