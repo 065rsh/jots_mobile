@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:jots_mobile/screens/home/addTagsSheet.dart';
 import 'package:jots_mobile/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,6 +16,7 @@ class TaskSheet extends StatefulWidget {
   final taskId;
   final task;
   final selectedBook;
+  final allTags;
 
   TaskSheet(
     this.pages,
@@ -23,6 +25,7 @@ class TaskSheet extends StatefulWidget {
     this.taskId,
     this.task,
     this.selectedBook,
+    this.allTags,
   );
 
   @override
@@ -41,6 +44,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
   int taskPriority = 0;
   String taskNote;
   bool closeSheetAfterCreatingTask = true;
+  List taskTagChips;
 
   @override
   void initState() {
@@ -51,6 +55,13 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
       vsync: this,
       value: 0.0,
     );
+
+    List tempArr = [];
+
+    if (widget.taskId != null)
+      widget.task["tag_ids"].forEach((selectedTag) {
+        tempArr.add(selectedTag);
+      });
 
     setState(() {
       selectedPageIdToAddTask = widget.selectedPage;
@@ -63,6 +74,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
       isTaskValid = widget.taskId != null;
       taskPriority = widget.taskId != null ? widget.task["priority"] : 0;
       taskNote = widget.taskId != null ? widget.task["note"] : "";
+      taskTagChips = tempArr;
     });
 
     taskNameController = TextEditingController(
@@ -179,7 +191,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                               ],
                             ),
                           ),
-                    // # Text form field
+                    // # Task Name
                     Container(
                       margin: EdgeInsets.only(top: 10, right: 20, left: 20),
                       child: TextFormField(
@@ -211,49 +223,65 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                         ),
                       ),
                     ),
+                    // # Task Note
                     Container(
                       margin: EdgeInsets.only(left: 20, top: 7, right: 20),
-                      child: Expanded(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            SvgPicture.asset(
-                              "assets/vectors/NotesIcon.svg",
-                              width: 17,
-                              color: lightDarkColor.withAlpha(900),
-                            ),
-                            Expanded(
-                              child: Container(
-                                margin: EdgeInsets.only(left: 10, bottom: 10),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          SvgPicture.asset(
+                            "assets/vectors/NotesIcon.svg",
+                            width: 17,
+                            color: lightDarkColor.withAlpha(900),
+                          ),
+                          Expanded(
+                            child: Container(
+                              margin: EdgeInsets.only(left: 10, bottom: 10),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: TextFormField(
+                                controller: taskNoteController,
+                                keyboardType: TextInputType.multiline,
+                                maxLines: null,
+                                onChanged: (value) =>
+                                    setState(() => taskNote = value),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  letterSpacing: 1,
+                                  color: themex.textTheme.headline3.color
+                                      .withAlpha(950),
                                 ),
-                                child: TextFormField(
-                                  controller: taskNoteController,
-                                  keyboardType: TextInputType.multiline,
-                                  maxLines: null,
-                                  onChanged: (value) =>
-                                      setState(() => taskNote = value),
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    letterSpacing: 1,
-                                    color: themex.textTheme.headline3.color
-                                        .withAlpha(950),
-                                  ),
-                                  decoration: InputDecoration(
-                                    hintText: "Add a note...",
-                                    hintStyle: TextStyle(color: lightDarkColor),
-                                    isDense: true,
-                                    counterText: '',
-                                    contentPadding: EdgeInsets.only(left: 5),
-                                    border: InputBorder.none,
-                                  ),
+                                decoration: InputDecoration(
+                                  hintText: "Add a note...",
+                                  hintStyle: TextStyle(color: lightDarkColor),
+                                  isDense: true,
+                                  counterText: '',
+                                  contentPadding: EdgeInsets.only(left: 5),
+                                  border: InputBorder.none,
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // # Tags Container
+                    // priority title text
+                    Container(
+                      margin: EdgeInsets.only(left: 20, top: 20),
+                      child: Text(
+                        "Tags",
+                        style: TextStyle(color: lightDarkColor),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(left: 20, right: 20, top: 8),
+                      child: Wrap(
+                        runSpacing: 10,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: _addTagsList(),
                       ),
                     ),
                     // # Due Date Container
@@ -520,7 +548,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                       margin:
                                           EdgeInsets.only(right: 20, left: 20),
                                       decoration: BoxDecoration(
-                                        color: themeblue.withAlpha(20),
+                                        color: lightDarkColor.withAlpha(20),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: FlatButton(
@@ -531,7 +559,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                         child: Text(
                                           "COPY",
                                           style: TextStyle(
-                                            color: themeblue,
+                                            color: lightDarkColor,
                                             fontWeight: FontWeight.w400,
                                           ),
                                         ),
@@ -540,7 +568,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                     Container(
                                       height: 40,
                                       decoration: BoxDecoration(
-                                        color: warningColor.withAlpha(20),
+                                        color: lightDarkColor.withAlpha(20),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: FlatButton(
@@ -551,7 +579,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                         child: Text(
                                           "MOVE",
                                           style: TextStyle(
-                                            color: warningColor,
+                                            color: lightDarkColor,
                                             fontWeight: FontWeight.w400,
                                           ),
                                         ),
@@ -840,13 +868,31 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
       bool isTaskAddPageChanged =
           widget.selectedPage != selectedPageIdToAddTask;
 
+      bool isTaskTagsChanged =
+          !areListsEqual(widget.task["tag_ids"], taskTagChips);
+
       return isTaskNameChanged ||
           isDueDateChanged ||
           isPriorityChanged ||
           isTaskNoteChanged ||
+          isTaskTagsChanged ||
           isTaskAddPageChanged;
     } else
       return false;
+  }
+
+  bool areListsEqual(var list1, var list2) {
+    if (list1.length != list2.length) {
+      return false;
+    }
+
+    for (int i = 0; i < list1.length; i++) {
+      if (list1[i] != list2[i]) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   _removeDueDate() {
@@ -1018,6 +1064,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
 
   _makeChangesInOldTask() async {
     bool isTaskAddPageChanged = widget.selectedPage != selectedPageIdToAddTask;
+    print(taskTagChips);
 
     if (isTaskAddPageChanged) {
       var bytes = utf8.encode(hashCode.toString());
@@ -1036,7 +1083,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
           "is_checked": false,
           "note": taskNote,
           "priority": taskPriority,
-          "tag_ids": [],
+          "tag_ids": taskTagChips,
           "task_name": taskName,
         }
       }, merge: true);
@@ -1059,7 +1106,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
           "due_date": selectedDate ?? "",
           "note": taskNote,
           "priority": taskPriority,
-          "tag_ids": [],
+          "tag_ids": taskTagChips,
           "task_name": taskName,
         }
       };
@@ -1086,7 +1133,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
           "is_checked": false,
           "note": taskNote,
           "priority": taskPriority,
-          "tag_ids": [],
+          "tag_ids": taskTagChips,
           "task_name": taskName,
         }
       };
@@ -1120,6 +1167,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
         isTaskValid = false;
         taskPriority = 0;
         taskNote = "";
+        taskTagChips = [];
       });
     }
   }
@@ -1221,5 +1269,118 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
     } else {
       return "Not available";
     }
+  }
+
+  _addTagsList() {
+    final themex = Theme.of(context);
+
+    List<Widget> tagsRowWithAddBtn = [];
+
+    tagsRowWithAddBtn = _getTagChipsList();
+
+    tagsRowWithAddBtn.add(
+      DottedBorder(
+        borderType: BorderType.RRect,
+        strokeWidth: 0.5,
+        dashPattern: [3, 2],
+        color: lightDarkColor,
+        radius: Radius.circular(20),
+        child: Container(
+          child: ButtonTheme(
+            minWidth: 0,
+            height: 0,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 13),
+            child: FlatButton(
+              onPressed: _openAddTagsSheet,
+              child: Text(
+                (taskTagChips.length < 1 ? "Add" : "Edit") +
+                    " tag" +
+                    (taskTagChips.length > 1 ? "s" : ""),
+                style: TextStyle(
+                  color: themex.textTheme.headline3.color,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    return tagsRowWithAddBtn;
+  }
+
+  _updateTagChips(newTagIdsList) {
+    List tempArr = [];
+
+    newTagIdsList.forEach((selectedTag) {
+      tempArr.add(selectedTag);
+    });
+
+    setState(() {
+      taskTagChips = tempArr;
+    });
+  }
+
+  _getTagChipsList() {
+    // final themeNotifier = Provider.of<ThemeNotifier>(context);
+    // final isDarkThemeEnabled = themeNotifier.getTheme() == darkTheme;
+
+    List<Widget> tagChipsList = [];
+    List fetchedTagsArr = taskTagChips;
+    if (fetchedTagsArr.length != 0) {
+      fetchedTagsArr.forEach(
+        (tag) {
+          tagChipsList.add(
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 5, horizontal: 13),
+              margin: EdgeInsets.only(right: 10),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.transparent,
+                  width: 0.5,
+                ),
+                color: tagsColorArr[widget.allTags[tag]["color"]].withAlpha(40),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                widget.allTags[tag]["tag_name"],
+                style: TextStyle(
+                  fontWeight: FontWeight.w400,
+                  color: tagsColorArr[widget.allTags[tag]["color"]],
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    return tagChipsList;
+  }
+
+  _openAddTagsSheet() {
+    FocusScope.of(context).requestFocus(new FocusNode());
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withAlpha(20),
+      builder: (_) {
+        return AddTagsSheet(
+          widget.task,
+          widget.allTags,
+          widget.pageRef,
+          widget.selectedPage,
+          widget.taskId,
+          _updateTagChips,
+          taskTagChips,
+        );
+      },
+    );
   }
 }

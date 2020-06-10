@@ -37,6 +37,7 @@ dependencies:
   fitted_text_field_container: ^1.1.0
   shared_preferences: ^0.5.7+3
   dotted_border: ^1.0.5
+  firebase_messaging: ^5.0.1
 
 dev_dependencies:
   flutter_test:

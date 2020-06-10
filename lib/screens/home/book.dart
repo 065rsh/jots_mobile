@@ -736,7 +736,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                         ),
                       ),
                       // # Add task container
-                      AddTask(widget.pages, widget.pageRef),
+                      AddTask(widget.pages, widget.pageRef, widget.allTags),
                       // # close drawer overlay
                       widget.isDrawerOpen
                           ? GestureDetector(
@@ -988,7 +988,14 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withAlpha(50),
       builder: (context) {
-        return EditPageSheet(widget.selectedBook, null, null, null, null);
+        return EditPageSheet(
+          widget.selectedBook,
+          null,
+          null,
+          null,
+          null,
+          widget.allTags,
+        );
       },
     );
   }

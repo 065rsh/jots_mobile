@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -175,7 +177,7 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
 
   Future getUserPhoto() async {
     try {
-      var image = await ImagePicker.pickImage(
+      var image = await ImagePicker().getImage(
         source: ImageSource.gallery,
         maxHeight: 200,
       );
@@ -183,7 +185,7 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
       StorageReference storageReference = FirebaseStorage.instance
           .ref()
           .child(user.uid + '/userDetails/profileImages.jpg');
-      StorageUploadTask uploadTask = storageReference.putFile(image);
+      StorageUploadTask uploadTask = storageReference.putFile(File(image.path));
       await uploadTask.onComplete;
 
       storageReference.getDownloadURL().then((fileURL) {

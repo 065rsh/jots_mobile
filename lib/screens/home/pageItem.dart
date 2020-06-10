@@ -305,6 +305,7 @@ class _PageItemState extends State<PageItem>
           widget.pages[widget.pageIndex].documentID,
           widget.pages,
           widget.pageRef,
+          widget.allTags,
         );
       },
     );

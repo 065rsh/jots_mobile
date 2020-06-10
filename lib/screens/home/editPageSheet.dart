@@ -12,9 +12,16 @@ class EditPageSheet extends StatefulWidget {
   final String pageId;
   final pages;
   final pageRef;
+  final allTags;
 
-  EditPageSheet(this.selectedBook, this.initialPageName, this.pageId,
-      this.pages, this.pageRef);
+  EditPageSheet(
+    this.selectedBook,
+    this.initialPageName,
+    this.pageId,
+    this.pages,
+    this.pageRef,
+    this.allTags,
+  );
 
   @override
   _EditPageSheetState createState() => _EditPageSheetState();
@@ -298,6 +305,7 @@ class _EditPageSheetState extends State<EditPageSheet> {
           null,
           null,
           null,
+          widget.allTags,
         );
       },
     );

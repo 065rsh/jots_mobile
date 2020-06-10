@@ -4,7 +4,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/screens/home/taskSheet.dart';
 import 'package:jots_mobile/theme.dart';
 import 'package:jots_mobile/handyArr.dart';
-import 'package:provider/provider.dart';
 
 class TaskItem extends StatefulWidget {
   final taskId;
@@ -377,7 +376,7 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withAlpha(50),
-      builder: (context) {
+      builder: (_) {
         return TaskSheet(
           widget.pages,
           widget.pageRef,
@@ -385,6 +384,7 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
           widget.taskId,
           widget.task,
           widget.selectedBook,
+          widget.allTags,
         );
       },
     );

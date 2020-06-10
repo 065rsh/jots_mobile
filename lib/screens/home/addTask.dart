@@ -4,8 +4,9 @@ import 'package:jots_mobile/screens/home/taskSheet.dart';
 class AddTask extends StatefulWidget {
   final pages;
   final pageRef;
+  final allTags;
 
-  AddTask(this.pages, this.pageRef);
+  AddTask(this.pages, this.pageRef, this.allTags);
 
   @override
   _AddTaskState createState() => _AddTaskState();
@@ -79,7 +80,8 @@ class _AddTaskState extends State<AddTask> {
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withAlpha(50),
       builder: (context) {
-        return TaskSheet(widget.pages, widget.pageRef, null, null, null, null);
+        return TaskSheet(widget.pages, widget.pageRef, null, null, null, null,
+            widget.allTags);
       },
     );
   }
