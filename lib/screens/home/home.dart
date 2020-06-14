@@ -85,7 +85,7 @@ class _HomeState extends State<Home> {
                           FocusScope.of(context).requestFocus(new FocusNode());
                         },
                         child: Container(
-                          color: lightTransparentColor,
+                          color: themex.primaryColor.withAlpha(200),
                           margin: EdgeInsets.only(top: 35),
                           child: Column(
                             children: <Widget>[
@@ -93,7 +93,7 @@ class _HomeState extends State<Home> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
                                   Container(
-                                    color: Colors.white,
+                                    color: themex.primaryColor,
                                     height: 45,
                                     alignment: Alignment.center,
                                     child: ConstrainedBox(

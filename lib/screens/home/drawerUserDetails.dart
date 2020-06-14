@@ -81,7 +81,7 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
                             width: 60,
                             height: 60,
                             decoration: BoxDecoration(
-                              color: Color(0x22000000),
+                              color: Colors.black.withAlpha(30),
                             ),
                             child: FlatButton(
                               onPressed: () => getUserPhoto(),

@@ -14,7 +14,7 @@ final monthsArr = [
   "Dec"
 ];
 
-final priorityArr = ["None", "Low", "Medium", "High"];
+final priorityArr = ["Set priority", "Low", "Medium", "High"];
 
 final filterOptionArr = ["Incomplete tasks", "Complete tasks", "All tasks"];
 

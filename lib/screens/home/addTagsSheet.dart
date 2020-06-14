@@ -51,8 +51,6 @@ class _AddTagsSheetState extends State<AddTagsSheet> {
     setState(() {
       isAddingTags = addNewTagFN.hasFocus;
     });
-
-    if (addNewTagFN.hasFocus) {}
   }
 
   @override
@@ -339,7 +337,7 @@ class _AddTagsSheetState extends State<AddTagsSheet> {
                   setState(() {
                     _selectedTagsList = tempArr;
                     isTagsSelectionChanged = widget.taskId != null
-                        ? !areListsEqual(tempArr, widget.task["tag_ids"])
+                        ? !areListsEqual(tempArr, widget.taskTagChipsFromSheet)
                         : true;
                   });
                 }

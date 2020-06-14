@@ -7,19 +7,17 @@ import 'package:jots_mobile/theme.dart';
 
 class ChangeBookSheet extends StatefulWidget {
   final selectedBook;
-  final selectedBookColor;
-  final bool deleteCurrentTask;
   final task;
   final taskId;
   final String currentPageId;
+  final books;
 
   ChangeBookSheet(
     this.selectedBook,
-    this.selectedBookColor,
-    this.deleteCurrentTask,
     this.task,
     this.taskId,
     this.currentPageId,
+    this.books,
   );
 
   @override
@@ -31,12 +29,16 @@ class _ChangeBookSheetState extends State<ChangeBookSheet> {
   List books = [];
   String newBookId;
   bool isSavedToOtherBook = false;
+  bool shouldDeleteTaskAfterCopy = false;
 
   @override
   void initState() {
     super.initState();
 
-    fetchBooks();
+    setState(() {
+      books = widget.books;
+      newBookId = widget.selectedBook.documentID;
+    });
   }
 
   @override
@@ -53,7 +55,7 @@ class _ChangeBookSheetState extends State<ChangeBookSheet> {
 
     return Center(
       child: Container(
-        width: 300,
+        width: 350,
         decoration: BoxDecoration(
           color: themex.dialogBackgroundColor,
           boxShadow: [
@@ -72,9 +74,7 @@ class _ChangeBookSheetState extends State<ChangeBookSheet> {
               alignment: Alignment.center,
               padding: EdgeInsets.only(
                 top: 10,
-                right: 50,
                 bottom: 10,
-                left: 50,
               ),
               decoration: BoxDecoration(
                 color: themex.dialogBackgroundColor,
@@ -86,19 +86,76 @@ class _ChangeBookSheetState extends State<ChangeBookSheet> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Text(
-                    widget.deleteCurrentTask
-                        ? (isSavedToOtherBook ? "Moved" : "Move")
-                        : (isSavedToOtherBook ? "Copied" : "Copy"),
-                    style: TextStyle(
-                      decoration: TextDecoration.underline,
-                      color: widget.selectedBookColor,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  Row(
+                    children: <Widget>[
+                      ButtonTheme(
+                        minWidth: 0,
+                        child: FlatButton(
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          padding: EdgeInsets.all(0),
+                          onPressed: () {
+                            setState(() {
+                              shouldDeleteTaskAfterCopy = false;
+                            });
+                          },
+                          child: Text(
+                            isSavedToOtherBook && !shouldDeleteTaskAfterCopy
+                                ? "Copied"
+                                : "Copy",
+                            style: TextStyle(
+                              decoration: shouldDeleteTaskAfterCopy
+                                  ? TextDecoration.none
+                                  : TextDecoration.underline,
+                              color: shouldDeleteTaskAfterCopy
+                                  ? lightDarkColor.withAlpha(80)
+                                  : themeblue,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Text(
+                        "  or  ",
+                        style: TextStyle(
+                          color: themex.textTheme.headline1.color,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      ButtonTheme(
+                        minWidth: 0,
+                        child: FlatButton(
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          padding: EdgeInsets.all(0),
+                          onPressed: () {
+                            setState(() {
+                              shouldDeleteTaskAfterCopy = true;
+                            });
+                          },
+                          child: Text(
+                            isSavedToOtherBook && shouldDeleteTaskAfterCopy
+                                ? "Moved"
+                                : "Move",
+                            style: TextStyle(
+                              decoration: shouldDeleteTaskAfterCopy
+                                  ? TextDecoration.underline
+                                  : TextDecoration.none,
+                              color: shouldDeleteTaskAfterCopy
+                                  ? warningColor
+                                  : lightDarkColor.withAlpha(80),
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   Text(
-                    " to other book",
+                    "  to other book",
                     style: TextStyle(
                       color: themex.textTheme.headline1.color,
                       fontSize: 20,
@@ -110,11 +167,12 @@ class _ChangeBookSheetState extends State<ChangeBookSheet> {
             ),
             Container(
               color: themex.dividerColor,
-              width: 300,
+              width: 350,
               height: 0.5,
               margin: EdgeInsets.only(bottom: 20),
             ),
             Container(
+              padding: EdgeInsets.symmetric(horizontal: 20),
               child: Wrap(
                 runSpacing: 15,
                 children: _parseBookNames(),
@@ -149,18 +207,17 @@ class _ChangeBookSheetState extends State<ChangeBookSheet> {
                       ),
                     ),
                   ),
-                  Opacity(
-                    opacity: isBookChanged ? 1 : 0.5,
-                    child: FlatButton(
-                      onPressed: _changeTaskBook,
-                      child: Text(
-                        "Save",
-                        style: TextStyle(
-                          color: isBookChanged
-                              ? widget.selectedBookColor
-                              : lightDarkColor,
-                          fontSize: 20,
-                        ),
+                  FlatButton(
+                    onPressed: _changeTaskBook,
+                    child: Text(
+                      "Save",
+                      style: TextStyle(
+                        color: isBookChanged
+                            ? (shouldDeleteTaskAfterCopy
+                                ? warningColor
+                                : themeblue)
+                            : lightDarkColor.withAlpha(50),
+                        fontSize: 20,
                       ),
                     ),
                   ),
@@ -171,24 +228,6 @@ class _ChangeBookSheetState extends State<ChangeBookSheet> {
         ),
       ),
     );
-  }
-
-  fetchBooks() async {
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-
-    CollectionReference todoCollectionRef = Firestore.instance
-        .collection('Users')
-        .document(user.uid)
-        .collection('Todo');
-
-    booksSnapshot = todoCollectionRef
-        .orderBy("creation_date", descending: true)
-        .snapshots()
-        .listen((data) {
-      setState(() {
-        books = data.documents;
-      });
-    });
   }
 
   _parseBookNames() {
@@ -208,7 +247,9 @@ class _ChangeBookSheetState extends State<ChangeBookSheet> {
             margin: EdgeInsets.only(right: 20),
             decoration: BoxDecoration(
               color: isCurrentlySelectedBook
-                  ? widget.selectedBookColor.withAlpha(20)
+                  ? (shouldDeleteTaskAfterCopy
+                      ? warningColor.withAlpha(20)
+                      : themeblue.withAlpha(20))
                   : themex.textTheme.headline2.color.withAlpha(20),
               borderRadius: BorderRadius.circular(7),
             ),
@@ -222,7 +263,7 @@ class _ChangeBookSheetState extends State<ChangeBookSheet> {
                 book.data["book_name"],
                 style: TextStyle(
                   color: isCurrentlySelectedBook
-                      ? widget.selectedBookColor
+                      ? (shouldDeleteTaskAfterCopy ? warningColor : themeblue)
                       : themex.textTheme.headline2.color,
                   decoration: isInitialBook
                       ? TextDecoration.underline
@@ -267,7 +308,7 @@ class _ChangeBookSheetState extends State<ChangeBookSheet> {
               .document("not_sectioned")
               .setData({widget.taskId: widget.task}, merge: true);
 
-          if (widget.deleteCurrentTask) {
+          if (shouldDeleteTaskAfterCopy) {
             await Firestore.instance
                 .collection("Users")
                 .document(user.uid)

@@ -617,41 +617,41 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                     ),
                                   ),
                                   // # Edit book name Button
-                                  FlatButton(
-                                    onPressed: () {
-                                      _bookOptionsAC.reverse();
-                                      widget.startEditingBookName();
-                                    },
-                                    padding: EdgeInsets.only(top: 25),
-                                    materialTapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                    child: Row(
-                                      children: <Widget>[
-                                        Container(
-                                          margin: EdgeInsets.only(
-                                            left: 10,
-                                            right: 17,
-                                          ),
-                                          child: SvgPicture.asset(
-                                            "assets/vectors/EditIcon.svg",
-                                            width: 14,
-                                            color: lightDarkColor,
-                                          ),
-                                        ),
-                                        Text(
-                                          "Edit book",
-                                          style: TextStyle(
-                                            letterSpacing: 1,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: themex
-                                                .textTheme.headline1.color,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  // # Edit book name Button
+                                  // FlatButton(
+                                  //   onPressed: () {
+                                  //     _bookOptionsAC.reverse();
+                                  //     widget.startEditingBookName();
+                                  //   },
+                                  //   padding: EdgeInsets.only(top: 25),
+                                  //   materialTapTargetSize:
+                                  //       MaterialTapTargetSize.shrinkWrap,
+                                  //   child: Row(
+                                  //     children: <Widget>[
+                                  //       Container(
+                                  //         margin: EdgeInsets.only(
+                                  //           left: 10,
+                                  //           right: 17,
+                                  //         ),
+                                  //         child: SvgPicture.asset(
+                                  //           "assets/vectors/EditIcon.svg",
+                                  //           width: 14,
+                                  //           color: lightDarkColor,
+                                  //         ),
+                                  //       ),
+                                  //       Text(
+                                  //         "Edit book",
+                                  //         style: TextStyle(
+                                  //           letterSpacing: 1,
+                                  //           fontSize: 14,
+                                  //           fontWeight: FontWeight.w400,
+                                  //           color: themex
+                                  //               .textTheme.headline1.color,
+                                  //         ),
+                                  //       ),
+                                  //     ],
+                                  //   ),
+                                  // ),
+                                  // # Clear completed Button
                                   FlatButton(
                                     onPressed: () {
                                       _bookOptionsAC.reverse();

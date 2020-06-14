@@ -64,6 +64,7 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
               padding: EdgeInsets.only(right: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Expanded(
                     child: Row(
@@ -115,7 +116,7 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
                             child: FlatButton(
                               materialTapTargetSize:
                                   MaterialTapTargetSize.shrinkWrap,
-                              padding: EdgeInsets.only(top: 5, bottom: 5),
+                              padding: EdgeInsets.all(0),
                               onPressed: _openEditTaskSheet,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,8 +200,9 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
                   ),
                   widget.task["note"].length > 0
                       ? Container(
+                          padding: EdgeInsets.only(top: 3, left: 5),
                           child: SvgPicture.asset(
-                            "assets/vectors/NotesIcon.svg",
+                            "assets/vectors/NoteIcon.svg",
                             color: darkLightColor,
                             width: 17,
                           ),

@@ -103,7 +103,7 @@ class _PageItemState extends State<PageItem>
         top: showPageHeader ? 10 : 0,
         bottom: showPageHeader ? (!showTasks ? 10 : 0) : 0,
         left: showPageHeader ? 15 : 0,
-        right: showPageHeader ? 10 : 0,
+        right: showPageHeader ? 15 : 0,
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
@@ -118,6 +118,7 @@ class _PageItemState extends State<PageItem>
           showPageHeader
               ? Container(
                   alignment: Alignment.centerLeft,
+                  margin: EdgeInsets.only(bottom: showTasks ? 10 : 0),
                   child: FlatButton(
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onPressed: () => setState(() => showTasks = !showTasks),
@@ -185,7 +186,7 @@ class _PageItemState extends State<PageItem>
           // # Page tasks list
           showTasks
               ? Container(
-                  margin: EdgeInsets.only(top: showPageHeader ? 10 : 5),
+                  margin: EdgeInsets.only(top: 5),
                   child: filteredTasks(),
                 )
               : Container(),

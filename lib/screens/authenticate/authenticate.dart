@@ -548,7 +548,13 @@ class SignInFormState extends State<SignInForm> {
             width: 240,
             height: 48,
             margin: EdgeInsets.only(bottom: 10),
-            child: OutlineButton(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Theme.lightBorderColor,
+              ),
+              borderRadius: BorderRadius.circular(7),
+            ),
+            child: FlatButton(
               padding: EdgeInsets.only(left: 5, right: 5),
               onPressed: () async {
                 try {
@@ -562,9 +568,6 @@ class SignInFormState extends State<SignInForm> {
                   print(e.toString());
                 }
               },
-              shape: new RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(7.0),
-              ),
               child: Row(
                 children: <Widget>[
                   Expanded(
