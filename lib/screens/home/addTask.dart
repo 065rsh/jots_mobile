@@ -24,11 +24,11 @@ class _AddTaskState extends State<AddTask> {
     return Stack(
       children: <Widget>[
         Align(
-          alignment: Alignment.bottomRight,
+          alignment: Alignment.bottomCenter,
           child: Container(
             width: 60,
             height: 60,
-            margin: EdgeInsets.only(bottom: 60, right: 30),
+            margin: EdgeInsets.only(bottom: 30),
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30),
                 gradient: LinearGradient(

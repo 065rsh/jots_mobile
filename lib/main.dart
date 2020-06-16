@@ -12,34 +12,60 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-Future _showNotificationWithDefaultSound(String title, String message) async {
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
+Future onDidReceiveLocalNotification(
+    int id, String title, String body, String payload) async {
+  print("RAN onDidReceiveLocalNotification for IOS");
+}
+
+Future onSelectNotification(String payload) async {
+  if (payload != null) {
+    debugPrint("Notification payload: $payload");
+  }
+
+  debugPrint("OX: DONE WITH PAYLOAD");
+}
+
+Future _showNotificationWithDefaultSound(String title, String message) async {
   var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'channel_id', 'channel_name', 'channel_description',
-      importance: Importance.Max, priority: Priority.High);
-  var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+    "DUE_DATE_REMINDER",
+    "Due date reminder notification",
+    "Notification channel for task due date reminder.",
+  );
+
+  var iosChannelSpecifics = IOSNotificationDetails();
+
   var platformChannelSpecifics = NotificationDetails(
-      androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    androidPlatformChannelSpecifics,
+    iosChannelSpecifics,
+  );
+
   await flutterLocalNotificationsPlugin.show(
     0,
-    "HEYEYEYE!!",
-    '$message',
+    title,
+    message,
     platformChannelSpecifics,
-    payload: 'Default_Sound',
   );
+
+  return Future<void>.value();
 }
 
 Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) async {
-  if (message['data'] != null) {
-    final data = message['data'];
+  print("data");
+  await _showNotificationWithDefaultSound(
+    "FlutterLocalNotifications",
+    "onBackgroundMessage ran myBackgroundMessageHandler()",
+  );
 
-    final title = data['title'];
-    final body = data['message'];
+  if (message.containsKey("data")) {
+    // final data = message["data"];
 
-    await _showNotificationWithDefaultSound(title, body);
+    // final title = data["title"];
+    // final body = data["body"];
   }
+
   return Future<void>.value();
 }
 
@@ -48,6 +74,7 @@ void main() {
 
   SharedPreferences.getInstance().then((prefs) {
     var darkModeOn = prefs.getBool('darkMode') ?? false;
+
     runApp(
       ChangeNotifierProvider<ThemeNotifier>(
         create: (_) => ThemeNotifier(darkModeOn ? darkTheme : lightTheme),
@@ -64,15 +91,13 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final FirebaseMessaging _fcm = FirebaseMessaging();
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-  var initializationSettingsAndroid;
-  var initializationSettingsIOS;
-  var initializationSettings;
 
   @override
   void initState() {
     super.initState();
+
+    // ! temporary call
+    _checkIfRanBackgroundHandler();
 
     if (Platform.isIOS) {
       _fcm.onIosSettingsRegistered.listen((data) {
@@ -84,40 +109,49 @@ class _MyAppState extends State<MyApp> {
       _saveDeviceToken();
     }
 
-    initializationSettingsAndroid =
-        new AndroidInitializationSettings("app_icon");
-    initializationSettingsIOS = new IOSInitializationSettings(
-        onDidReceiveLocalNotification: onDidReceiveLocalNotification);
-    initializationSettings = new InitializationSettings(
-        initializationSettingsAndroid, initializationSettingsIOS);
-    flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: onSelectNotification);
+    _initializeFlutterLocalNotificationPlugin();
 
     _fcm.configure(
       onMessage: (Map<String, dynamic> message) async {
         print('onMessage: $message');
-
-        _showNotification();
       },
+      onBackgroundMessage: myBackgroundMessageHandler,
       onLaunch: (Map<String, dynamic> message) async {
         print('onLaunch: $message');
-
-        _showNotification();
       },
       onResume: (Map<String, dynamic> message) async {
         print('onResume: $message');
-
-        _showNotification();
       },
-      onBackgroundMessage: myBackgroundMessageHandler,
     );
+  }
+
+  _initializeFlutterLocalNotificationPlugin() async {
+    var initializationSettingsAndroid =
+        AndroidInitializationSettings("app_icon");
+    var initializationSettingsIOS = IOSInitializationSettings(
+      onDidReceiveLocalNotification: onDidReceiveLocalNotification,
+    );
+    var initializationSettings = InitializationSettings(
+      initializationSettingsAndroid,
+      initializationSettingsIOS,
+    );
+
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onSelectNotification: onSelectNotification,
+    );
+  }
+
+  // ! temporary function
+  _checkIfRanBackgroundHandler() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    print("boolbool: " + prefs.getBool("boolbool").toString());
   }
 
   _saveDeviceToken() async {
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
-
-    // get the token for this device
-    String fcmToken = await _fcm.getToken();
+    String fcmToken = await _fcm.getToken(); // gets the token for this device
 
     if (fcmToken != null) {
       var tokenRef = Firestore.instance
@@ -137,7 +171,6 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
-
     return StreamProvider<FirebaseUser>.value(
       value: AuthService().user,
       child: MaterialApp(
@@ -148,46 +181,29 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  Future<void> _demoNotification() async {
-    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      "channel_id",
-      "channel name",
-      "channel description",
-      importance: Importance.Max,
-      priority: Priority.High,
-      ticker: "text ticker",
-    );
+  // Future<void> _demoNotification() async {
+  //   var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+  //     "channel_id",
+  //     "channel name",
+  //     "channel description",
+  //     importance: Importance.Max,
+  //     priority: Priority.High,
+  //     ticker: "text ticker",
+  //   );
 
-    var iosChannelSpecifics = IOSNotificationDetails();
+  //   var iosChannelSpecifics = IOSNotificationDetails();
 
-    var platformChannelSpecifics = NotificationDetails(
-      androidPlatformChannelSpecifics,
-      iosChannelSpecifics,
-    );
+  //   var platformChannelSpecifics = NotificationDetails(
+  //     androidPlatformChannelSpecifics,
+  //     iosChannelSpecifics,
+  //   );
 
-    await flutterLocalNotificationsPlugin.show(
-      0,
-      "HEY!!",
-      "How are you!",
-      platformChannelSpecifics,
-      payload: "test payload",
-    );
-  }
-
-  void _showNotification() async {
-    await _demoNotification();
-  }
-
-  Future onDidReceiveLocalNotification(
-      int id, String title, String body, String payload) async {
-    print("RAN onDidReceiveLocalNotification for IOS");
-  }
-
-  Future onSelectNotification(String payload) async {
-    if (payload != null) {
-      debugPrint("Notification payload: $payload");
-    }
-
-    debugPrint("OX: DONE WITH PAYLOAD");
-  }
+  //   await flutterLocalNotificationsPlugin.show(
+  //     0,
+  //     "HEY!!",
+  //     "onMessage ran _demoNotifications()",
+  //     platformChannelSpecifics,
+  //     payload: "test payload",
+  //   );
+  // }
 }
