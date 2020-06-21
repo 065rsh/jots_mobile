@@ -11,24 +11,9 @@ import 'package:jots_mobile/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:jots_mobile/services/customNotificationHandler.dart';
 
-FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
-
-Future onDidReceiveLocalNotification(
-    int id, String title, String body, String payload) async {
-  print("RAN onDidReceiveLocalNotification for IOS");
-}
-
-Future onSelectNotification(String payload) async {
-  if (payload != null) {
-    debugPrint("Notification payload: $payload");
-  }
-
-  debugPrint("OX: DONE WITH PAYLOAD");
-}
-
-Future _showNotificationWithDefaultSound(String title, String message) async {
+_showFlutterLocalNotification(String title, String message) async {
   var androidPlatformChannelSpecifics = AndroidNotificationDetails(
     "DUE_DATE_REMINDER",
     "Due date reminder notification",
@@ -42,29 +27,20 @@ Future _showNotificationWithDefaultSound(String title, String message) async {
     iosChannelSpecifics,
   );
 
-  await flutterLocalNotificationsPlugin.show(
+  await CustomNotificationHandler.flutterLocalNotificationsPlugin.schedule(
     0,
     title,
     message,
+    DateTime.now(),
     platformChannelSpecifics,
   );
-
-  return Future<void>.value();
 }
 
 Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) async {
-  print("data");
-  await _showNotificationWithDefaultSound(
-    "FlutterLocalNotifications",
+  await _showFlutterLocalNotification(
+    "HEY!!",
     "onBackgroundMessage ran myBackgroundMessageHandler()",
   );
-
-  if (message.containsKey("data")) {
-    // final data = message["data"];
-
-    // final title = data["title"];
-    // final body = data["body"];
-  }
 
   return Future<void>.value();
 }
@@ -91,13 +67,14 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final FirebaseMessaging _fcm = FirebaseMessaging();
+  final CustomNotificationHandler customNotificationHandler =
+      CustomNotificationHandler();
 
   @override
   void initState() {
     super.initState();
 
-    // ! temporary call
-    _checkIfRanBackgroundHandler();
+    customNotificationHandler.initializeHandler();
 
     if (Platform.isIOS) {
       _fcm.onIosSettingsRegistered.listen((data) {
@@ -109,13 +86,11 @@ class _MyAppState extends State<MyApp> {
       _saveDeviceToken();
     }
 
-    _initializeFlutterLocalNotificationPlugin();
-
     _fcm.configure(
       onMessage: (Map<String, dynamic> message) async {
         print('onMessage: $message');
       },
-      onBackgroundMessage: myBackgroundMessageHandler,
+      onBackgroundMessage: Platform.isIOS ? null : myBackgroundMessageHandler,
       onLaunch: (Map<String, dynamic> message) async {
         print('onLaunch: $message');
       },
@@ -123,30 +98,6 @@ class _MyAppState extends State<MyApp> {
         print('onResume: $message');
       },
     );
-  }
-
-  _initializeFlutterLocalNotificationPlugin() async {
-    var initializationSettingsAndroid =
-        AndroidInitializationSettings("app_icon");
-    var initializationSettingsIOS = IOSInitializationSettings(
-      onDidReceiveLocalNotification: onDidReceiveLocalNotification,
-    );
-    var initializationSettings = InitializationSettings(
-      initializationSettingsAndroid,
-      initializationSettingsIOS,
-    );
-
-    await flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
-      onSelectNotification: onSelectNotification,
-    );
-  }
-
-  // ! temporary function
-  _checkIfRanBackgroundHandler() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    print("boolbool: " + prefs.getBool("boolbool").toString());
   }
 
   _saveDeviceToken() async {

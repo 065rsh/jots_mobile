@@ -22,6 +22,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
+            <!-- Manually added -->
             <intent-filter>
                 <action android:name="FLUTTER_NOTIFICATION_CLICK" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -29,14 +30,14 @@
         </activity>
 
         <!-- Manually added -->
-         <!-- To ensure scheduled notifications remain scheduled upon a reboot -->
+        <!-- To ensure scheduled notifications remain scheduled upon a reboot -->
         <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"></action>
             </intent-filter>
         </receiver>
         <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
-
+        
         <meta-data 
         android:name="com.google.firebase.messaging.default_notification_channel_id" 
         android:value="DUE_DATE_REMINDER"/>

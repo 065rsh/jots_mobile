@@ -63,8 +63,8 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     implementation 'com.google.firebase:firebase-analytics:17.2.2'
     implementation 'com.google.firebase:firebase-messaging:20.1.6'
@@ -72,4 +72,4 @@ dependencies {
 
 apply plugin: 'com.google.gms.google-services'
 
-com.google.gms.googleservices.GoogleServicesPlugin.config.disableVersionCheck = true
+// com.google.gms.googleservices.GoogleServicesPlugin.config.disableVersionCheck = true
