@@ -5,11 +5,13 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/screens/home/addTagsSheet.dart';
+import 'package:jots_mobile/services/customNotificationHandler.dart';
 import 'package:jots_mobile/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:jots_mobile/handyArr.dart';
 import 'changeBookSheet.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 final double taskSheetIconRightMargin = 20;
 final double taskSheetItemTopMargin = 30;
@@ -42,15 +44,18 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
   AnimationController _taskAboutAC;
   TextEditingController taskNameController, taskNoteController;
   StreamSubscription<QuerySnapshot> booksSnapshot;
+  AutoScrollController addToPageScrollController = AutoScrollController();
 
+  int taskPriority = 0;
+  bool isTaskValid = false;
+  bool closeSheetAfterCreatingTask = true;
+  bool showAddNotes = false;
+  bool showSelectDate = false;
   String selectedPageIdToAddTask;
   String taskName;
+  String taskNote;
   DateTime dueDate;
   DateTime selectedDate;
-  bool isTaskValid = false;
-  int taskPriority = 0;
-  String taskNote;
-  bool closeSheetAfterCreatingTask = true;
   List taskTagChips;
   List books = [];
 
@@ -74,7 +79,8 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
       });
 
     setState(() {
-      selectedPageIdToAddTask = widget.selectedPage;
+      selectedPageIdToAddTask =
+          widget.selectedPage ?? widget.pages[0].documentID;
       selectedDate = widget.taskId != null
           ? widget.task["due_date"] == ""
               ? null
@@ -113,26 +119,26 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
         formattedDueDate["time"] == null;
     final themex = Theme.of(context);
 
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: themex.dialogBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 20,
+            offset: Offset(2, 4),
+          )
+        ],
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
       ),
-      child: Container(
-        width: double.infinity,
-        margin: EdgeInsets.only(top: 60),
-        decoration: BoxDecoration(
-          color: themex.dialogBackgroundColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 20,
-              offset: Offset(2, 4),
-            )
-          ],
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
+      child: AnimatedPadding(
+        duration: Duration(milliseconds: 200),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
         child: GestureDetector(
           onHorizontalDragEnd: (details) => _onSheetDragEnd(details),
@@ -147,31 +153,18 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    // # Drag logo
-                    Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                        width: 30,
-                        height: 3,
-                        margin: EdgeInsets.only(top: 10),
-                        decoration: BoxDecoration(
-                          color: themex.hintColor.withAlpha(90),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
                     // # Add to page row
                     widget.pages.length == 1
                         ? Container()
                         : Container(
                             width: double.infinity,
-                            margin:
-                                EdgeInsets.only(left: 20, top: 15, right: 20),
-                            padding: EdgeInsets.only(bottom: 10),
+                            margin: EdgeInsets.only(top: 10),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
                             decoration: BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
-                                  width: 0.5,
+                                  width: 1,
                                   color: themex.dividerColor,
                                 ),
                               ),
@@ -180,19 +173,18 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
-                                Container(
-                                  child: Text(
-                                    "ADD TO PAGE",
-                                    style: TextStyle(
-                                      color: lightDarkColor,
-                                      fontSize: 10,
-                                      letterSpacing: 0.5,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                Text(
+                                  "ADD TO PAGE",
+                                  style: TextStyle(
+                                    color: lightDarkColor,
+                                    fontSize: 10,
+                                    letterSpacing: 0.5,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                                 SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
+                                  controller: addToPageScrollController,
                                   child: Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -204,7 +196,10 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                           ),
                     // # Task Name
                     Container(
-                      margin: EdgeInsets.only(top: 5, right: 20, left: 20),
+                      margin: EdgeInsets.only(
+                          top: widget.pages.length == 1 ? 10 : 5,
+                          right: 20,
+                          left: 20),
                       child: TextFormField(
                         controller: taskNameController,
                         autofocus: isNewTask,
@@ -236,182 +231,132 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                       ),
                     ),
                     // # Task Note
-                    Container(
-                      margin: EdgeInsets.only(
-                        left: 20,
-                        top: 20,
-                        right: 20,
-                        bottom: 5,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Container(
+                    isNewTask && !showAddNotes
+                        ? Container()
+                        : Container(
                             margin: EdgeInsets.only(
-                                right: taskSheetIconRightMargin, top: 2),
-                            child: SvgPicture.asset(
-                              "assets/vectors/NoteIcon.svg",
-                              width: 20,
-                              color: lightDarkColor,
+                              left: 20,
+                              top: 20,
+                              right: 20,
+                              bottom: 5,
                             ),
-                          ),
-                          Expanded(
-                            child: TextFormField(
-                              controller: taskNoteController,
-                              keyboardType: TextInputType.multiline,
-                              maxLines: null,
-                              onChanged: (value) =>
-                                  setState(() => taskNote = value),
-                              style: TextStyle(
-                                fontSize: 15,
-                                letterSpacing: 0.5,
-                                color: themex.textTheme.headline3.color,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: "Add notes...",
-                                hintStyle: TextStyle(color: lightDarkColor),
-                                isDense: true,
-                                counterText: '',
-                                contentPadding: EdgeInsets.only(top: 0),
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // # Tags Container
-                    // priority title text
-                    // Container(
-                    //   margin: EdgeInsets.only(left: 20, top: 20),
-                    //   child: Text(
-                    //     "Tags",
-                    //     style: TextStyle(color: lightDarkColor),
-                    //   ),
-                    // ),
-                    Container(
-                      margin: EdgeInsets.only(
-                          left: 20, right: 20, top: taskSheetItemTopMargin),
-                      child: Row(
-                        children: <Widget>[
-                          Container(
-                            margin: EdgeInsets.only(
-                                right: taskSheetIconRightMargin),
-                            child: SvgPicture.asset(
-                              "assets/vectors/TagIcon.svg",
-                              color: lightDarkColor,
-                              width: 20,
-                            ),
-                          ),
-                          Wrap(
-                            runSpacing: 10,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: _addTagsList(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // # Due Date Container
-                    Container(
-                      margin: EdgeInsets.only(
-                          top: taskSheetItemTopMargin, left: 20),
-                      child: Column(
-                        children: <Widget>[
-                          // # Due date head
-                          // Row(
-                          //   children: <Widget>[
-                          //     Text(
-                          //       "Due date" +
-                          //           (formattedDueDate["date_time"] == null
-                          //               ? ""
-                          //               : "  •  "),
-                          //       style: TextStyle(color: lightDarkColor),
-                          //     ),
-                          //     Text(
-                          //       formattedDueDate["date_time"] ?? "",
-                          //       style: TextStyle(
-                          //         color: formattedDueDate["color"] ??
-                          //             Colors.transparent,
-                          //       ),
-                          //     ),
-                          //   ],
-                          // ),
-                          // # Due date action buttons
-                          Row(
-                            children: <Widget>[
-                              Container(
-                                margin: EdgeInsets.only(
-                                    right: taskSheetIconRightMargin),
-                                child: Icon(
-                                  Icons.calendar_today,
-                                  color: lightDarkColor,
-                                  size: 20,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Container(
+                                  margin: EdgeInsets.only(
+                                      right: taskSheetIconRightMargin, top: 2),
+                                  child: SvgPicture.asset(
+                                    "assets/vectors/NoteIcon.svg",
+                                    width: 20,
+                                    color: lightDarkColor,
+                                  ),
                                 ),
-                              ),
-                              Container(
-                                height: taskSheetButtonHeight,
-                                margin: EdgeInsets.only(right: 20),
-                                decoration: BoxDecoration(
-                                  color: formattedDueDate["date"] == null
-                                      ? Colors.transparent
-                                      : formattedDueDate["color"].withAlpha(20),
-                                  borderRadius: BorderRadius.circular(7),
-                                ),
-                                child: ButtonTheme(
-                                  minWidth: 0,
-                                  child: FlatButton(
-                                    onPressed: _selectDate,
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal:
-                                            formattedDueDate["date"] == null
-                                                ? 0
-                                                : 15),
-                                    materialTapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                    child: Text(
-                                      formattedDueDate["date"] ?? "Select date",
-                                      style: TextStyle(
-                                        color: formattedDueDate["date"] == null
-                                            ? lightDarkColor
-                                            : formattedDueDate["color"],
-                                        fontWeight: FontWeight.w400,
-                                      ),
+                                Expanded(
+                                  child: TextFormField(
+                                    autofocus: isNewTask && !showAddNotes,
+                                    controller: taskNoteController,
+                                    keyboardType: TextInputType.multiline,
+                                    maxLines: null,
+                                    onChanged: (value) =>
+                                        setState(() => taskNote = value),
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      letterSpacing: 0.5,
+                                      color: themex.textTheme.headline3.color,
+                                    ),
+                                    decoration: InputDecoration(
+                                      hintText: "Add notes...",
+                                      hintStyle:
+                                          TextStyle(color: lightDarkColor),
+                                      isDense: true,
+                                      counterText: '',
+                                      contentPadding: EdgeInsets.only(top: 0),
+                                      border: InputBorder.none,
                                     ),
                                   ),
                                 ),
-                              ),
-                              formattedDueDate["date"] != null
-                                  ? Container(
+                              ],
+                            ),
+                          ),
+                    // # Tags Container
+                    isNewTask
+                        ? Container()
+                        : Container(
+                            margin: EdgeInsets.only(
+                              left: 20,
+                              right: 20,
+                              top: taskSheetItemTopMargin,
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                Container(
+                                  margin: EdgeInsets.only(
+                                      right: taskSheetIconRightMargin),
+                                  child: SvgPicture.asset(
+                                    "assets/vectors/TagIcon.svg",
+                                    color: lightDarkColor,
+                                    width: 20,
+                                  ),
+                                ),
+                                Wrap(
+                                  runSpacing: 10,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: _addTagsList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                    // # Due Date Container
+                    isNewTask && !showSelectDate
+                        ? Container()
+                        : Container(
+                            margin: EdgeInsets.only(
+                                top: isNewTask ? 20 : taskSheetItemTopMargin,
+                                left: 20),
+                            child: Column(
+                              children: <Widget>[
+                                // # Due date action buttons
+                                Row(
+                                  children: <Widget>[
+                                    Container(
+                                      margin: EdgeInsets.only(
+                                          right: taskSheetIconRightMargin),
+                                      child: Icon(
+                                        Icons.calendar_today,
+                                        color: lightDarkColor,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    Container(
                                       height: taskSheetButtonHeight,
+                                      margin: EdgeInsets.only(right: 20),
                                       decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: Colors.transparent),
-                                        color: isTimeNotAval
+                                        color: formattedDueDate["date"] == null
                                             ? Colors.transparent
                                             : formattedDueDate["color"]
                                                 .withAlpha(20),
                                         borderRadius: BorderRadius.circular(7),
                                       ),
-                                      child: DottedBorder(
-                                        borderType: BorderType.RRect,
-                                        strokeWidth: 0.5,
-                                        dashPattern: [3, 2],
-                                        color: isTimeNotAval
-                                            ? lightDarkColor
-                                            : Colors.transparent,
-                                        radius: Radius.circular(7),
+                                      child: ButtonTheme(
+                                        minWidth: 0,
                                         child: FlatButton(
-                                          onPressed: _selectTime,
+                                          onPressed: _selectDate,
                                           padding: EdgeInsets.symmetric(
-                                              horizontal: 15),
+                                              horizontal:
+                                                  formattedDueDate["date"] ==
+                                                          null
+                                                      ? 0
+                                                      : 15),
+                                          materialTapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
                                           child: Text(
-                                            isTimeNotAval
-                                                ? "Select time"
-                                                : formattedDueDate["time"]
-                                                    .substring(2),
+                                            formattedDueDate["date"] ??
+                                                "Select date",
                                             style: TextStyle(
-                                              color: isTimeNotAval
+                                              color: formattedDueDate["date"] ==
+                                                      null
                                                   ? lightDarkColor
                                                   : formattedDueDate["color"],
                                               fontWeight: FontWeight.w400,
@@ -419,213 +364,304 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                           ),
                                         ),
                                       ),
-                                    )
-                                  : Container(),
-                              // # clear due date button
-                              formattedDueDate["date"] != null
-                                  ? Container(
-                                      width: 25,
-                                      height: 25,
-                                      margin: EdgeInsets.only(left: 20),
-                                      decoration: BoxDecoration(
-                                        color: themex.dialogBackgroundColor,
-                                        borderRadius: BorderRadius.circular(20),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color:
-                                                Colors.black.withOpacity(0.1),
-                                            blurRadius: 4,
-                                            offset: Offset(0, 1),
-                                          ),
-                                        ],
-                                      ),
-                                      child: FlatButton(
-                                        onPressed: _removeDueDate,
-                                        materialTapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
-                                        padding: EdgeInsets.all(0),
-                                        child: Icon(
-                                          Icons.clear,
-                                          color: lightDarkColor,
-                                          size: 18,
-                                        ),
-                                      ),
-                                    )
-                                  : Container(),
-                            ],
+                                    ),
+                                    formattedDueDate["date"] != null
+                                        ? Container(
+                                            height: taskSheetButtonHeight,
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: Colors.transparent),
+                                              color: isTimeNotAval
+                                                  ? Colors.transparent
+                                                  : formattedDueDate["color"]
+                                                      .withAlpha(20),
+                                              borderRadius:
+                                                  BorderRadius.circular(7),
+                                            ),
+                                            child: DottedBorder(
+                                              borderType: BorderType.RRect,
+                                              strokeWidth: 0.5,
+                                              dashPattern: [3, 2],
+                                              color: isTimeNotAval
+                                                  ? lightDarkColor
+                                                  : Colors.transparent,
+                                              radius: Radius.circular(7),
+                                              child: FlatButton(
+                                                onPressed: _selectTime,
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 15),
+                                                child: Text(
+                                                  isTimeNotAval
+                                                      ? "Select time"
+                                                      : formattedDueDate["time"]
+                                                          .substring(2),
+                                                  style: TextStyle(
+                                                    color: isTimeNotAval
+                                                        ? lightDarkColor
+                                                        : formattedDueDate[
+                                                            "color"],
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        : Container(),
+                                    // # clear due date button
+                                    formattedDueDate["date"] != null
+                                        ? Container(
+                                            width: 25,
+                                            height: 25,
+                                            margin: EdgeInsets.only(left: 20),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  themex.dialogBackgroundColor,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black
+                                                      .withOpacity(0.1),
+                                                  blurRadius: 4,
+                                                  offset: Offset(0, 1),
+                                                ),
+                                              ],
+                                            ),
+                                            child: FlatButton(
+                                              onPressed: _removeDueDate,
+                                              materialTapTargetSize:
+                                                  MaterialTapTargetSize
+                                                      .shrinkWrap,
+                                              padding: EdgeInsets.all(0),
+                                              child: Icon(
+                                                Icons.clear,
+                                                color: lightDarkColor,
+                                                size: 18,
+                                              ),
+                                            ),
+                                          )
+                                        : Container(),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ],
-                      ),
-                    ),
                     // # Priority Container
-                    // priority title text
-                    // Container(
-                    //   margin: EdgeInsets.only(
-                    //       top: taskSheetItemTopMargin, left: 20),
-                    //   child: Text(
-                    //     "Priority",
-                    //     style: TextStyle(color: lightDarkColor),
-                    //   ),
-                    // ),
-                    // priority button
-                    Container(
-                      margin: EdgeInsets.only(
-                          left: 20, top: taskSheetItemTopMargin),
-                      child: Row(
-                        children: <Widget>[
-                          Container(
-                            width: 20,
-                            height: 20,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: lightDarkColor,
-                                width: 1,
-                              ),
-                              borderRadius: BorderRadius.circular(30),
-                            ),
+                    isNewTask
+                        ? Container()
+                        : Container(
                             margin: EdgeInsets.only(
-                                right: taskSheetIconRightMargin),
-                            child: Text(
-                              "!",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: lightDarkColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            height: taskSheetButtonHeight,
-                            decoration: BoxDecoration(
-                              color: taskPriority == 0
-                                  ? Colors.transparent
-                                  : priorityColorsArr[taskPriority]
-                                      .withAlpha(20),
-                              borderRadius: BorderRadius.circular(7),
-                            ),
-                            child: ButtonTheme(
-                              minWidth: 0,
-                              materialTapTargetSize:
-                                  MaterialTapTargetSize.shrinkWrap,
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: taskPriority == 0 ? 0 : 20),
-                              child: FlatButton(
-                                onPressed: () {
-                                  setState(() {
-                                    taskPriority =
-                                        taskPriority == priorityArr.length - 1
-                                            ? 0
-                                            : taskPriority + 1;
-                                  });
-                                },
-                                child: Text(
-                                  taskPriority == 0
-                                      ? priorityArr[taskPriority]
-                                      : priorityArr[taskPriority].toUpperCase(),
-                                  style: TextStyle(
-                                    color: priorityColorsArr[taskPriority],
-                                    letterSpacing: taskPriority == 0 ? 0 : 1,
-                                    fontWeight: taskPriority == 0
-                                        ? FontWeight.w400
-                                        : FontWeight.w500,
+                                left: 20, top: taskSheetItemTopMargin),
+                            child: Row(
+                              children: <Widget>[
+                                Container(
+                                  width: 20,
+                                  height: 20,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: lightDarkColor,
+                                      width: 1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                  margin: EdgeInsets.only(
+                                      right: taskSheetIconRightMargin),
+                                  child: Text(
+                                    "!",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: lightDarkColor,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ),
-                              ),
+                                Container(
+                                  height: taskSheetButtonHeight,
+                                  decoration: BoxDecoration(
+                                    color: taskPriority == 0
+                                        ? Colors.transparent
+                                        : priorityColorsArr[taskPriority]
+                                            .withAlpha(20),
+                                    borderRadius: BorderRadius.circular(7),
+                                  ),
+                                  child: ButtonTheme(
+                                    minWidth: 0,
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: taskPriority == 0 ? 0 : 20),
+                                    child: FlatButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          taskPriority = taskPriority ==
+                                                  priorityArr.length - 1
+                                              ? 0
+                                              : taskPriority + 1;
+                                        });
+                                      },
+                                      child: Text(
+                                        taskPriority == 0
+                                            ? priorityArr[taskPriority]
+                                            : priorityArr[taskPriority]
+                                                .toUpperCase(),
+                                        style: TextStyle(
+                                          color:
+                                              priorityColorsArr[taskPriority],
+                                          letterSpacing:
+                                              taskPriority == 0 ? 0 : 1,
+                                          fontWeight: taskPriority == 0
+                                              ? FontWeight.w400
+                                              : FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-
                     // # Action buttons
                     isNewTask
                         ? Container(
                             margin: EdgeInsets.only(
-                                top: taskSheetItemTopMargin - 5, bottom: 5),
+                                top: taskSheetItemTopMargin - 5, bottom: 15),
                             padding:
                                 EdgeInsets.only(top: 5, left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              border: Border(
-                                top: BorderSide(
-                                    color: themex.dividerColor, width: 0.5),
-                              ),
-                            ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                                FlatButton(
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  padding: EdgeInsets.all(0),
-                                  onPressed: () {
-                                    setState(() {
-                                      closeSheetAfterCreatingTask =
-                                          !closeSheetAfterCreatingTask;
-                                    });
-                                  },
+                                Container(
+                                  width: 60,
                                   child: Row(
-                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
-                                      Container(
-                                        width: 20,
-                                        height: 20,
-                                        margin: EdgeInsets.only(right: 15),
-                                        child: Container(
-                                          width: 20,
-                                          height: 20,
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                              color: lightDarkColor,
-                                            ),
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(5),
-                                            ),
-                                            color: closeSheetAfterCreatingTask
-                                                ? lightDarkColor
-                                                : Colors.transparent,
+                                      ButtonTheme(
+                                        minWidth: 0,
+                                        padding: EdgeInsets.all(0),
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        child: FlatButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              showAddNotes = true;
+                                            });
+                                          },
+                                          child: SvgPicture.asset(
+                                            "assets/vectors/NoteIcon.svg",
+                                            color: showAddNotes
+                                                ? lightDarkColor.withAlpha(90)
+                                                : lightDarkColor,
+                                            width: 20,
                                           ),
+                                        ),
+                                      ),
+                                      ButtonTheme(
+                                        minWidth: 0,
+                                        padding: EdgeInsets.all(0),
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        child: FlatButton(
+                                          onPressed: () {
+                                            _selectDate();
+                                            setState(() {
+                                              showSelectDate = true;
+                                            });
+                                          },
                                           child: Icon(
-                                            Icons.check,
-                                            size: 14.0,
-                                            color: closeSheetAfterCreatingTask
-                                                ? Colors.white
+                                            Icons.calendar_today,
+                                            size: 20,
+                                            color: showSelectDate
+                                                ? lightDarkColor.withAlpha(90)
                                                 : lightDarkColor,
                                           ),
                                         ),
                                       ),
-                                      Container(
-                                        child: Text(
-                                          "Close after creating task",
-                                          style: TextStyle(
-                                            color: lightDarkColor,
-                                          ),
-                                        ),
-                                      )
                                     ],
                                   ),
                                 ),
-                                Container(
-                                  // decoration: BoxDecoration(
-                                  //   color: Colors.amber,
-                                  // ),
-                                  child: FlatButton(
-                                    onPressed: () {
-                                      if (isTaskValid) {
-                                        _createNewTask();
-                                      }
-                                    },
-                                    child: Text(
-                                      "CREATE",
-                                      style: TextStyle(
-                                        color: isTaskValid
-                                            ? themeblue
-                                            : lightDarkColor.withAlpha(50),
-                                        letterSpacing: 1,
-                                        fontSize: 15,
+                                Row(
+                                  children: <Widget>[
+                                    ButtonTheme(
+                                      minWidth: 0,
+                                      padding: EdgeInsets.all(0),
+                                      materialTapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                      child: FlatButton(
+                                        onPressed: () {
+                                          if (isTaskValid) {
+                                            _createNewTask();
+                                          }
+                                        },
+                                        child: Text(
+                                          "CREATE",
+                                          style: TextStyle(
+                                            color: isTaskValid
+                                                ? themeblue
+                                                : lightDarkColor.withAlpha(80),
+                                            letterSpacing: 1,
+                                            fontSize: 15,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
+                                    Text(
+                                      "   &   ",
+                                      style: TextStyle(
+                                        color: lightDarkColor.withAlpha(950),
+                                      ),
+                                    ),
+                                    FlatButton(
+                                      materialTapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                      padding: EdgeInsets.all(0),
+                                      onPressed: () {
+                                        setState(() {
+                                          closeSheetAfterCreatingTask =
+                                              !closeSheetAfterCreatingTask;
+                                        });
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                          color: lightDarkColor.withAlpha(30),
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: <Widget>[
+                                            Container(
+                                              child: Text(
+                                                "CLOSE  ",
+                                                style: TextStyle(
+                                                  color:
+                                                      closeSheetAfterCreatingTask
+                                                          ? lightDarkColor
+                                                          : lightDarkColor
+                                                              .withAlpha(90),
+                                                  letterSpacing: 1,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                            ),
+                                            Icon(
+                                              closeSheetAfterCreatingTask
+                                                  ? Icons.radio_button_checked
+                                                  : Icons
+                                                      .radio_button_unchecked,
+                                              color: closeSheetAfterCreatingTask
+                                                  ? lightDarkColor
+                                                  : lightDarkColor
+                                                      .withAlpha(90),
+                                              size: 17,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -1065,17 +1101,20 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
     final themex = Theme.of(context);
     List<Widget> pageButtonWidgets = [];
 
-    if (selectedPageIdToAddTask == null) {
-      setState(() => selectedPageIdToAddTask = widget.pages[0].documentID);
-    }
-
     for (int i = 0; i < widget.pages.length; i++) {
       bool isSelectedPage = false;
       if (widget.pages[i].documentID == selectedPageIdToAddTask) {
         isSelectedPage = true;
+        addToPageScrollController.scrollToIndex(
+          i,
+          preferPosition: AutoScrollPosition.middle,
+        );
       }
       pageButtonWidgets.add(
-        Container(
+        AutoScrollTag(
+          key: ValueKey(i),
+          controller: addToPageScrollController,
+          index: i,
           child: ButtonTheme(
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             minWidth: 10,
@@ -1193,13 +1232,26 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
 
     await sectionRef.setData(taskObject, merge: true);
 
-    print(taskObject.keys.first);
-    await sectionRef
-        .collection("DueDates")
-        .document(taskObject.keys.first)
-        .setData({
-      "due_date": selectedDate ?? null,
-    });
+//    await sectionRef
+//        .collection("DueDates")
+//        .document(taskObject.keys.first)
+//        .setData(
+//      {
+//        "due_date": selectedDate ?? null,
+//      },
+//    );
+
+    if (selectedDate != null) {
+      if (selectedDate.hour != 0 || selectedDate.minute != 0) {
+        await CustomNotificationHandler.scheduleNotification(
+            selectedDate, taskName, taskNote);
+      } else {
+        DateTime dateWithDefaultTime = new DateTime(
+            selectedDate.year, selectedDate.month, selectedDate.day, 8);
+        await CustomNotificationHandler.scheduleNotification(
+            dateWithDefaultTime, taskName, taskNote);
+      }
+    }
 
     if (closeSheetAfterCreatingTask) {
       try {

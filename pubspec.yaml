@@ -23,7 +23,7 @@ dependencies:
   # less mandatory
   flutter_launcher_icons: ^0.7.5
   url_launcher: ^5.4.7
-  image_picker: ^0.6.6+4
+  image_picker: ^0.6.7+2
   scroll_to_index: ^1.0.6
   fitted_text_field_container: ^1.1.0
   dotted_border: ^1.0.5

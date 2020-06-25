@@ -115,7 +115,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final themex = Theme.of(context);
+    final themeX = Theme.of(context);
 
     if (widget.isDrawerOpen) {
       _drawerAnimationController.fling(velocity: 10.0);
@@ -149,7 +149,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                   ..scale(scale),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: themex.primaryColor,
+                    color: themeX.primaryColor,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.12),
@@ -175,7 +175,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                               border: Border(
                                 bottom: BorderSide(
                                   width: 0.5,
-                                  color: themex.dividerColor,
+                                  color: themeX.dividerColor,
                                 ),
                               ),
                             ),
@@ -200,43 +200,41 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                           "assets/vectors/DrawerIcon.svg",
                                           width: 20,
                                           color:
-                                              themex.textTheme.headline2.color,
+                                          themeX.textTheme.headline2.color,
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
                                 // # Book title
-                                Container(
-                                  child: Align(
-                                    alignment: Alignment.center,
-                                    child: ButtonTheme(
-                                      materialTapTargetSize:
-                                          MaterialTapTargetSize.shrinkWrap,
-                                      minWidth: 0,
-                                      height: 0,
-                                      child: FlatButton(
-                                        padding: EdgeInsets.only(
-                                            left: 10, right: 10),
-                                        onPressed: () {
-                                          widget.startEditingBookName();
-                                        },
-                                        child: ConstrainedBox(
-                                          constraints: BoxConstraints(
-                                            maxWidth: 200,
-                                          ),
-                                          child: Text(
-                                            widget.selectedBook != null
-                                                ? widget.selectedBook
-                                                    .data["book_name"]
-                                                : "NaN",
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              color: themex
-                                                  .textTheme.headline1.color,
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 22,
-                                            ),
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: ButtonTheme(
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    minWidth: 0,
+                                    height: 0,
+                                    child: FlatButton(
+                                      padding: EdgeInsets.only(
+                                          left: 10, right: 10),
+                                      onPressed: () {
+                                        widget.startEditingBookName();
+                                      },
+                                      child: ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          maxWidth: 200,
+                                        ),
+                                        child: Text(
+                                          widget.selectedBook != null
+                                              ? widget.selectedBook
+                                                  .data["book_name"]
+                                              : "NaN",
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: themeX
+                                                .textTheme.headline1.color,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 22,
                                           ),
                                         ),
                                       ),
@@ -288,8 +286,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                             color: filterSelected !=
                                                     defaultFilterInt
                                                 ? themeblue
-                                                : themex
-                                                    .textTheme.headline2.color,
+                                                : themeX
+                                                .textTheme.headline2.color,
                                           ),
                                         ),
                                       ),
@@ -345,7 +343,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                   top: 10, right: 10, bottom: 20, left: 10),
                               width: 210,
                               decoration: BoxDecoration(
-                                color: themex.dialogBackgroundColor,
+                                color: themeX.dialogBackgroundColor,
                                 borderRadius: BorderRadius.circular(3),
                                 boxShadow: [
                                   BoxShadow(
@@ -405,7 +403,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                                       fontSize: 14,
                                                       fontWeight:
                                                           FontWeight.w400,
-                                                      color: themex.textTheme
+                                                      color: themeX.textTheme
                                                           .headline1.color,
                                                     ),
                                                   ),
@@ -472,7 +470,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                     decoration: BoxDecoration(
                                       border: Border(
                                         bottom: BorderSide(
-                                          color: themex.dividerColor,
+                                          color: themeX.dividerColor,
                                           width: 0.5,
                                         ),
                                       ),
@@ -523,7 +521,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                                         fontSize: 14,
                                                         fontWeight:
                                                             FontWeight.w400,
-                                                        color: themex.textTheme
+                                                        color: themeX.textTheme
                                                             .headline1.color,
                                                       ),
                                                     ),
@@ -609,7 +607,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                             letterSpacing: 1,
                                             fontSize: 14,
                                             fontWeight: FontWeight.w400,
-                                            color: themex
+                                            color: themeX
                                                 .textTheme.headline1.color,
                                           ),
                                         ),
@@ -644,7 +642,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                   //           letterSpacing: 1,
                                   //           fontSize: 14,
                                   //           fontWeight: FontWeight.w400,
-                                  //           color: themex
+                                  //           color: themeX
                                   //               .textTheme.headline1.color,
                                   //         ),
                                   //       ),
@@ -687,7 +685,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                             letterSpacing: 1,
                                             fontSize: 14,
                                             fontWeight: FontWeight.w400,
-                                            color: themex
+                                            color: themeX
                                                 .textTheme.headline1.color,
                                           ),
                                         ),
@@ -722,7 +720,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                             letterSpacing: 1,
                                             fontSize: 14,
                                             fontWeight: FontWeight.w400,
-                                            color: themex
+                                            color: themeX
                                                 .textTheme.headline1.color,
                                           ),
                                         ),
@@ -736,7 +734,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                         ),
                       ),
                       // # Add task container
-                      AddTask(widget.pages, widget.pageRef, widget.allTags),
+                      AddTask(widget.pages, widget.pageRef, widget.allTags,
+                          borderRadius),
                       // # close drawer overlay
                       widget.isDrawerOpen
                           ? GestureDetector(

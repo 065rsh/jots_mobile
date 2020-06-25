@@ -82,7 +82,8 @@ class _EditPageSheetState extends State<EditPageSheet> {
   Widget build(BuildContext context) {
     final themex = Theme.of(context);
 
-    return Padding(
+    return AnimatedPadding(
+      duration: Duration(milliseconds: 300),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
@@ -106,7 +107,7 @@ class _EditPageSheetState extends State<EditPageSheet> {
             Align(
               alignment: Alignment.center,
               child: Container(
-                width: 30,
+                width: 50,
                 height: 3,
                 margin: EdgeInsets.only(top: 10),
                 decoration: BoxDecoration(

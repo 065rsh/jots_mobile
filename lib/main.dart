@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:jots_mobile/screens/wrapper/wrapper.dart';
 import 'package:jots_mobile/services/auth.dart';
 import 'package:jots_mobile/theme.dart';
@@ -48,15 +49,18 @@ Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) async {
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  SharedPreferences.getInstance().then((prefs) {
-    var darkModeOn = prefs.getBool('darkMode') ?? false;
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    SharedPreferences.getInstance().then((prefs) {
+      var darkModeOn = prefs.getBool('darkMode') ?? false;
 
-    runApp(
-      ChangeNotifierProvider<ThemeNotifier>(
-        create: (_) => ThemeNotifier(darkModeOn ? darkTheme : lightTheme),
-        child: MyApp(),
-      ),
-    );
+      runApp(
+        ChangeNotifierProvider<ThemeNotifier>(
+          create: (_) => ThemeNotifier(darkModeOn ? darkTheme : lightTheme),
+          child: MyApp(),
+        ),
+      );
+    });
   });
 }
 

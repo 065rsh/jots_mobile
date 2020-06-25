@@ -49,7 +49,7 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final themex = Theme.of(context);
-    final maxTaskXOffset = widget.showPageHeader ? -95 : -60;
+    final maxTaskXOffset = widget.showPageHeader ? -95 : -70;
 
     return Container(
       margin: EdgeInsets.only(bottom: 15),
@@ -60,156 +60,151 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
             onHorizontalDragUpdate: (details) =>
                 _onTaskLeftDragUpdate(details, maxTaskXOffset),
             onHorizontalDragEnd: (details) => _onTaskDragEnd(details),
-            child: Container(
-              padding: EdgeInsets.only(right: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Expanded(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        // # task checkbox
-                        Container(
-                          width: 30,
-                          height: 30,
-                          margin: EdgeInsets.only(right: 5),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Expanded(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      // # task checkbox
+                      Container(
+                        width: 30,
+                        height: 30,
+                        margin: EdgeInsets.only(right: 5),
+                        child: FlatButton(
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          padding: EdgeInsets.all(0),
+                          onPressed: () => _toggleTaskCheck(),
+                          child: Container(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              width: 18,
+                              height: 18,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: widget.task["is_checked"]
+                                      ? themeblue
+                                      : lightDarkColor.withAlpha(900),
+                                ),
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(10),
+                                ),
+                                color: widget.task["is_checked"]
+                                    ? themeblue
+                                    : Colors.transparent,
+                              ),
+                              child: Icon(
+                                Icons.check,
+                                size: 13.0,
+                                color: widget.task["is_checked"]
+                                    ? Colors.white
+                                    : Colors.transparent,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // # task gesture container
+                      Expanded(
+                        child: Container(
+                          alignment: Alignment.centerLeft,
                           child: FlatButton(
                             materialTapTargetSize:
                                 MaterialTapTargetSize.shrinkWrap,
                             padding: EdgeInsets.all(0),
-                            onPressed: () => _toggleTaskCheck(),
-                            child: Container(
-                              alignment: Alignment.centerLeft,
-                              child: Container(
-                                width: 18,
-                                height: 18,
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: widget.task["is_checked"]
-                                        ? themeblue
-                                        : lightDarkColor,
+                            onPressed: _openEditTaskSheet,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                // # Task name
+                                Text(
+                                  widget.task["task_name"],
+                                  style: TextStyle(
+                                    color: themex.textTheme.bodyText1.color,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w400,
                                   ),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(10),
-                                  ),
-                                  color: widget.task["is_checked"]
-                                      ? themeblue
-                                      : Colors.transparent,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                child: Icon(
-                                  Icons.check,
-                                  size: 13.0,
-                                  color: widget.task["is_checked"]
-                                      ? Colors.white
-                                      : lightDarkColor,
-                                ),
-                              ),
+                                // # due date and priority
+                                widget.task["due_date"] != "" ||
+                                        widget.task["priority"] != 0
+                                    ? Container(
+                                        margin: EdgeInsets.only(top: 5),
+                                        child: Row(
+                                          children: <Widget>[
+                                            // # formatted due date
+                                            widget.task["due_date"] != ""
+                                                ? Text(
+                                                    _formatDueDate()["date"],
+                                                    style: TextStyle(
+                                                      color: _formatDueDate()[
+                                                          "color"],
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      fontSize: 12,
+                                                    ),
+                                                  )
+                                                : Container(),
+                                            // # bullet between due date and priority
+                                            widget.task["due_date"] != "" &&
+                                                    widget.task["priority"] != 0
+                                                ? Text(
+                                                    "  •  ",
+                                                    style: TextStyle(
+                                                        color: lightDarkColor),
+                                                  )
+                                                : Container(),
+                                            // # priority
+                                            widget.task["priority"] != 0
+                                                ? Text(
+                                                    priorityArr[widget
+                                                        .task["priority"]],
+                                                    style: TextStyle(
+                                                      color: priorityColorsArr[
+                                                          widget.task[
+                                                              "priority"]],
+                                                      fontSize: 12,
+                                                    ),
+                                                  )
+                                                : Container(),
+                                          ],
+                                        ),
+                                      )
+                                    : Container(),
+                                // # Tags chips
+                                widget.task["tag_ids"].length != 0
+                                    ? Container(
+                                        margin: EdgeInsets.only(bottom: 5),
+                                        child: Wrap(
+                                          runSpacing: 5,
+                                          children: _getTagChipsList(),
+                                        ),
+                                      )
+                                    : Container(),
+                              ],
                             ),
                           ),
                         ),
-                        // # task gesture container
-                        Expanded(
-                          child: Container(
-                            alignment: Alignment.centerLeft,
-                            child: FlatButton(
-                              materialTapTargetSize:
-                                  MaterialTapTargetSize.shrinkWrap,
-                              padding: EdgeInsets.all(0),
-                              onPressed: _openEditTaskSheet,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  // # Task name
-                                  Text(
-                                    widget.task["task_name"],
-                                    style: TextStyle(
-                                      color: themex.textTheme.headline2.color,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  // # due date and priority
-                                  widget.task["due_date"] != "" ||
-                                          widget.task["priority"] != 0
-                                      ? Container(
-                                          margin: EdgeInsets.only(top: 5),
-                                          child: Row(
-                                            children: <Widget>[
-                                              // # formatted due date
-                                              widget.task["due_date"] != ""
-                                                  ? Text(
-                                                      _formatDueDate()["date"],
-                                                      style: TextStyle(
-                                                        color: _formatDueDate()[
-                                                            "color"],
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                        fontSize: 12,
-                                                      ),
-                                                    )
-                                                  : Container(),
-                                              // # bullet between due date and priority
-                                              widget.task["due_date"] != "" &&
-                                                      widget.task["priority"] !=
-                                                          0
-                                                  ? Text(
-                                                      "  •  ",
-                                                      style: TextStyle(
-                                                          color:
-                                                              lightDarkColor),
-                                                    )
-                                                  : Container(),
-                                              // # priority
-                                              widget.task["priority"] != 0
-                                                  ? Text(
-                                                      priorityArr[widget
-                                                          .task["priority"]],
-                                                      style: TextStyle(
-                                                        color: priorityColorsArr[
-                                                            widget.task[
-                                                                "priority"]],
-                                                        fontSize: 12,
-                                                      ),
-                                                    )
-                                                  : Container(),
-                                            ],
-                                          ),
-                                        )
-                                      : Container(),
-                                  // # Tags chips
-                                  widget.task["tag_ids"].length != 0
-                                      ? Container(
-                                          margin: EdgeInsets.only(bottom: 5),
-                                          child: Wrap(
-                                            runSpacing: 5,
-                                            children: _getTagChipsList(),
-                                          ),
-                                        )
-                                      : Container(),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  widget.task["note"].length > 0
-                      ? Container(
-                          padding: EdgeInsets.only(top: 3, left: 5),
-                          child: SvgPicture.asset(
-                            "assets/vectors/NoteIcon.svg",
-                            color: darkLightColor,
-                            width: 17,
-                          ),
-                        )
-                      : Container(),
-                ],
-              ),
+                ),
+                widget.task["note"].length > 0
+                    ? Container(
+                        padding: EdgeInsets.only(left: 5),
+                        child: SvgPicture.asset(
+                          "assets/vectors/NoteIcon.svg",
+                          color: darkLightColor,
+                          width: 17,
+                        ),
+                      )
+                    : Container(),
+              ],
             ),
           ),
           // # Delete button animation builder
@@ -231,7 +226,6 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
                 ),
                 margin: EdgeInsets.only(
                   left: MediaQuery.of(context).size.width - 10 + slideX,
-                  right: 10,
                 ),
                 child: FlatButton(
                   onPressed: _deleteTask,

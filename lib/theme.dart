@@ -77,12 +77,13 @@ class CompanyColors {
 }
 
 final darkTheme = ThemeData(
-  primaryColor: Color(0xFF1A1A1A),
   brightness: Brightness.light,
-  backgroundColor: Color(0xFF222222),
-  dividerColor: Color(0x22FFFFFF),
+  primaryColor: Colors.black,
+  backgroundColor: Color(0xFF111111),
+  dividerColor: Color(0xFF222222),
   hintColor: Color(0xFF555555),
-  dialogBackgroundColor: Color(0xFF292929),
+  dialogBackgroundColor: Color(0xFF111111),
+  accentColor: Color(0XFF236CFF),
   textTheme: TextTheme(
     headline1: TextStyle(
       color: Color(0xFFDDDDDD),
@@ -94,7 +95,7 @@ final darkTheme = ThemeData(
       color: Color(0xFF999999),
     ),
     bodyText1: TextStyle(
-      color: Colors.white,
+      color: Color(0xFFEEEEEE),
     ),
     bodyText2: TextStyle(
       color: Color(0xFFDDDDDD),
@@ -106,9 +107,10 @@ final lightTheme = ThemeData(
   primaryColor: Colors.white,
   brightness: Brightness.dark,
   backgroundColor: Color(0xFFF5F5F5),
-  dividerColor: Color(0xFFDDDDDD),
+  dividerColor: Color(0xFFEEEEEE),
   hintColor: Color(0xFFBBBBBB),
   dialogBackgroundColor: Colors.white,
+  accentColor: themeblue,
   textTheme: TextTheme(
     headline1: TextStyle(
       color: Color(0xFF555555),
@@ -119,8 +121,9 @@ final lightTheme = ThemeData(
     headline3: TextStyle(
       color: Color(0xFF777777),
     ),
+    // task name color
     bodyText1: TextStyle(
-      color: Color(0xFF555555),
+      color: Color(0xFF333333),
     ),
     bodyText2: TextStyle(
       color: Color(0xFF777777),

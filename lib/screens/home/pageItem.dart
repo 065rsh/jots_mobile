@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/screens/home/taskItem.dart';
+import 'package:jots_mobile/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'editPageSheet.dart';
 
@@ -94,9 +95,9 @@ class _PageItemState extends State<PageItem>
       margin: EdgeInsets.only(
         top: showPageHeader ? 15 : 10,
         left: 15,
-        right: showPageHeader ? 15 : 5,
+        right: 15,
         bottom: widget.pageIndex == widget.pages.length - 1
-            ? 30
+            ? 100
             : showPageHeader ? 5 : 0,
       ),
       padding: EdgeInsets.only(
@@ -109,7 +110,7 @@ class _PageItemState extends State<PageItem>
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
           width: 0.3,
-          color: showPageHeader ? themex.hintColor : Colors.transparent,
+          color: showPageHeader ? lightDarkColor.withAlpha(100) : Colors.transparent,
         ),
       ),
       child: Column(
@@ -118,7 +119,7 @@ class _PageItemState extends State<PageItem>
           showPageHeader
               ? Container(
                   alignment: Alignment.centerLeft,
-                  margin: EdgeInsets.only(bottom: showTasks ? 10 : 0),
+                  margin: EdgeInsets.only(bottom: showTasks ? 15 : 0),
                   child: FlatButton(
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onPressed: () => setState(() => showTasks = !showTasks),
@@ -141,17 +142,6 @@ class _PageItemState extends State<PageItem>
                         children: <Widget>[
                           Row(
                             children: <Widget>[
-                              // # page down arrow
-                              Container(
-                                margin: EdgeInsets.only(top: 2, right: 10),
-                                child: Transform.rotate(
-                                  angle: showTasks ? 0 : 0.5,
-                                  child: SvgPicture.asset(
-                                    "assets/vectors/DownArrowIcon.svg",
-                                    color: themex.textTheme.bodyText2.color,
-                                  ),
-                                ),
-                              ),
                               Text(
                                 widget.pages[widget.pageIndex]["page_name"],
                                 style: TextStyle(
@@ -161,10 +151,22 @@ class _PageItemState extends State<PageItem>
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
+
+                              // # page down arrow
+                              showTasks ? Container(
+                                margin: EdgeInsets.only(top: 2, left: 10),
+                                child: Transform.rotate(
+                                  angle: showTasks ? 0 : 0.5,
+                                  child: SvgPicture.asset(
+                                    "assets/vectors/DownArrowIcon.svg",
+                                    color: themex.textTheme.bodyText2.color,
+                                  ),
+                                ),
+                              ) : Container(),
                             ],
                           ),
                           Container(
-                            width: 40,
+                            width: 30,
                             height: 30,
                             child: FlatButton(
                               padding: EdgeInsets.all(0),
@@ -181,7 +183,7 @@ class _PageItemState extends State<PageItem>
                     ),
                   ),
                 )
-              : Container(),
+              : Container(height: 5,),
 
           // # Page tasks list
           showTasks

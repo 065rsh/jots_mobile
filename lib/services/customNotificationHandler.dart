@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -34,5 +36,28 @@ class CustomNotificationHandler {
     }
 
     debugPrint("OX: DONE WITH PAYLOAD");
+  }
+
+  static Future scheduleNotification(
+      DateTime selectedDateTime, String taskName, String taskNote) async {
+
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'channel_id',
+      'channel_name',
+      'channel_description',
+    );
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+    NotificationDetails platformChannelSpecifics = NotificationDetails(
+      androidPlatformChannelSpecifics,
+      iOSPlatformChannelSpecifics,
+    );
+
+    await flutterLocalNotificationsPlugin.schedule(
+      0,
+      taskName,
+      taskNote,
+      selectedDateTime,
+      platformChannelSpecifics,
+    );
   }
 }
