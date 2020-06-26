@@ -69,9 +69,9 @@ class _PageItemState extends State<PageItem>
       SharedPreferences tempPref = await SharedPreferences.getInstance();
 
       setState(() {
-        showTasks = !tempPref.getBool(
+        showTasks = !(tempPref.getBool(
                 widget.pages[widget.pageIndex].documentID + "_is_collapsed") ??
-            false;
+            true);
       });
     } catch (e) {
       print(e);
@@ -110,7 +110,9 @@ class _PageItemState extends State<PageItem>
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
           width: 0.3,
-          color: showPageHeader ? lightDarkColor.withAlpha(100) : Colors.transparent,
+          color: showPageHeader
+              ? lightDarkColor.withAlpha(100)
+              : Colors.transparent,
         ),
       ),
       child: Column(
@@ -153,16 +155,19 @@ class _PageItemState extends State<PageItem>
                               ),
 
                               // # page down arrow
-                              showTasks ? Container(
-                                margin: EdgeInsets.only(top: 2, left: 10),
-                                child: Transform.rotate(
-                                  angle: showTasks ? 0 : 0.5,
-                                  child: SvgPicture.asset(
-                                    "assets/vectors/DownArrowIcon.svg",
-                                    color: themex.textTheme.bodyText2.color,
-                                  ),
-                                ),
-                              ) : Container(),
+                              showTasks
+                                  ? Container(
+                                      margin: EdgeInsets.only(top: 2, left: 10),
+                                      child: Transform.rotate(
+                                        angle: showTasks ? 0 : 0.5,
+                                        child: SvgPicture.asset(
+                                          "assets/vectors/DownArrowIcon.svg",
+                                          color:
+                                              themex.textTheme.bodyText2.color,
+                                        ),
+                                      ),
+                                    )
+                                  : Container(),
                             ],
                           ),
                           Container(
@@ -183,7 +188,9 @@ class _PageItemState extends State<PageItem>
                     ),
                   ),
                 )
-              : Container(height: 5,),
+              : Container(
+                  height: 5,
+                ),
 
           // # Page tasks list
           showTasks

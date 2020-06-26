@@ -94,7 +94,8 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
     });
 
     taskNameController = TextEditingController(
-        text: widget.taskId != null ? widget.task["task_name"] : "");
+      text: widget.taskId != null ? widget.task["task_name"] : "",
+    );
     taskNoteController = TextEditingController(text: taskNote);
   }
 
@@ -117,12 +118,12 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
     bool isTimeNotAval = formattedDueDate["time"] == "" ||
         formattedDueDate["time"] == ", " ||
         formattedDueDate["time"] == null;
-    final themex = Theme.of(context);
+    final themeX = Theme.of(context);
 
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: themex.dialogBackgroundColor,
+        color: themeX.dialogBackgroundColor,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.2),
@@ -165,7 +166,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                               border: Border(
                                 bottom: BorderSide(
                                   width: 1,
-                                  color: themex.dividerColor,
+                                  color: themeX.dividerColor,
                                 ),
                               ),
                             ),
@@ -200,13 +201,14 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                           top: widget.pages.length == 1 ? 10 : 5,
                           right: 20,
                           left: 20),
-                      child: TextFormField(
-                        controller: taskNameController,
+                      child: TextField(
                         autofocus: isNewTask,
+                        controller: taskNameController,
                         keyboardType: TextInputType.multiline,
                         maxLines: null,
                         textCapitalization: TextCapitalization.sentences,
                         onChanged: (text) {
+                          debugPrint("TASKNAME: " + taskName + " | " + text);
                           setState(() {
                             taskName = text;
                             isTaskValid = text.length > 0;
@@ -214,7 +216,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                         },
                         maxLength: 100,
                         style: TextStyle(
-                          color: themex.textTheme.headline2.color,
+                          color: themeX.textTheme.headline2.color,
                           fontSize: 22,
                           height: 1.3,
                           fontWeight: FontWeight.w500,
@@ -254,17 +256,22 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                   ),
                                 ),
                                 Expanded(
-                                  child: TextFormField(
+                                  child: TextField(
                                     autofocus: isNewTask && !showAddNotes,
                                     controller: taskNoteController,
                                     keyboardType: TextInputType.multiline,
                                     maxLines: null,
-                                    onChanged: (value) =>
-                                        setState(() => taskNote = value),
+                                    onChanged: (text) {
+                                      print("TASKNOTE: " +
+                                          taskName +
+                                          " | " +
+                                          text);
+                                      setState(() => taskNote = text);
+                                    },
                                     style: TextStyle(
                                       fontSize: 15,
                                       letterSpacing: 0.5,
-                                      color: themex.textTheme.headline3.color,
+                                      color: themeX.textTheme.headline3.color,
                                     ),
                                     decoration: InputDecoration(
                                       hintText: "Add notes...",
@@ -415,7 +422,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                             margin: EdgeInsets.only(left: 20),
                                             decoration: BoxDecoration(
                                               color:
-                                                  themex.dialogBackgroundColor,
+                                                  themeX.dialogBackgroundColor,
                                               borderRadius:
                                                   BorderRadius.circular(20),
                                               boxShadow: [
@@ -701,9 +708,12 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                           padding: EdgeInsets.symmetric(
                                               horizontal: 10),
                                           child: FlatButton(
-                                            onPressed: _checkTaskChange()
-                                                ? _makeChangesInOldTask
-                                                : null,
+                                            onPressed: () {
+                                              if (isTaskChangedAndIsValid) {
+                                                isTaskChangedAndIsValid = false;
+                                                _makeChangesInOldTask();
+                                              }
+                                            },
                                             child: Row(
                                               mainAxisSize: MainAxisSize.min,
                                               children: <Widget>[
@@ -740,7 +750,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                             height: 40,
                                             decoration: BoxDecoration(
                                               border: Border.all(
-                                                color: themex
+                                                color: themeX
                                                     .textTheme.headline3.color,
                                               ),
                                               borderRadius:
@@ -751,7 +761,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                               child: Text(
                                                 "Change book",
                                                 style: TextStyle(
-                                                  color: themex.textTheme
+                                                  color: themeX.textTheme
                                                       .headline3.color,
                                                   fontWeight: FontWeight.w400,
                                                 ),
@@ -776,7 +786,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                           child: SvgPicture.asset(
                                             "assets/vectors/DeleteIcon.svg",
                                             width: 22,
-                                            color: themex
+                                            color: themeX
                                                 .textTheme.headline3.color,
                                           ),
                                         ),
@@ -793,7 +803,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                               _taskAboutAC.forward(),
                                           child: Icon(
                                             Icons.info_outline,
-                                            color: themex
+                                            color: themeX
                                                 .textTheme.headline3.color
                                                 .withAlpha(990),
                                             size: 30,
@@ -828,7 +838,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                 height: 130,
                                 padding: EdgeInsets.all(15),
                                 decoration: BoxDecoration(
-                                  color: themex.backgroundColor,
+                                  color: themeX.backgroundColor,
                                   borderRadius: BorderRadius.circular(3),
                                   boxShadow: [
                                     BoxShadow(
@@ -853,7 +863,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                       _formatFullDate(
                                           widget.task["creation_date"]),
                                       style: TextStyle(
-                                        color: themex.textTheme.headline1.color,
+                                        color: themeX.textTheme.headline1.color,
                                       ),
                                     ),
                                     SizedBox(
@@ -870,7 +880,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                       _formatFullDate(
                                           widget.task["completion_date"]),
                                       style: TextStyle(
-                                        color: themex.textTheme.headline1.color,
+                                        color: themeX.textTheme.headline1.color,
                                       ),
                                     ),
                                   ],
@@ -1098,7 +1108,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
   }
 
   parsePageButtons() {
-    final themex = Theme.of(context);
+    final themeX = Theme.of(context);
     List<Widget> pageButtonWidgets = [];
 
     for (int i = 0; i < widget.pages.length; i++) {
@@ -1130,8 +1140,8 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                 i == 0 ? "None" : widget.pages[i].data["page_name"],
                 style: TextStyle(
                   color: isSelectedPage
-                      ? themex.textTheme.headline1.color
-                      : themex.hintColor.withAlpha(120),
+                      ? themeX.textTheme.headline1.color
+                      : themeX.hintColor.withAlpha(120),
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
                 ),
