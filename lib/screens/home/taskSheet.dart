@@ -1409,9 +1409,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
               padding: EdgeInsets.symmetric(horizontal: 13),
               onPressed: _openAddTagsSheet,
               child: Text(
-                (taskTagChips.length < 1 ? "Add" : "Edit") +
-                    " tag" +
-                    (taskTagChips.length > 1 ? "s" : ""),
+                "Edit tags",
                 style: TextStyle(
                   color: lightDarkColor,
                   fontWeight: FontWeight.w400,

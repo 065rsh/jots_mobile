@@ -572,7 +572,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                     ],
                                   ),
                                 ),
-                                // # Edit Labels Button
+                                // # Edit tags Button
                                 FlatButton(
                                   onPressed: () {
                                     _bookOptionsAC.reverse();
@@ -595,7 +595,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                         ),
                                       ),
                                       Text(
-                                        "Edit labels",
+                                        "Edit tags",
                                         style: TextStyle(
                                           letterSpacing: 1,
                                           fontSize: 14,

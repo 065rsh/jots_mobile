@@ -103,9 +103,7 @@ class _AddTagsSheetState extends State<AddTagsSheet> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text(
-                        (_selectedTagsList.length < 1 ? "Add" : "Edit") +
-                            " tag" +
-                            (_selectedTagsList.length > 1 ? "s" : ""),
+                        "Edit tags",
                         style: TextStyle(
                           color: themex.textTheme.headline1.color,
                           fontSize: 20,
@@ -116,19 +114,20 @@ class _AddTagsSheetState extends State<AddTagsSheet> {
                         children: <Widget>[
                           // # Add new tag
                           Container(
-                            width: 70,
                             margin: EdgeInsets.symmetric(horizontal: 15),
-                            height: 30,
-                            alignment: Alignment.centerLeft,
                             child: DottedBorder(
                               borderType: BorderType.RRect,
                               strokeWidth: 0.5,
                               dashPattern: [3, 2],
                               color: lightDarkColor,
-                              radius: Radius.circular(7),
-                              padding: EdgeInsets.symmetric(horizontal: 13),
+                              radius: Radius.circular(30),
                               child: ButtonTheme(
-                                padding: EdgeInsets.all(0),
+                                minWidth: 0,
+                                height: 30,
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 5),
                                 child: FlatButton(
                                   onPressed: () =>
                                       _openAddNewTagSheet(null, null),
@@ -148,53 +147,35 @@ class _AddTagsSheetState extends State<AddTagsSheet> {
                           // # Edit tags
                           Opacity(
                             opacity: widget.allTags.length == 0 ? 0.5 : 1,
-                            child: Container(
-                              width: 70,
-                              height: 30,
-                              alignment: Alignment.centerLeft,
-                              child: DottedBorder(
-                                borderType: BorderType.RRect,
-                                strokeWidth: 0.5,
-                                dashPattern: [3, 2],
-                                color: lightDarkColor,
-                                radius: Radius.circular(7),
-                                padding: EdgeInsets.symmetric(horizontal: 13),
-                                child: ButtonTheme(
-                                  padding: EdgeInsets.all(0),
-                                  child: FlatButton(
-                                    onPressed: () {
-                                      if (widget.allTags.length != 0) {
-                                        setState(() {
-                                          isEditingTags = !isEditingTags;
-                                        });
-                                      }
-                                    },
-                                    materialTapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        Container(
-                                          margin: EdgeInsets.only(right: 7),
-                                          child: SvgPicture.asset(
-                                            "assets/vectors/EditIcon.svg",
-                                            color: isEditingTags
-                                                ? themeblue
-                                                : lightDarkColor,
-                                            width: 13,
-                                          ),
-                                        ),
-                                        Text(
-                                          "Edit",
-                                          style: TextStyle(
-                                            color: isEditingTags
-                                                ? themeblue
-                                                : lightDarkColor,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                            child: DottedBorder(
+                              borderType: BorderType.RRect,
+                              strokeWidth: 0.5,
+                              dashPattern: [3, 2],
+                              color: lightDarkColor,
+                              radius: Radius.circular(30),
+                              child: ButtonTheme(
+                                minWidth: 30,
+                                height: 30,
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 7, vertical: 5),
+                                child: FlatButton(
+                                  onPressed: () {
+                                    if (widget.allTags.length != 0) {
+                                      setState(() {
+                                        isEditingTags = !isEditingTags;
+                                      });
+                                    }
+                                  },
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  child: SvgPicture.asset(
+                                    "assets/vectors/EditIcon.svg",
+                                    color: isEditingTags
+                                        ? themeblue
+                                        : lightDarkColor,
+                                    width: 13,
                                   ),
                                 ),
                               ),
