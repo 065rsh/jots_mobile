@@ -1,5 +1,16 @@
 class User {
-  final String uid;
+  String userId;
+  dynamic allTagsArr;
 
-  User({this.uid});
+  // User(String userId){
+  //   this.userId = userId;
+  // }
+
+  setAllTagsArr(dynamic allTagsArr) {
+    this.allTagsArr = allTagsArr;
+  }
+
+  List<String> getAllTagsArr() {
+    return this.allTagsArr;
+  }
 }

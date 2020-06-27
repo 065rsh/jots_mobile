@@ -208,7 +208,6 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                         maxLines: null,
                         textCapitalization: TextCapitalization.sentences,
                         onChanged: (text) {
-                          debugPrint("TASKNAME: " + taskName + " | " + text);
                           setState(() {
                             taskName = text;
                             isTaskValid = text.length > 0;
@@ -834,8 +833,8 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                               ),
                               child: Container(
                                 alignment: Alignment.topLeft,
-                                width: 200,
-                                height: 130,
+                                width: 230,
+                                height: 150,
                                 padding: EdgeInsets.all(15),
                                 decoration: BoxDecoration(
                                   color: themeX.backgroundColor,
@@ -1113,6 +1112,9 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
 
     for (int i = 0; i < widget.pages.length; i++) {
       bool isSelectedPage = false;
+      String initiallySelectedPageID =
+          widget.selectedPage ?? widget.pages[0].documentID;
+
       if (widget.pages[i].documentID == selectedPageIdToAddTask) {
         isSelectedPage = true;
         addToPageScrollController.scrollToIndex(
@@ -1120,6 +1122,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
           preferPosition: AutoScrollPosition.middle,
         );
       }
+
       pageButtonWidgets.add(
         AutoScrollTag(
           key: ValueKey(i),
@@ -1144,6 +1147,10 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                       : themeX.hintColor.withAlpha(120),
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
+                  decoration:
+                      initiallySelectedPageID == widget.pages[i].documentID
+                          ? TextDecoration.underline
+                          : TextDecoration.none,
                 ),
               ),
             ),

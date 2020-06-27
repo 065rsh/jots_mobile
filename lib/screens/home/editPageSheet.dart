@@ -28,11 +28,13 @@ class EditPageSheet extends StatefulWidget {
 }
 
 class _EditPageSheetState extends State<EditPageSheet> {
-  String newPageName;
+  bool isCollapsePageByDefault = true;
+  bool isPageNameValid = false;
+  CollectionReference pageColRef;
   FocusNode addNewPageFocusNode = FocusNode();
   FirebaseUser user;
-  CollectionReference pageColRef;
-  bool isCollapsePageByDefault = true;
+  String newPageName;
+  String pageId;
 
   @override
   void initState() {
@@ -40,7 +42,7 @@ class _EditPageSheetState extends State<EditPageSheet> {
 
     _setPageCollapseValue();
     initFirestore();
-    addNewPageFocusNode.addListener(handleAddNewPageFocusNode);
+    // addNewPageFocusNode.addListener(handleAddNewPageFocusNode);
   }
 
   _setPageCollapseValue() async {
@@ -49,34 +51,31 @@ class _EditPageSheetState extends State<EditPageSheet> {
 
       setState(() {
         isCollapsePageByDefault =
-            tempPref.getBool(widget.pageId + "_is_collapsed") ?? true;
+            tempPref.getBool(widget.pageId ?? "" + "_is_collapsed") ?? true;
       });
     } catch (e) {
       print(e);
     }
   }
 
-  handleAddNewPageFocusNode() async {
-    try {
-      SharedPreferences tempPref = await SharedPreferences.getInstance();
-      tempPref.setBool(
-          widget.pageId + "_is_collapsed", isCollapsePageByDefault);
-      print(tempPref.getBool(widget.pageId + "_is_collapsed"));
-    } catch (e) {
-      print(e);
-    }
+  // handleAddNewPageFocusNode() async {
+  //   var bytes = utf8.encode(UniqueKey().toString());
+  //   var randomTaskId = base64.encode(bytes);
+  //   randomTaskId = randomTaskId.substring(0, randomTaskId.length - 1);
 
-    if (!addNewPageFocusNode.hasFocus &&
-        newPageName != null &&
-        newPageName != "") {
-      if (widget.initialPageName != null) {
-        // editing page_name
-        editPageName();
-      } else {
-        addNewPage();
-      }
-    }
-  }
+  //   try {
+  //     SharedPreferences tempPref = await SharedPreferences.getInstance();
+  //     tempPref.setBool(widget.pageId ?? randomTaskId + "_is_collapsed",
+  //         isCollapsePageByDefault);
+  //   } catch (e) {
+  //     print(e);
+  //   }
+
+  //   if (!addNewPageFocusNode.hasFocus &&
+  //       newPageName != null &&
+  //       newPageName != "") {
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +88,7 @@ class _EditPageSheetState extends State<EditPageSheet> {
       ),
       child: Container(
         margin: EdgeInsets.all(20),
+        padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: themex.dialogBackgroundColor,
           borderRadius: BorderRadius.circular(15),
@@ -103,25 +103,11 @@ class _EditPageSheetState extends State<EditPageSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            // # Drag line icon
-            Align(
-              alignment: Alignment.center,
-              child: Container(
-                width: 50,
-                height: 3,
-                margin: EdgeInsets.only(top: 10),
-                decoration: BoxDecoration(
-                  color: semiLightColor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            ),
             // # Text form field
             Container(
-              margin: EdgeInsets.only(left: 20, bottom: 15, right: 20, top: 15),
-              padding: EdgeInsets.only(top: 10, bottom: 10),
+              padding: EdgeInsets.symmetric(vertical: 10),
               decoration: BoxDecoration(
-                color: Color(0x11000000),
+                color: lightDarkColor.withAlpha(30),
                 borderRadius: BorderRadius.circular(7),
               ),
               child: TextFormField(
@@ -134,6 +120,7 @@ class _EditPageSheetState extends State<EditPageSheet> {
                 onChanged: (text) {
                   setState(() {
                     newPageName = text;
+                    isPageNameValid = text.length > 0;
                   });
                 },
                 style: TextStyle(
@@ -155,23 +142,24 @@ class _EditPageSheetState extends State<EditPageSheet> {
             ),
             // # Keep page expanded
             Container(
-              margin: EdgeInsets.only(bottom: 20, left: 20),
-              child: Row(
-                children: <Widget>[
-                  Container(
-                    width: 30,
-                    height: 30,
-                    child: FlatButton(
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      padding: EdgeInsets.all(0),
-                      onPressed: () {
-                        setState(() {
-                          isCollapsePageByDefault = !isCollapsePageByDefault;
-                        });
-                      },
-                      child: Container(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
+              alignment: Alignment.centerLeft,
+              margin: EdgeInsets.only(top: 10),
+              child: FlatButton(
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                padding: EdgeInsets.all(0),
+                onPressed: () {
+                  setState(() {
+                    isCollapsePageByDefault = !isCollapsePageByDefault;
+                  });
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Container(
+                          margin: EdgeInsets.only(right: 10),
                           width: 18,
                           height: 18,
                           decoration: BoxDecoration(
@@ -193,13 +181,48 @@ class _EditPageSheetState extends State<EditPageSheet> {
                                 : lightDarkColor,
                           ),
                         ),
-                      ),
+                        Container(
+                          child: Text(
+                            "Close page by default",
+                            style: TextStyle(
+                              color: themex.textTheme.bodyText2.color,
+                            ),
+                          ),
+                        )
+                      ],
                     ),
-                  ),
-                  Container(
-                    child: Text("Close page by default"),
-                  )
-                ],
+                    widget.initialPageName == null
+                        ? ButtonTheme(
+                            minWidth: 0,
+                            padding: EdgeInsets.all(0),
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            child: FlatButton(
+                              onPressed: () {
+                                if (isPageNameValid) {
+                                  if (widget.initialPageName != null) {
+                                    // editing page_name
+                                    editPageName();
+                                  } else {
+                                    addNewPage();
+                                  }
+                                }
+                              },
+                              child: Text(
+                                "CREATE",
+                                style: TextStyle(
+                                  color: isPageNameValid
+                                      ? themeblue
+                                      : lightDarkColor.withAlpha(80),
+                                  letterSpacing: 1,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                          )
+                        : Container(),
+                  ],
+                ),
               ),
             ),
             // # Page action buttons
@@ -210,7 +233,6 @@ class _EditPageSheetState extends State<EditPageSheet> {
                       // # Delete page button
                       Container(
                         height: 40,
-                        margin: EdgeInsets.only(left: 20, bottom: 20),
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: warningColor,
@@ -247,7 +269,7 @@ class _EditPageSheetState extends State<EditPageSheet> {
                       Container(
                         width: 120,
                         height: 40,
-                        margin: EdgeInsets.only(left: 20, bottom: 20),
+                        margin: EdgeInsets.only(left: 20),
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: themex.textTheme.headline1.color,

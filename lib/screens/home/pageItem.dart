@@ -215,39 +215,43 @@ class _PageItemState extends State<PageItem>
       List fetchedTaskIds = [];
       List fetchedTasks = [];
 
-      doc.data.forEach((k, v) => fetchedTasks.add({k: v}));
+      try {
+        doc.data.forEach((k, v) => fetchedTasks.add({k: v}));
 
-      fetchedTasks.sort((a, b) {
-        return a[a.keys.first]["creation_date"]
-            .compareTo(b[b.keys.first]["creation_date"]);
-      });
-
-      if (widget.sortBySelected == 1) {
         fetchedTasks.sort((a, b) {
-          final taskDate1 = a[a.keys.first]["due_date"];
-          final taskDate2 = b[b.keys.first]["due_date"];
-
-          final taskDate11 =
-              taskDate1 == "" ? DateTime(2099) : taskDate1.toDate();
-          final taskDate22 =
-              taskDate2 == "" ? DateTime(2099) : taskDate2.toDate();
-
-          return (taskDate11).compareTo(taskDate22);
+          return a[a.keys.first]["creation_date"]
+              .compareTo(b[b.keys.first]["creation_date"]);
         });
-      } else if (widget.sortBySelected == 2) {
-        fetchedTasks.sort((a, b) {
-          final taskDate2 = a[a.keys.first]["priority"];
-          final taskDate1 = b[b.keys.first]["priority"];
 
-          return (taskDate1).compareTo(taskDate2);
-        });
-      } else if (widget.sortBySelected == 3) {
-        fetchedTasks.sort((a, b) {
-          final taskDate1 = a[a.keys.first]["task_name"];
-          final taskDate2 = b[b.keys.first]["task_name"];
+        if (widget.sortBySelected == 1) {
+          fetchedTasks.sort((a, b) {
+            final taskDate1 = a[a.keys.first]["due_date"];
+            final taskDate2 = b[b.keys.first]["due_date"];
 
-          return (taskDate1).compareTo(taskDate2);
-        });
+            final taskDate11 =
+                taskDate1 == "" ? DateTime(2099) : taskDate1.toDate();
+            final taskDate22 =
+                taskDate2 == "" ? DateTime(2099) : taskDate2.toDate();
+
+            return (taskDate11).compareTo(taskDate22);
+          });
+        } else if (widget.sortBySelected == 2) {
+          fetchedTasks.sort((a, b) {
+            final taskDate2 = a[a.keys.first]["priority"];
+            final taskDate1 = b[b.keys.first]["priority"];
+
+            return (taskDate1).compareTo(taskDate2);
+          });
+        } else if (widget.sortBySelected == 3) {
+          fetchedTasks.sort((a, b) {
+            final taskDate1 = a[a.keys.first]["task_name"];
+            final taskDate2 = b[b.keys.first]["task_name"];
+
+            return (taskDate1).compareTo(taskDate2);
+          });
+        }
+      } catch (e) {
+        print(e);
       }
 
       fetchedTasks.forEach((task) {

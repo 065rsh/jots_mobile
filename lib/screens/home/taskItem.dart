@@ -327,9 +327,6 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
   }
 
   _getTagChipsList() {
-    // final themeNotifier = Provider.of<ThemeNotifier>(context);
-    // final isDarkThemeEnabled = themeNotifier.getTheme() == darkTheme;
-
     List<Widget> tagChipsList = [];
     List fetchedTagsArr = widget.task["tag_ids"];
     if (fetchedTagsArr.length != 0) {

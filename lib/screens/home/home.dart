@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:jots_mobile/screens/home/book.dart';
 import 'package:jots_mobile/screens/home/customDrawer.dart';
 import 'package:jots_mobile/theme.dart';
+import 'package:jots_mobile/models/globals.dart' as globals;
 
 class Home extends StatefulWidget {
   @override
@@ -169,6 +170,8 @@ class _HomeState extends State<Home> {
 
     userRef.snapshots().listen((event) {
       setState(() => allTags = event.data["tags"]["todo"]);
+
+      globals.allTags = event.data["tags"]["todo"];
     });
   }
 

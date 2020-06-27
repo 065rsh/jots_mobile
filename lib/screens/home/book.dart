@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/handyArr.dart';
+import 'package:jots_mobile/screens/home/addNewTagSheet.dart';
 import 'package:jots_mobile/screens/home/addTask.dart';
 import 'package:jots_mobile/screens/home/pageItem.dart';
 import 'package:jots_mobile/theme.dart';
@@ -75,37 +76,6 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
     );
   }
 
-  _initializeDrawerAnimationController() {
-    _drawerAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-  }
-
-  _setLocalDefaultFilter() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      setState(() {
-        defaultFilterInt = prefs.getInt('default_filter') ?? 0;
-        filterSelected = prefs.getInt('default_filter') ?? 0;
-      });
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  _setLocalDefaultSortBy() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      setState(() {
-        defaultSortByInt = prefs.getInt('default_sort_by') ?? 0;
-        sortBySelected = prefs.getInt('default_sort_by') ?? 0;
-      });
-    } catch (e) {
-      print(e);
-    }
-  }
-
   @override
   void dispose() {
     super.dispose();
@@ -134,238 +104,346 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
           FocusScope.of(context).requestFocus(new FocusNode());
         },
         child: AnimatedBuilder(
-            animation: _drawerAnimationController,
-            builder: (context, builderWidget) {
-              double slideX =
-                  maxDrawerXOffset * _drawerAnimationController.value;
-              double slideY =
-                  maxDrawerYOffset * _drawerAnimationController.value;
-              double borderRadius = 20 * _drawerAnimationController.value;
-              double scale = 1 - (_drawerAnimationController.value * 0.35);
+          animation: _drawerAnimationController,
+          builder: (context, builderWidget) {
+            double slideX = maxDrawerXOffset * _drawerAnimationController.value;
+            double slideY = maxDrawerYOffset * _drawerAnimationController.value;
+            double borderRadius = 20 * _drawerAnimationController.value;
+            double scale = 1 - (_drawerAnimationController.value * 0.35);
 
-              return Transform(
-                transform: Matrix4.identity()
-                  ..translate(slideX, slideY)
-                  ..scale(scale),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: themeX.primaryColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.12),
-                        blurRadius: 20,
-                        offset: Offset(3, 7),
-                      ),
-                    ],
-                    borderRadius: BorderRadius.circular(borderRadius),
-                  ),
-                  child: Stack(
-                    children: <Widget>[
-                      // # Book
-                      Column(
-                        children: <Widget>[
-                          // # Book head
-                          Container(
-                            height: 50,
-                            margin: EdgeInsets.only(
-                              top: 33 * (1 - _drawerAnimationController.value),
-                            ),
-                            padding: EdgeInsets.only(left: 15, right: 10),
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                  width: 0.5,
-                                  color: themeX.dividerColor,
-                                ),
+            return Transform(
+              transform: Matrix4.identity()
+                ..translate(slideX, slideY)
+                ..scale(scale),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: themeX.primaryColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.12),
+                      blurRadius: 20,
+                      offset: Offset(3, 7),
+                    ),
+                  ],
+                  borderRadius: BorderRadius.circular(borderRadius),
+                ),
+                child: Stack(
+                  children: <Widget>[
+                    // # Book
+                    Column(
+                      children: <Widget>[
+                        // # Book head
+                        Container(
+                          height: 50,
+                          margin: EdgeInsets.only(
+                            top: 33 * (1 - _drawerAnimationController.value),
+                          ),
+                          padding: EdgeInsets.only(left: 15, right: 10),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                width: 1,
+                                color: themeX.dividerColor,
                               ),
                             ),
-                            child: Stack(
-                              children: <Widget>[
-                                // # Small hamburger icon
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Container(
-                                    width: 30,
-                                    height: 30,
-                                    child: FlatButton(
-                                      materialTapTargetSize:
-                                          MaterialTapTargetSize.shrinkWrap,
-                                      padding: EdgeInsets.all(0),
-                                      onPressed: () {
-                                        widget.toggleDrawer(true);
-                                        _bookOptionsAC.reverse();
-                                      },
-                                      child: Container(
-                                        child: SvgPicture.asset(
-                                          "assets/vectors/DrawerIcon.svg",
-                                          width: 20,
-                                          color:
-                                          themeX.textTheme.headline2.color,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                // # Book title
-                                Align(
-                                  alignment: Alignment.center,
-                                  child: ButtonTheme(
+                          ),
+                          child: Stack(
+                            children: <Widget>[
+                              // # Small hamburger icon
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Container(
+                                  width: 30,
+                                  height: 30,
+                                  child: FlatButton(
                                     materialTapTargetSize:
                                         MaterialTapTargetSize.shrinkWrap,
-                                    minWidth: 0,
-                                    height: 0,
-                                    child: FlatButton(
-                                      padding: EdgeInsets.only(
-                                          left: 10, right: 10),
-                                      onPressed: () {
-                                        widget.startEditingBookName();
-                                      },
-                                      child: ConstrainedBox(
-                                        constraints: BoxConstraints(
-                                          maxWidth: 200,
-                                        ),
-                                        child: Text(
-                                          widget.selectedBook != null
-                                              ? widget.selectedBook
-                                                  .data["book_name"]
-                                              : "NaN",
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            color: themeX
-                                                .textTheme.headline1.color,
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 22,
-                                          ),
+                                    padding: EdgeInsets.all(0),
+                                    onPressed: () {
+                                      widget.toggleDrawer(true);
+                                      _bookOptionsAC.reverse();
+                                    },
+                                    child: Container(
+                                      child: SvgPicture.asset(
+                                        "assets/vectors/DrawerIcon.svg",
+                                        width: 20,
+                                        color: themeX.textTheme.headline2.color,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              // # Book title
+                              Align(
+                                alignment: Alignment.center,
+                                child: ButtonTheme(
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  minWidth: 0,
+                                  height: 0,
+                                  child: FlatButton(
+                                    padding:
+                                        EdgeInsets.only(left: 10, right: 10),
+                                    onPressed: () {
+                                      widget.startEditingBookName();
+                                    },
+                                    child: ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        maxWidth: 200,
+                                      ),
+                                      child: Text(
+                                        widget.selectedBook != null
+                                            ? widget
+                                                .selectedBook.data["book_name"]
+                                            : "NaN",
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color:
+                                              themeX.textTheme.headline1.color,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 22,
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                                // # Action buttons // Home & Kebab plate button
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      // # Home button
-                                      Container(
-                                        width: 40,
-                                        height: 40,
-                                        child: FlatButton(
-                                          materialTapTargetSize:
-                                              MaterialTapTargetSize.shrinkWrap,
-                                          splashColor: Colors.transparent,
-                                          padding: EdgeInsets.all(0),
-                                          onPressed: toggleHomeBook,
-                                          child: SvgPicture.asset(
-                                            "assets/vectors/Home" +
-                                                (homeBookId ==
-                                                        widget.selectedBook
-                                                            .documentID
-                                                    ? "Filled"
-                                                    : "Stroked") +
-                                                "Icon.svg",
-                                            width: 22,
-                                          ),
+                              ),
+                              // # Action buttons // Home & Kebab plate button
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    // # Home button
+                                    Container(
+                                      width: 40,
+                                      height: 40,
+                                      child: FlatButton(
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        splashColor: Colors.transparent,
+                                        padding: EdgeInsets.all(0),
+                                        onPressed: toggleHomeBook,
+                                        child: SvgPicture.asset(
+                                          "assets/vectors/Home" +
+                                              (homeBookId ==
+                                                      widget.selectedBook
+                                                          .documentID
+                                                  ? "Filled"
+                                                  : "Stroked") +
+                                              "Icon.svg",
+                                          width: 22,
                                         ),
                                       ),
-                                      // # Kebab plate button
+                                    ),
+                                    // # Kebab plate button
+                                    Container(
+                                      width: 40,
+                                      height: 40,
+                                      child: FlatButton(
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        padding: EdgeInsets.all(0),
+                                        onPressed: () {
+                                          _bookOptionsAC.forward();
+                                        },
+                                        child: SvgPicture.asset(
+                                          "assets/vectors/KebabPlateIcon.svg",
+                                          width: 22,
+                                          color:
+                                              filterSelected != defaultFilterInt
+                                                  ? themeblue
+                                                  : themeX.textTheme.headline2
+                                                      .color,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // # Book body
+                        widget.isRefreshingBook
+                            ? Container(
+                                color: Colors.white,
+                              )
+                            : Expanded(
+                                child: Container(
+                                  child: MediaQuery.removePadding(
+                                    context: context,
+                                    removeTop: true,
+                                    child: ListView.builder(
+                                      itemCount: widget.pages.length,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        return PageItem(
+                                          index,
+                                          filterSelected,
+                                          sortBySelected,
+                                          widget.selectedBook,
+                                          widget.allTags,
+                                          widget.pages,
+                                          widget.pageRef,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                      ],
+                    ),
+                    // # Book options dropdown
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: Container(
+                        margin: EdgeInsets.only(top: 45, right: 15),
+                        child: ScaleTransition(
+                          alignment: Alignment.topRight,
+                          scale: CurvedAnimation(
+                            parent: _bookOptionsAC,
+                            curve: Curves.easeIn,
+                          ),
+                          child: Container(
+                            padding: EdgeInsets.only(
+                                top: 10, right: 10, bottom: 20, left: 10),
+                            width: 210,
+                            decoration: BoxDecoration(
+                              color: themeX.dialogBackgroundColor,
+                              borderRadius: BorderRadius.circular(3),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                // # Filter Button
+                                FlatButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      if (filterSelected ==
+                                          filterOptionArr.length - 1)
+                                        filterSelected = 0;
+                                      else
+                                        filterSelected = filterSelected + 1;
+                                    });
+                                    widget.refreshBook();
+                                  },
+                                  padding: EdgeInsets.all(0),
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
                                       Container(
-                                        width: 40,
-                                        height: 40,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: <Widget>[
+                                            Container(
+                                              margin: EdgeInsets.only(
+                                                left: 10,
+                                                right: 17,
+                                              ),
+                                              child: SvgPicture.asset(
+                                                "assets/vectors/FilterIcon.svg",
+                                                width: 13,
+                                                color: lightDarkColor,
+                                              ),
+                                            ),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                Text(
+                                                  "Filter",
+                                                  style: TextStyle(
+                                                    letterSpacing: 1,
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: themeX.textTheme
+                                                        .headline1.color,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  filterOptionArr[
+                                                      filterSelected],
+                                                  style: TextStyle(
+                                                    fontSize: 11,
+                                                    color: themeblue,
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 30,
+                                        height: 30,
                                         child: FlatButton(
                                           materialTapTargetSize:
                                               MaterialTapTargetSize.shrinkWrap,
                                           padding: EdgeInsets.all(0),
-                                          onPressed: () {
-                                            _bookOptionsAC.forward();
+                                          onPressed: () async {
+                                            setState(() {
+                                              defaultFilterInt = filterSelected;
+                                            });
+
+                                            try {
+                                              SharedPreferences tempPref =
+                                                  await SharedPreferences
+                                                      .getInstance();
+                                              tempPref.setInt("default_filter",
+                                                  filterSelected);
+                                            } catch (e) {
+                                              print(e);
+                                            }
                                           },
-                                          child: SvgPicture.asset(
-                                            "assets/vectors/KebabPlateIcon.svg",
-                                            width: 22,
-                                            color: filterSelected !=
-                                                    defaultFilterInt
+                                          child: Icon(
+                                            defaultFilterInt == filterSelected
+                                                ? Icons.radio_button_checked
+                                                : Icons.radio_button_unchecked,
+                                            size: 20,
+                                            color: defaultFilterInt ==
+                                                    filterSelected
                                                 ? themeblue
-                                                : themeX
-                                                .textTheme.headline2.color,
+                                                : lightDarkColor,
                                           ),
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          // # Book body
-                          widget.isRefreshingBook
-                              ? Container(
-                                  color: Colors.white,
-                                )
-                              : Expanded(
-                                  child: Container(
-                                    child: MediaQuery.removePadding(
-                                      context: context,
-                                      removeTop: true,
-                                      child: ListView.builder(
-                                        itemCount: widget.pages.length,
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                          return PageItem(
-                                            index,
-                                            filterSelected,
-                                            sortBySelected,
-                                            widget.selectedBook,
-                                            widget.allTags,
-                                            widget.pages,
-                                            widget.pageRef,
-                                          );
-                                        },
+                                // # Sort Button
+                                Container(
+                                  margin: EdgeInsets.only(top: 10),
+                                  padding: EdgeInsets.only(bottom: 10),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: themeX.dividerColor,
+                                        width: 1,
                                       ),
                                     ),
                                   ),
-                                ),
-                        ],
-                      ),
-                      // # Book options dropdown
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: Container(
-                          margin: EdgeInsets.only(top: 45, right: 15),
-                          child: ScaleTransition(
-                            alignment: Alignment.topRight,
-                            scale: CurvedAnimation(
-                              parent: _bookOptionsAC,
-                              curve: Curves.easeIn,
-                            ),
-                            child: Container(
-                              padding: EdgeInsets.only(
-                                  top: 10, right: 10, bottom: 20, left: 10),
-                              width: 210,
-                              decoration: BoxDecoration(
-                                color: themeX.dialogBackgroundColor,
-                                borderRadius: BorderRadius.circular(3),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.15),
-                                    blurRadius: 4,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  // # Filter Button
-                                  FlatButton(
+                                  child: FlatButton(
                                     onPressed: () {
                                       setState(() {
-                                        if (filterSelected ==
-                                            filterOptionArr.length - 1)
-                                          filterSelected = 0;
+                                        if (sortBySelected ==
+                                            sortByArr.length - 1)
+                                          sortBySelected = 0;
                                         else
-                                          filterSelected = filterSelected + 1;
+                                          sortBySelected = sortBySelected + 1;
                                       });
                                       widget.refreshBook();
                                     },
@@ -383,11 +461,11 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                               Container(
                                                 margin: EdgeInsets.only(
                                                   left: 10,
-                                                  right: 17,
+                                                  right: 13,
                                                 ),
-                                                child: SvgPicture.asset(
-                                                  "assets/vectors/FilterIcon.svg",
-                                                  width: 13,
+                                                child: Icon(
+                                                  Icons.sort,
+                                                  size: 17,
                                                   color: lightDarkColor,
                                                 ),
                                               ),
@@ -397,7 +475,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: <Widget>[
                                                   Text(
-                                                    "Filter",
+                                                    "Sort by",
                                                     style: TextStyle(
                                                       letterSpacing: 1,
                                                       fontSize: 14,
@@ -408,8 +486,7 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                                     ),
                                                   ),
                                                   Text(
-                                                    filterOptionArr[
-                                                        filterSelected],
+                                                    sortByArr[sortBySelected],
                                                     style: TextStyle(
                                                       fontSize: 11,
                                                       color: themeblue,
@@ -432,8 +509,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                             padding: EdgeInsets.all(0),
                                             onPressed: () async {
                                               setState(() {
-                                                defaultFilterInt =
-                                                    filterSelected;
+                                                defaultSortByInt =
+                                                    sortBySelected;
                                               });
 
                                               try {
@@ -441,20 +518,20 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                                     await SharedPreferences
                                                         .getInstance();
                                                 tempPref.setInt(
-                                                    "default_filter",
-                                                    filterSelected);
+                                                    "default_sort_by",
+                                                    sortBySelected);
                                               } catch (e) {
                                                 print(e);
                                               }
                                             },
                                             child: Icon(
-                                              defaultFilterInt == filterSelected
+                                              defaultSortByInt == sortBySelected
                                                   ? Icons.radio_button_checked
                                                   : Icons
                                                       .radio_button_unchecked,
                                               size: 20,
-                                              color: defaultFilterInt ==
-                                                      filterSelected
+                                              color: defaultSortByInt ==
+                                                      sortBySelected
                                                   ? themeblue
                                                   : lightDarkColor,
                                             ),
@@ -463,302 +540,216 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                       ],
                                     ),
                                   ),
-                                  // # Sort Button
-                                  Container(
-                                    margin: EdgeInsets.only(top: 10),
-                                    padding: EdgeInsets.only(bottom: 10),
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                        bottom: BorderSide(
-                                          color: themeX.dividerColor,
-                                          width: 0.5,
+                                ),
+                                // # Add Page Button
+                                FlatButton(
+                                  onPressed: openCreatePageSheet,
+                                  padding: EdgeInsets.only(top: 20),
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  child: Row(
+                                    children: <Widget>[
+                                      Container(
+                                        margin: EdgeInsets.only(
+                                          left: 10,
+                                          right: 17,
+                                        ),
+                                        child: SvgPicture.asset(
+                                          "assets/vectors/PageIcon.svg",
+                                          width: 14,
+                                          color: lightDarkColor,
                                         ),
                                       ),
-                                    ),
-                                    child: FlatButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          if (sortBySelected ==
-                                              sortByArr.length - 1)
-                                            sortBySelected = 0;
-                                          else
-                                            sortBySelected = sortBySelected + 1;
-                                        });
-                                        widget.refreshBook();
-                                      },
-                                      padding: EdgeInsets.all(0),
-                                      materialTapTargetSize:
-                                          MaterialTapTargetSize.shrinkWrap,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: <Widget>[
-                                          Container(
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: <Widget>[
-                                                Container(
-                                                  margin: EdgeInsets.only(
-                                                    left: 10,
-                                                    right: 13,
-                                                  ),
-                                                  child: Icon(
-                                                    Icons.sort,
-                                                    size: 17,
-                                                    color: lightDarkColor,
-                                                  ),
-                                                ),
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: <Widget>[
-                                                    Text(
-                                                      "Sort by",
-                                                      style: TextStyle(
-                                                        letterSpacing: 1,
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                        color: themeX.textTheme
-                                                            .headline1.color,
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      sortByArr[sortBySelected],
-                                                      style: TextStyle(
-                                                        fontSize: 11,
-                                                        color: themeblue,
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          Container(
-                                            width: 30,
-                                            height: 30,
-                                            child: FlatButton(
-                                              materialTapTargetSize:
-                                                  MaterialTapTargetSize
-                                                      .shrinkWrap,
-                                              padding: EdgeInsets.all(0),
-                                              onPressed: () async {
-                                                setState(() {
-                                                  defaultSortByInt =
-                                                      sortBySelected;
-                                                });
-
-                                                try {
-                                                  SharedPreferences tempPref =
-                                                      await SharedPreferences
-                                                          .getInstance();
-                                                  tempPref.setInt(
-                                                      "default_sort_by",
-                                                      sortBySelected);
-                                                } catch (e) {
-                                                  print(e);
-                                                }
-                                              },
-                                              child: Icon(
-                                                defaultSortByInt ==
-                                                        sortBySelected
-                                                    ? Icons.radio_button_checked
-                                                    : Icons
-                                                        .radio_button_unchecked,
-                                                size: 20,
-                                                color: defaultSortByInt ==
-                                                        sortBySelected
-                                                    ? themeblue
-                                                    : lightDarkColor,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                      Text(
+                                        "Add page",
+                                        style: TextStyle(
+                                          letterSpacing: 1,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color:
+                                              themeX.textTheme.headline1.color,
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                  // # Add Page Button
-                                  FlatButton(
-                                    onPressed: openCreatePageSheet,
-                                    padding: EdgeInsets.only(top: 20),
-                                    materialTapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                    child: Row(
-                                      children: <Widget>[
-                                        Container(
-                                          margin: EdgeInsets.only(
-                                            left: 10,
-                                            right: 17,
-                                          ),
-                                          child: SvgPicture.asset(
-                                            "assets/vectors/PageIcon.svg",
-                                            width: 14,
+                                ),
+                                // # Edit Labels Button
+                                FlatButton(
+                                  onPressed: () {
+                                    _bookOptionsAC.reverse();
+                                    _openAddNewTagSheet(null, null);
+                                  },
+                                  padding: EdgeInsets.only(top: 25),
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  child: Row(
+                                    children: <Widget>[
+                                      Container(
+                                        margin: EdgeInsets.only(
+                                          left: 8,
+                                          right: 15,
+                                        ),
+                                        child: SvgPicture.asset(
+                                          "assets/vectors/TagIcon.svg",
+                                          width: 18,
+                                          color: lightDarkColor,
+                                        ),
+                                      ),
+                                      Text(
+                                        "Edit labels",
+                                        style: TextStyle(
+                                          letterSpacing: 1,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color:
+                                              themeX.textTheme.headline1.color,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // # Clear completed Button
+                                FlatButton(
+                                  onPressed: () {
+                                    _bookOptionsAC.reverse();
+                                    _clearCompletedTasks();
+                                  },
+                                  padding: EdgeInsets.only(top: 25),
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  child: Row(
+                                    children: <Widget>[
+                                      Container(
+                                        padding: EdgeInsets.all(1),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          border: Border.all(
                                             color: lightDarkColor,
                                           ),
                                         ),
-                                        Text(
-                                          "Add page",
-                                          style: TextStyle(
-                                            letterSpacing: 1,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: themeX
-                                                .textTheme.headline1.color,
-                                          ),
+                                        margin: EdgeInsets.only(
+                                          left: 8,
+                                          right: 14,
                                         ),
-                                      ],
-                                    ),
+                                        child: Icon(
+                                          Icons.clear,
+                                          color: lightDarkColor,
+                                          size: 15,
+                                        ),
+                                      ),
+                                      Text(
+                                        "Clear completed",
+                                        style: TextStyle(
+                                          letterSpacing: 1,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color:
+                                              themeX.textTheme.headline1.color,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  // # Edit book name Button
-                                  // FlatButton(
-                                  //   onPressed: () {
-                                  //     _bookOptionsAC.reverse();
-                                  //     widget.startEditingBookName();
-                                  //   },
-                                  //   padding: EdgeInsets.only(top: 25),
-                                  //   materialTapTargetSize:
-                                  //       MaterialTapTargetSize.shrinkWrap,
-                                  //   child: Row(
-                                  //     children: <Widget>[
-                                  //       Container(
-                                  //         margin: EdgeInsets.only(
-                                  //           left: 10,
-                                  //           right: 17,
-                                  //         ),
-                                  //         child: SvgPicture.asset(
-                                  //           "assets/vectors/EditIcon.svg",
-                                  //           width: 14,
-                                  //           color: lightDarkColor,
-                                  //         ),
-                                  //       ),
-                                  //       Text(
-                                  //         "Edit book",
-                                  //         style: TextStyle(
-                                  //           letterSpacing: 1,
-                                  //           fontSize: 14,
-                                  //           fontWeight: FontWeight.w400,
-                                  //           color: themeX
-                                  //               .textTheme.headline1.color,
-                                  //         ),
-                                  //       ),
-                                  //     ],
-                                  //   ),
-                                  // ),
-                                  // # Clear completed Button
-                                  FlatButton(
-                                    onPressed: () {
-                                      _bookOptionsAC.reverse();
-                                      _clearCompletedTasks();
-                                    },
-                                    padding: EdgeInsets.only(top: 25),
-                                    materialTapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                    child: Row(
-                                      children: <Widget>[
-                                        Container(
-                                          padding: EdgeInsets.all(1),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            border: Border.all(
-                                              color: lightDarkColor,
-                                            ),
-                                          ),
-                                          margin: EdgeInsets.only(
-                                            left: 8,
-                                            right: 14,
-                                          ),
-                                          child: Icon(
-                                            Icons.clear,
-                                            color: lightDarkColor,
-                                            size: 15,
-                                          ),
+                                ),
+                                // # Delete Button
+                                FlatButton(
+                                  onPressed: () {
+                                    _bookOptionsAC.reverse();
+                                    _deleteBook();
+                                  },
+                                  padding: EdgeInsets.only(top: 25),
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  child: Row(
+                                    children: <Widget>[
+                                      Container(
+                                        margin: EdgeInsets.only(
+                                          left: 10,
+                                          right: 15,
                                         ),
-                                        Text(
-                                          "Clear completed",
-                                          style: TextStyle(
-                                            letterSpacing: 1,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: themeX
-                                                .textTheme.headline1.color,
-                                          ),
+                                        child: SvgPicture.asset(
+                                          "assets/vectors/DeleteIcon.svg",
+                                          width: 15,
+                                          color: lightDarkColor,
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                      Text(
+                                        "Delete",
+                                        style: TextStyle(
+                                          letterSpacing: 1,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color:
+                                              themeX.textTheme.headline1.color,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  // # Delete Button
-                                  FlatButton(
-                                    onPressed: () {
-                                      _bookOptionsAC.reverse();
-                                      _deleteBook();
-                                    },
-                                    padding: EdgeInsets.only(top: 25),
-                                    materialTapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                    child: Row(
-                                      children: <Widget>[
-                                        Container(
-                                          margin: EdgeInsets.only(
-                                            left: 10,
-                                            right: 15,
-                                          ),
-                                          child: SvgPicture.asset(
-                                            "assets/vectors/DeleteIcon.svg",
-                                            width: 15,
-                                            color: lightDarkColor,
-                                          ),
-                                        ),
-                                        Text(
-                                          "Delete",
-                                          style: TextStyle(
-                                            letterSpacing: 1,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: themeX
-                                                .textTheme.headline1.color,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ),
-                      // # Add task container
-                      AddTask(widget.pages, widget.pageRef, widget.allTags,
-                          borderRadius),
-                      // # close drawer overlay
-                      widget.isDrawerOpen
-                          ? GestureDetector(
-                              onHorizontalDragStart: (details) =>
-                                  _onDrawerDragStart(details),
-                              onHorizontalDragUpdate: (details) =>
-                                  _onDrawerDragUpdate(details),
-                              onHorizontalDragEnd: (details) =>
-                                  _onDrawerDragEnd(details),
-                              onTap: () {
-                                widget.toggleDrawer(false);
-                              })
-                          : Container(),
-                    ],
-                  ),
+                    ),
+                    // # Add task container
+                    AddTask(widget.pages, widget.pageRef, widget.allTags,
+                        borderRadius),
+                    // # close drawer overlay
+                    widget.isDrawerOpen
+                        ? GestureDetector(
+                            onHorizontalDragStart: (details) =>
+                                _onDrawerDragStart(details),
+                            onHorizontalDragUpdate: (details) =>
+                                _onDrawerDragUpdate(details),
+                            onHorizontalDragEnd: (details) =>
+                                _onDrawerDragEnd(details),
+                            onTap: () {
+                              widget.toggleDrawer(false);
+                            })
+                        : Container(),
+                  ],
                 ),
-              );
-            }),
+              ),
+            );
+          },
+        ),
       );
     } else {
       return Container(
         color: Colors.white,
       );
+    }
+  }
+
+  _initializeDrawerAnimationController() {
+    _drawerAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+  }
+
+  _setLocalDefaultFilter() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      setState(() {
+        defaultFilterInt = prefs.getInt('default_filter') ?? 0;
+        filterSelected = prefs.getInt('default_filter') ?? 0;
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  _setLocalDefaultSortBy() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      setState(() {
+        defaultSortByInt = prefs.getInt('default_sort_by') ?? 0;
+        sortBySelected = prefs.getInt('default_sort_by') ?? 0;
+      });
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -995,6 +986,18 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
           null,
           widget.allTags,
         );
+      },
+    );
+  }
+
+  _openAddNewTagSheet(tag, tagId) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withAlpha(20),
+      builder: (_) {
+        return AddNewTagSheet(null, null);
       },
     );
   }
