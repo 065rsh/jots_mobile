@@ -398,7 +398,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             newBookNameFocusNode.requestFocus();
           },
           child: Text(
-            "+ Book",
+            "+  Book",
             style: TextStyle(
               fontSize: 15,
               color: themex.textTheme.headline1.color,

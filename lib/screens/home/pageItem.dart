@@ -55,13 +55,6 @@ class _PageItemState extends State<PageItem>
     }
 
     _setPageCollapseValue();
-
-    if (widget.pages[widget.pageIndex]["page_name"] == "General") {
-      setState(() {
-        showTasks = true;
-        showPageHeader = false;
-      });
-    }
   }
 
   _setPageCollapseValue() async {
@@ -73,6 +66,13 @@ class _PageItemState extends State<PageItem>
                 widget.pages[widget.pageIndex].documentID + "_is_collapsed") ??
             true);
       });
+
+      if (widget.pages[widget.pageIndex]["page_name"] == "General") {
+        setState(() {
+          showTasks = true;
+          showPageHeader = false;
+        });
+      }
     } catch (e) {
       print(e);
     }
