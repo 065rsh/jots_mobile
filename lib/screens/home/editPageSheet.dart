@@ -29,6 +29,7 @@ class EditPageSheet extends StatefulWidget {
 
 class _EditPageSheetState extends State<EditPageSheet> {
   bool isCollapsePageByDefault = true;
+  bool initialCollapsePageByDefault = true;
   bool isPageNameValid = false;
   CollectionReference pageColRef;
   FocusNode addNewPageFocusNode = FocusNode();
@@ -37,12 +38,18 @@ class _EditPageSheetState extends State<EditPageSheet> {
   String pageId;
 
   @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
 
     _setPageCollapseValue();
     initFirestore();
-    // addNewPageFocusNode.addListener(handleAddNewPageFocusNode);
   }
 
   _setPageCollapseValue() async {
@@ -52,34 +59,23 @@ class _EditPageSheetState extends State<EditPageSheet> {
       setState(() {
         isCollapsePageByDefault =
             tempPref.getBool(widget.pageId ?? "" + "_is_collapsed") ?? true;
+        initialCollapsePageByDefault =
+            tempPref.getBool(widget.pageId ?? "" + "_is_collapsed") ?? true;
+        isPageNameValid = widget.initialPageName != null;
+        newPageName = widget.initialPageName ?? "";
       });
     } catch (e) {
       print(e);
     }
   }
 
-  // handleAddNewPageFocusNode() async {
-  //   var bytes = utf8.encode(UniqueKey().toString());
-  //   var randomTaskId = base64.encode(bytes);
-  //   randomTaskId = randomTaskId.substring(0, randomTaskId.length - 1);
-
-  //   try {
-  //     SharedPreferences tempPref = await SharedPreferences.getInstance();
-  //     tempPref.setBool(widget.pageId ?? randomTaskId + "_is_collapsed",
-  //         isCollapsePageByDefault);
-  //   } catch (e) {
-  //     print(e);
-  //   }
-
-  //   if (!addNewPageFocusNode.hasFocus &&
-  //       newPageName != null &&
-  //       newPageName != "") {
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     final themex = Theme.of(context);
+    bool isCreatingNewPage = widget.initialPageName == null;
+    bool canSubmitPageName = isPageNameValid &&
+        (newPageName != widget.initialPageName ||
+            initialCollapsePageByDefault != isCollapsePageByDefault);
 
     return AnimatedPadding(
       duration: Duration(milliseconds: 300),
@@ -143,19 +139,20 @@ class _EditPageSheetState extends State<EditPageSheet> {
             // # Keep page expanded
             Container(
               alignment: Alignment.centerLeft,
-              margin: EdgeInsets.only(top: 10),
-              child: FlatButton(
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                padding: EdgeInsets.all(0),
-                onPressed: () {
-                  setState(() {
-                    isCollapsePageByDefault = !isCollapsePageByDefault;
-                  });
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Row(
+              margin: EdgeInsets.only(top: isCreatingNewPage ? 15 : 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  // # Close page by default check button
+                  FlatButton(
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    padding: EdgeInsets.all(0),
+                    onPressed: () {
+                      setState(() {
+                        isCollapsePageByDefault = !isCollapsePageByDefault;
+                      });
+                    },
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         Container(
@@ -191,119 +188,134 @@ class _EditPageSheetState extends State<EditPageSheet> {
                         )
                       ],
                     ),
-                    widget.initialPageName == null
-                        ? ButtonTheme(
-                            minWidth: 0,
-                            padding: EdgeInsets.all(0),
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                            child: FlatButton(
-                              onPressed: () {
-                                if (isPageNameValid) {
-                                  if (widget.initialPageName != null) {
-                                    // editing page_name
-                                    editPageName();
-                                  } else {
-                                    addNewPage();
-                                  }
-                                }
-                              },
-                              child: Text(
-                                "CREATE",
-                                style: TextStyle(
-                                  color: isPageNameValid
-                                      ? themeblue
-                                      : lightDarkColor.withAlpha(80),
-                                  letterSpacing: 1,
-                                  fontSize: 15,
-                                ),
+                  ),
+                  isCreatingNewPage
+                      ? ButtonTheme(
+                          minWidth: 0,
+                          padding: EdgeInsets.symmetric(horizontal: 5),
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          child: FlatButton(
+                            onPressed: () {
+                              if (isPageNameValid) {
+                                addNewPage();
+                              }
+                            },
+                            child: Text(
+                              "CREATE",
+                              style: TextStyle(
+                                color: isPageNameValid
+                                    ? themeblue
+                                    : lightDarkColor.withAlpha(80),
+                                letterSpacing: 1,
+                                fontSize: 15,
                               ),
                             ),
-                          )
-                        : Container(),
-                  ],
-                ),
+                          ),
+                        )
+                      : Container(),
+                ],
               ),
             ),
             // # Page action buttons
-            widget.initialPageName != null
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      // # Delete page button
-                      Container(
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: warningColor,
-                          ),
-                          borderRadius: BorderRadius.circular(7),
-                        ),
-                        child: FlatButton(
-                          onPressed: () {
-                            FocusScope.of(context).requestFocus(FocusNode());
-                            deletePage();
-                          },
-                          child: Row(
-                            children: <Widget>[
-                              Container(
-                                margin: EdgeInsets.only(right: 10),
+            !isCreatingNewPage
+                ? Container(
+                    margin: EdgeInsets.only(top: 15),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            // # Delete page button
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                border:
+                                    Border.all(width: 1, color: warningColor),
+                                borderRadius: BorderRadius.circular(7),
+                              ),
+                              child: FlatButton(
+                                padding: EdgeInsets.all(0),
+                                onPressed: () {
+                                  FocusScope.of(context)
+                                      .requestFocus(FocusNode());
+                                  deletePage();
+                                },
                                 child: SvgPicture.asset(
                                   "assets/vectors/DeleteIcon.svg",
-                                  width: 16,
+                                  width: 17,
                                   color: warningColor,
                                 ),
                               ),
-                              Text(
-                                "Delete",
-                                style: TextStyle(
-                                  color: warningColor,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      // # Add Task in page button
-                      Container(
-                        width: 120,
-                        height: 40,
-                        margin: EdgeInsets.only(left: 20),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: themex.textTheme.headline1.color,
-                          ),
-                          borderRadius: BorderRadius.circular(7),
-                        ),
-                        child: FlatButton(
-                          onPressed: showAddTaskSheet,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: <Widget>[
-                              Container(
-                                margin: EdgeInsets.only(right: 10),
-                                child: Text(
-                                  "+",
-                                  style: TextStyle(
-                                    fontSize: 25,
-                                    color: themex.textTheme.headline1.color,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                "New Task",
-                                style: TextStyle(
+                            ),
+                            // # Add Task in page button
+                            Container(
+                              height: 40,
+                              margin: EdgeInsets.only(left: 15),
+                              decoration: BoxDecoration(
+                                border: Border.all(
                                   color: themex.textTheme.headline1.color,
-                                  fontWeight: FontWeight.w400,
+                                ),
+                                borderRadius: BorderRadius.circular(7),
+                              ),
+                              child: FlatButton(
+                                onPressed: showAddTaskSheet,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: <Widget>[
+                                    Container(
+                                      margin: EdgeInsets.only(right: 10),
+                                      child: Text(
+                                        "+",
+                                        style: TextStyle(
+                                          fontSize: 25,
+                                          color:
+                                              themex.textTheme.headline1.color,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      "New Task",
+                                      style: TextStyle(
+                                        color: themex.textTheme.headline1.color,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                        ButtonTheme(
+                          minWidth: 0,
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          child: FlatButton(
+                            onPressed: () async {
+                              if (canSubmitPageName) {
+                                await editPageName();
+                              }
+                            },
+                            child: Text(
+                              "SAVE",
+                              style: TextStyle(
+                                color: canSubmitPageName
+                                    ? themeblue
+                                    : lightDarkColor.withAlpha(80),
+                                letterSpacing: 1,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                   )
                 : Container(),
           ],
@@ -346,24 +358,37 @@ class _EditPageSheetState extends State<EditPageSheet> {
   }
 
   addNewPage() async {
-    await pageColRef.add({
-      "page_name": newPageName,
-      "creation_date": DateTime.now(),
-    }).then((pageRef) =>
-        pageRef.collection("Sections").document("not_sectioned").setData({}));
+    print("newPageName: " + newPageName ?? "IS NULL");
 
-    hideModalBottomSheet();
+    DocumentReference newPageRef = await pageColRef.add({
+      "page_name": newPageName.trim(),
+      "creation_date": DateTime.now(),
+    });
+
+    await newPageRef
+        .collection("Sections")
+        .document("not_sectioned")
+        .setData({});
+
+    await hideModalBottomSheet(newPageRef.documentID);
   }
 
   editPageName() async {
     await pageColRef
         .document(widget.pageId)
-        .setData({"page_name": newPageName}, merge: true);
+        .setData({"page_name": newPageName.trim()}, merge: true);
 
-    hideModalBottomSheet();
+    hideModalBottomSheet(widget.pageId);
   }
 
-  hideModalBottomSheet() {
+  hideModalBottomSheet(pageId) async {
+    try {
+      SharedPreferences tempPref = await SharedPreferences.getInstance();
+      await tempPref.setBool(pageId + "_is_collapsed", isCollapsePageByDefault);
+    } catch (e) {
+      print(e);
+    }
+
     try {
       Navigator.pop(context);
     } catch (e) {
@@ -426,7 +451,7 @@ class _EditPageSheetState extends State<EditPageSheet> {
                         .document(widget.pageId)
                         .delete();
 
-                    Navigator.of(context).pop();
+                    Navigator.pop(context);
                     Navigator.pop(context);
                   } catch (e) {
                     print("ERROR while updating task: " + e.toString());

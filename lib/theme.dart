@@ -83,6 +83,9 @@ final darkTheme = ThemeData(
   dividerColor: Color(0xFF222222),
   hintColor: Color(0xFF555555),
   dialogBackgroundColor: Color(0xFF111111),
+  dialogTheme: DialogTheme(
+    backgroundColor: Color(0xFF555555),
+  ),
   accentColor: Color(0XFF236CFF),
   textTheme: TextTheme(
     headline1: TextStyle(
@@ -110,6 +113,9 @@ final lightTheme = ThemeData(
   dividerColor: Color(0xFFEEEEEE),
   hintColor: Color(0xFFBBBBBB),
   dialogBackgroundColor: Colors.white,
+  dialogTheme: DialogTheme(
+    backgroundColor: Colors.white,
+  ),
   accentColor: themeblue,
   textTheme: TextTheme(
     headline1: TextStyle(
