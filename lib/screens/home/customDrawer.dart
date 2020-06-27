@@ -421,7 +421,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
           .collection('Todo');
 
       todoCollectionRef.add({
-        "book_name": addBookNameText,
+        "book_name": addBookNameText.trim(),
         "creation_date": new DateTime.now(),
       }).then((bookRef) => bookRef.collection("Pages").add({
             "page_name": "General",

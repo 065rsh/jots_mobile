@@ -181,9 +181,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                                       MaterialTapTargetSize.shrinkWrap,
                                   minWidth: 0,
                                   height: 0,
+                                  padding: EdgeInsets.only(left: 10, right: 10),
                                   child: FlatButton(
-                                    padding:
-                                        EdgeInsets.only(left: 10, right: 10),
                                     onPressed: () {
                                       widget.startEditingBookName();
                                     },
@@ -693,8 +692,12 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                       ),
                     ),
                     // # Add task container
-                    AddTask(widget.pages, widget.pageRef, widget.allTags,
-                        borderRadius),
+                    AddTask(
+                      widget.pages,
+                      widget.pageRef,
+                      widget.allTags,
+                      borderRadius,
+                    ),
                     // # close drawer overlay
                     widget.isDrawerOpen
                         ? GestureDetector(

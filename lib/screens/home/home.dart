@@ -65,16 +65,17 @@ class _HomeState extends State<Home> {
             children: <Widget>[
               CustomDrawer(_updateSelectedBook, _updateHomeBook, _toggleDrawer),
               Book(
-                  pages,
-                  pageRef,
-                  isRefreshingBook,
-                  _isDrawerOpen,
-                  _selectedBook,
-                  _homeBookId,
-                  _toggleDrawer,
-                  _startEditingBookName,
-                  _refreshBook,
-                  allTags),
+                pages,
+                pageRef,
+                isRefreshingBook,
+                _isDrawerOpen,
+                _selectedBook,
+                _homeBookId,
+                _toggleDrawer,
+                _startEditingBookName,
+                _refreshBook,
+                allTags,
+              ),
               // # Editing book overlay as editing book name background
               AnimatedSwitcher(
                 // used AnimatedSwitcher to fade in whities overlay over home page
@@ -85,59 +86,53 @@ class _HomeState extends State<Home> {
                           setState(() => _isEditingBookName = false);
                           FocusScope.of(context).requestFocus(new FocusNode());
                         },
-                        child: Container(
-                          color: themex.primaryColor.withAlpha(200),
-                          margin: EdgeInsets.only(top: 35),
-                          child: Column(
-                            children: <Widget>[
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Container(
-                                    color: themex.primaryColor,
-                                    height: 45,
-                                    alignment: Alignment.center,
-                                    child: ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        maxWidth: 200,
-                                      ),
-                                      child: TextFormField(
-                                        autofocus: true,
-                                        textCapitalization:
-                                            TextCapitalization.sentences,
-                                        initialValue: _selectedBook != null
-                                            ? _selectedBook.data["book_name"]
-                                            : "",
-                                        textAlign: TextAlign.center,
-                                        focusNode: editBookNameFocusNode,
-                                        onChanged: (text) {
-                                          setState(() {
-                                            newBookNameText = text;
-                                          });
-                                        },
-                                        style: TextStyle(
-                                          color:
-                                              themex.textTheme.headline1.color,
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 22,
-                                        ),
-                                        decoration: InputDecoration(
-                                          hintText: "Book name...",
-                                          hintStyle: TextStyle(
-                                            color: lightDarkColor,
-                                          ),
-                                          isDense: true,
-                                          counterText: '',
-                                          contentPadding:
-                                              EdgeInsets.only(left: 7),
-                                          border: InputBorder.none,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                ],
+                        child: SafeArea(
+                          child: Container(
+                            height: double.infinity,
+                            width: double.infinity,
+                            alignment: Alignment.topCenter,
+                            color: themex.primaryColor.withAlpha(200),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: 200,
                               ),
-                            ],
+                              child: Container(
+                                height: 50,
+                                color: themex.primaryColor,
+                                alignment: Alignment.center,
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                child: TextFormField(
+                                  autofocus: true,
+                                  textCapitalization:
+                                      TextCapitalization.sentences,
+                                  initialValue: _selectedBook != null
+                                      ? _selectedBook.data["book_name"]
+                                      : "",
+                                  textAlign: TextAlign.center,
+                                  focusNode: editBookNameFocusNode,
+                                  onChanged: (text) {
+                                    setState(() {
+                                      newBookNameText = text;
+                                    });
+                                  },
+                                  style: TextStyle(
+                                    color: themex.textTheme.headline1.color,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 22,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: "Book name...",
+                                    hintStyle: TextStyle(
+                                      color: lightDarkColor,
+                                    ),
+                                    isDense: true,
+                                    counterText: '',
+                                    contentPadding: EdgeInsets.only(left: 7),
+                                    border: InputBorder.none,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       )
@@ -240,7 +235,7 @@ class _HomeState extends State<Home> {
           .collection('Todo');
 
       await todoCollectionRef.document(_selectedBook.documentID).setData({
-        "book_name": newBookNameText,
+        "book_name": newBookNameText.trim(),
       }, merge: true);
     } catch (e) {
       print("ERROR will updating task: " + e.toString());

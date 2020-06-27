@@ -261,10 +261,6 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                     keyboardType: TextInputType.multiline,
                                     maxLines: null,
                                     onChanged: (text) {
-                                      print("TASKNOTE: " +
-                                          taskName +
-                                          " | " +
-                                          text);
                                       setState(() => taskNote = text);
                                     },
                                     style: TextStyle(
@@ -940,7 +936,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
 
   _checkTaskChange() {
     if (widget.taskId != null) {
-      bool isTaskNameChanged = widget.task["task_name"] != taskName;
+      bool isTaskNameChanged = widget.task["task_name"] != taskName.trim();
 
       bool isDueDateChanged = widget.task["due_date"] != ""
           ? selectedDate != null
@@ -1176,14 +1172,14 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
 
       await sectionRef.setData({
         randomTaskId: {
+          "task_name": taskName.trim(),
+          "note": taskNote.trim(),
           "completion_date": "",
           "creation_date": DateTime.now(),
           "due_date": selectedDate ?? "",
           "is_checked": false,
-          "note": taskNote,
           "priority": taskPriority,
           "tag_ids": taskTagChips,
-          "task_name": taskName,
         }
       }, merge: true);
 
@@ -1206,7 +1202,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
           "note": taskNote,
           "priority": taskPriority,
           "tag_ids": taskTagChips,
-          "task_name": taskName,
+          "task_name": taskName.trim(),
         }
       };
 
@@ -1233,7 +1229,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
           "note": taskNote,
           "priority": taskPriority,
           "tag_ids": taskTagChips,
-          "task_name": taskName,
+          "task_name": taskName.trim(),
         }
       };
 
@@ -1261,12 +1257,12 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
     if (selectedDate != null) {
       if (selectedDate.hour != 0 || selectedDate.minute != 0) {
         await CustomNotificationHandler.scheduleNotification(
-            selectedDate, taskName, taskNote);
+            selectedDate, taskName.trim(), taskNote);
       } else {
         DateTime dateWithDefaultTime = new DateTime(
             selectedDate.year, selectedDate.month, selectedDate.day, 8);
         await CustomNotificationHandler.scheduleNotification(
-            dateWithDefaultTime, taskName, taskNote);
+            dateWithDefaultTime, taskName.trim(), taskNote);
       }
     }
 

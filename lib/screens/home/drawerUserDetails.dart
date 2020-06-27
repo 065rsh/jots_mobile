@@ -220,7 +220,7 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
       if (newDisplayNameText != "") {
         FirebaseAuth.instance.currentUser().then((val) {
           UserUpdateInfo updateUser = UserUpdateInfo();
-          updateUser.displayName = newDisplayNameText;
+          updateUser.displayName = newDisplayNameText.trim();
           val.updateProfile(updateUser);
         });
       } else if (newDisplayNameText != null) {

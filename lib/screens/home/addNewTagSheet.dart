@@ -446,7 +446,7 @@ class _AddNewTagSheetState extends State<AddNewTagSheet> {
       "tags": {
         "todo": {
           tagId: {
-            "tag_name": tagName,
+            "tag_name": tagName.trim(),
             "color": selectedColor,
             "creation_date": isAddingNewTag
                 ? DateTime.now()
