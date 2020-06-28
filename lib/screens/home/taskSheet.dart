@@ -237,7 +237,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                         : Container(
                             margin: EdgeInsets.only(
                               left: 20,
-                              top: 20,
+                              top: 5,
                               right: 20,
                               bottom: 5,
                             ),
@@ -259,6 +259,8 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                     autofocus: isNewTask && !showAddNotes,
                                     controller: taskNoteController,
                                     keyboardType: TextInputType.multiline,
+                                    textCapitalization:
+                                        TextCapitalization.sentences,
                                     maxLines: null,
                                     onChanged: (text) {
                                       setState(() => taskNote = text);
@@ -317,134 +319,125 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                             margin: EdgeInsets.only(
                                 top: isNewTask ? 20 : taskSheetItemTopMargin,
                                 left: 20),
-                            child: Column(
+                            child: Row(
                               children: <Widget>[
-                                // # Due date action buttons
-                                Row(
-                                  children: <Widget>[
-                                    Container(
-                                      margin: EdgeInsets.only(
-                                          right: taskSheetIconRightMargin),
-                                      child: Icon(
-                                        Icons.calendar_today,
-                                        color: lightDarkColor,
-                                        size: 20,
-                                      ),
-                                    ),
-                                    Container(
-                                      height: taskSheetButtonHeight,
-                                      margin: EdgeInsets.only(right: 20),
-                                      decoration: BoxDecoration(
-                                        color: formattedDueDate["date"] == null
-                                            ? Colors.transparent
-                                            : formattedDueDate["color"]
-                                                .withAlpha(20),
-                                        borderRadius: BorderRadius.circular(7),
-                                      ),
-                                      child: ButtonTheme(
-                                        minWidth: 0,
-                                        child: FlatButton(
-                                          onPressed: _selectDate,
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal:
-                                                  formattedDueDate["date"] ==
-                                                          null
-                                                      ? 0
-                                                      : 15),
-                                          materialTapTargetSize:
-                                              MaterialTapTargetSize.shrinkWrap,
-                                          child: Text(
-                                            formattedDueDate["date"] ??
-                                                "Select date",
-                                            style: TextStyle(
-                                              color: formattedDueDate["date"] ==
-                                                      null
+                                Container(
+                                  margin: EdgeInsets.only(
+                                      right: taskSheetIconRightMargin),
+                                  child: Icon(
+                                    Icons.calendar_today,
+                                    color: lightDarkColor,
+                                    size: 20,
+                                  ),
+                                ),
+                                Container(
+                                  height: taskSheetButtonHeight,
+                                  margin: EdgeInsets.only(right: 10),
+                                  decoration: BoxDecoration(
+                                    color: formattedDueDate["date"] == null
+                                        ? Colors.transparent
+                                        : formattedDueDate["color"]
+                                            .withAlpha(20),
+                                    borderRadius: BorderRadius.circular(7),
+                                  ),
+                                  child: ButtonTheme(
+                                    minWidth: 0,
+                                    child: FlatButton(
+                                      onPressed: _selectDate,
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal:
+                                              formattedDueDate["date"] == null
+                                                  ? 0
+                                                  : 15),
+                                      materialTapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                      child: Text(
+                                        formattedDueDate["date"] ??
+                                            "Select date",
+                                        style: TextStyle(
+                                          color:
+                                              formattedDueDate["date"] == null
                                                   ? lightDarkColor
                                                   : formattedDueDate["color"],
-                                              fontWeight: FontWeight.w400,
-                                            ),
-                                          ),
+                                          fontWeight: FontWeight.w400,
                                         ),
                                       ),
                                     ),
-                                    formattedDueDate["date"] != null
-                                        ? Container(
-                                            height: taskSheetButtonHeight,
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: Colors.transparent),
-                                              color: isTimeNotAval
-                                                  ? Colors.transparent
-                                                  : formattedDueDate["color"]
-                                                      .withAlpha(20),
-                                              borderRadius:
-                                                  BorderRadius.circular(7),
-                                            ),
-                                            child: DottedBorder(
-                                              borderType: BorderType.RRect,
-                                              strokeWidth: 0.5,
-                                              dashPattern: [3, 2],
-                                              color: isTimeNotAval
-                                                  ? lightDarkColor
-                                                  : Colors.transparent,
-                                              radius: Radius.circular(7),
-                                              child: FlatButton(
-                                                onPressed: _selectTime,
-                                                padding: EdgeInsets.symmetric(
-                                                    horizontal: 15),
-                                                child: Text(
-                                                  isTimeNotAval
-                                                      ? "Select time"
-                                                      : formattedDueDate["time"]
-                                                          .substring(2),
-                                                  style: TextStyle(
-                                                    color: isTimeNotAval
-                                                        ? lightDarkColor
-                                                        : formattedDueDate[
-                                                            "color"],
-                                                    fontWeight: FontWeight.w400,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          )
-                                        : Container(),
-                                    // # clear due date button
-                                    formattedDueDate["date"] != null
-                                        ? Container(
-                                            width: 25,
-                                            height: 25,
-                                            margin: EdgeInsets.only(left: 20),
-                                            decoration: BoxDecoration(
-                                              color:
-                                                  themeX.dialogBackgroundColor,
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black
-                                                      .withOpacity(0.1),
-                                                  blurRadius: 4,
-                                                  offset: Offset(0, 1),
-                                                ),
-                                              ],
-                                            ),
-                                            child: FlatButton(
-                                              onPressed: _removeDueDate,
-                                              materialTapTargetSize:
-                                                  MaterialTapTargetSize
-                                                      .shrinkWrap,
-                                              padding: EdgeInsets.all(0),
-                                              child: Icon(
-                                                Icons.clear,
-                                                color: lightDarkColor,
-                                                size: 18,
-                                              ),
-                                            ),
-                                          )
-                                        : Container(),
-                                  ],
+                                  ),
                                 ),
+                                formattedDueDate["date"] != null
+                                    ? Container(
+                                        height: taskSheetButtonHeight,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: Colors.transparent),
+                                          color: isTimeNotAval
+                                              ? Colors.transparent
+                                              : formattedDueDate["color"]
+                                                  .withAlpha(20),
+                                          borderRadius:
+                                              BorderRadius.circular(7),
+                                        ),
+                                        child: DottedBorder(
+                                          borderType: BorderType.RRect,
+                                          strokeWidth: 0.5,
+                                          dashPattern: [3, 2],
+                                          color: isTimeNotAval
+                                              ? lightDarkColor
+                                              : Colors.transparent,
+                                          radius: Radius.circular(7),
+                                          child: FlatButton(
+                                            onPressed: _selectTime,
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 15),
+                                            child: Text(
+                                              isTimeNotAval
+                                                  ? "Select time"
+                                                  : formattedDueDate["time"]
+                                                      .substring(2),
+                                              style: TextStyle(
+                                                color: isTimeNotAval
+                                                    ? lightDarkColor
+                                                    : formattedDueDate["color"],
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : Container(),
+                                // # clear due date button
+                                formattedDueDate["date"] != null
+                                    ? Container(
+                                        width: 25,
+                                        height: 25,
+                                        margin: EdgeInsets.only(left: 15),
+                                        decoration: BoxDecoration(
+                                          color: themeX.dialogBackgroundColor,
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.black.withOpacity(0.1),
+                                              blurRadius: 4,
+                                              offset: Offset(0, 1),
+                                            ),
+                                          ],
+                                        ),
+                                        child: FlatButton(
+                                          onPressed: _removeDueDate,
+                                          materialTapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                          padding: EdgeInsets.all(0),
+                                          child: Icon(
+                                            Icons.clear,
+                                            color: lightDarkColor,
+                                            size: 18,
+                                          ),
+                                        ),
+                                      )
+                                    : Container(),
                               ],
                             ),
                           ),
