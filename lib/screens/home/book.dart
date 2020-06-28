@@ -917,12 +917,14 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
   }
 
   _deleteBook() async {
-    // show the dialog
+    final themeX = Theme.of(context);
+
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return AlertDialog(
+            backgroundColor: themeX.dialogBackgroundColor,
             title: Text(
               "Delete \"" + widget.selectedBook.data["book_name"] + "\"?",
               style: TextStyle(

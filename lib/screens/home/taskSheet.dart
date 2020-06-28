@@ -1298,11 +1298,13 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
   }
 
   _deleteTask() {
+    final themeX = Theme.of(context);
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return AlertDialog(
+            backgroundColor: themeX.dialogBackgroundColor,
             title: Text(
               "Delete task?",
               style: TextStyle(

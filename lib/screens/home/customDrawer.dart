@@ -187,11 +187,14 @@ class _CustomDrawerState extends State<CustomDrawer> {
   }
 
   askLogout() {
+    final themeX = Theme.of(context);
+
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return AlertDialog(
+            backgroundColor: themeX.dialogBackgroundColor,
             title: Text(
               "Log out",
               style: TextStyle(
