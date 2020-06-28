@@ -134,8 +134,8 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
           )
         ],
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+          topLeft: Radius.circular(15),
+          topRight: Radius.circular(15),
         ),
       ),
       child: AnimatedPadding(
@@ -902,7 +902,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
     if (dragVelocity.abs() >= 365.0) {
       int currentPageIndex = pageIds.indexOf(selectedPageIdToAddTask);
 
-      if (dragVelocity < 0 && currentPageIndex != pageIds.length) {
+      if (dragVelocity < 0 && currentPageIndex != widget.pages.length) {
         setState(() {
           selectedPageIdToAddTask = pageIds[currentPageIndex + 1];
         });

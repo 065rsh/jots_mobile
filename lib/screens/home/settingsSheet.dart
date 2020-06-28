@@ -42,26 +42,13 @@ class _SettingsSheetState extends State<SettingsSheet> {
           )
         ],
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+          topLeft: Radius.circular(15),
+          topRight: Radius.circular(15),
         ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          // # Drag logo
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: 30,
-              height: 3,
-              margin: EdgeInsets.only(top: 10),
-              decoration: BoxDecoration(
-                color: themex.hintColor,
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ),
           Container(
             decoration: BoxDecoration(
               border: Border(
@@ -91,13 +78,14 @@ class _SettingsSheetState extends State<SettingsSheet> {
               ],
             ),
           ),
+          // # Divider
+          Container(
+            color: themex.dividerColor,
+            // width: 350,
+            height: 1,
+          ),
           // # Change theme button
           Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: themex.dividerColor),
-              ),
-            ),
             margin: EdgeInsets.only(top: 10, bottom: 40),
             child: FlatButton(
               onPressed: () {
@@ -112,14 +100,12 @@ class _SettingsSheetState extends State<SettingsSheet> {
                     "App theme  •  ",
                     style: TextStyle(
                       color: themex.textTheme.headline1.color,
-                      fontWeight: FontWeight.w400,
                     ),
                   ),
                   Text(
                     isDarkThemeEnabled ? "DARK" : "LIGHT",
                     style: TextStyle(
                       color: themeblue,
-                      fontWeight: FontWeight.w400,
                     ),
                   ),
                 ],

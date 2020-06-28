@@ -67,7 +67,7 @@ class _AddTagsSheetState extends State<AddTagsSheet> {
             FocusScope.of(context).requestFocus(new FocusNode());
           },
           child: Container(
-            width: 350,
+            margin: EdgeInsets.symmetric(horizontal: 20),
             decoration: BoxDecoration(
               color: themex.dialogBackgroundColor,
               boxShadow: [
@@ -189,9 +189,9 @@ class _AddTagsSheetState extends State<AddTagsSheet> {
                 // # Divider
                 Container(
                   color: themex.dividerColor,
-                  width: 350,
-                  height: 0.5,
-                  margin: EdgeInsets.only(bottom: 20),
+                  // width: 350,
+                  height: 1,
+                  margin: EdgeInsets.only(bottom: 25),
                 ),
                 // # Editing tags text
                 isEditingTags
@@ -293,6 +293,8 @@ class _AddTagsSheetState extends State<AddTagsSheet> {
     if (allTagsKeys.length != 0) {
       allTagsKeys.forEach((tagId) {
         bool isThisTagSelected = _selectedTagsList.contains(tagId);
+        bool wasTagInitiallySelected =
+            widget.taskTagChipsFromSheet.contains(tagId);
         Color tagColor = tagsColorArr[widget.allTags[tagId]["color"]];
 
         allTagsList.add(
@@ -342,13 +344,17 @@ class _AddTagsSheetState extends State<AddTagsSheet> {
                   borderRadius: BorderRadius.circular(5),
                 ),
                 child: Text(
-                  widget.allTags[tagId]["tag_name"],
+                  (wasTagInitiallySelected ? "•  " : "") +
+                      widget.allTags[tagId]["tag_name"],
                   style: TextStyle(
                     fontWeight: FontWeight.w400,
                     color: isThisTagSelected
                         ? tagsColorArr[widget.allTags[tagId]["color"]]
                         : lightDarkColor,
                     fontSize: 16,
+                    // decoration: wasTagInitiallySelected
+                    //     ? TextDecoration.underline
+                    //     : TextDecoration.none,
                   ),
                 ),
               ),
