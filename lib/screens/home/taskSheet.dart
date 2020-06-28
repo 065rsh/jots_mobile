@@ -45,6 +45,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
   TextEditingController taskNameController, taskNoteController;
   StreamSubscription<QuerySnapshot> booksSnapshot;
   AutoScrollController addToPageScrollController = AutoScrollController();
+  FocusNode taskNoteFN = new FocusNode();
 
   int taskPriority = 0;
   bool isTaskValid = false;
@@ -256,6 +257,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                 ),
                                 Expanded(
                                   child: TextField(
+                                    focusNode: taskNoteFN,
                                     autofocus: isNewTask && !showAddNotes,
                                     controller: taskNoteController,
                                     keyboardType: TextInputType.multiline,
@@ -413,17 +415,9 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                         height: 25,
                                         margin: EdgeInsets.only(left: 15),
                                         decoration: BoxDecoration(
-                                          color: themeX.dialogBackgroundColor,
+                                          color: lightDarkColor.withAlpha(30),
                                           borderRadius:
                                               BorderRadius.circular(20),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color:
-                                                  Colors.black.withOpacity(0.1),
-                                              blurRadius: 4,
-                                              offset: Offset(0, 1),
-                                            ),
-                                          ],
                                         ),
                                         child: FlatButton(
                                           onPressed: _removeDueDate,
@@ -532,6 +526,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
+                                      // # Add note icon button
                                       ButtonTheme(
                                         minWidth: 0,
                                         padding: EdgeInsets.all(0),
@@ -542,6 +537,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                             setState(() {
                                               showAddNotes = true;
                                             });
+                                            taskNoteFN.requestFocus();
                                           },
                                           child: SvgPicture.asset(
                                             "assets/vectors/NoteIcon.svg",
@@ -552,6 +548,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                           ),
                                         ),
                                       ),
+                                      // # Add due date icon button
                                       ButtonTheme(
                                         minWidth: 0,
                                         padding: EdgeInsets.all(0),
