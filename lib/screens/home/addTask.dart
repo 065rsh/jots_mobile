@@ -17,6 +17,13 @@ class AddTask extends StatefulWidget {
 
 class _AddTaskState extends State<AddTask> {
   @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final themeX = Theme.of(context);
     // final themeNotifier = Provider.of<ThemeNotifier>(context);

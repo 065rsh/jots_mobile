@@ -32,6 +32,13 @@ class _ChangeBookSheetState extends State<ChangeBookSheet> {
   bool shouldDeleteTaskAfterCopy = false;
 
   @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
 
@@ -285,55 +292,54 @@ class _ChangeBookSheetState extends State<ChangeBookSheet> {
     if (newBookId != widget.selectedBook.documentID) {
       FirebaseUser user = await FirebaseAuth.instance.currentUser();
 
-      Firestore.instance
+      QuerySnapshot allPageFireDocs = await Firestore.instance
           .collection("Users")
           .document(user.uid)
           .collection("Todo")
           .document(newBookId)
           .collection("Pages")
           .where("page_name", isEqualTo: "General")
-          .getDocuments()
-          .then((event) async {
-        if (event.documents.isNotEmpty) {
-          final String pageId = event.documents.single.documentID;
+          .getDocuments();
 
+      if (allPageFireDocs.documents.isNotEmpty) {
+        final String pageId = allPageFireDocs.documents.single.documentID;
+
+        await Firestore.instance
+            .collection("Users")
+            .document(user.uid)
+            .collection("Todo")
+            .document(newBookId)
+            .collection("Pages")
+            .document(pageId)
+            .collection("Sections")
+            .document("not_sectioned")
+            .setData({widget.taskId: widget.task}, merge: true);
+
+        if (shouldDeleteTaskAfterCopy) {
           await Firestore.instance
               .collection("Users")
               .document(user.uid)
               .collection("Todo")
-              .document(newBookId)
+              .document(widget.selectedBook.documentID)
               .collection("Pages")
-              .document(pageId)
+              .document(widget.currentPageId)
               .collection("Sections")
               .document("not_sectioned")
-              .setData({widget.taskId: widget.task}, merge: true);
-
-          if (shouldDeleteTaskAfterCopy) {
-            await Firestore.instance
-                .collection("Users")
-                .document(user.uid)
-                .collection("Todo")
-                .document(widget.selectedBook.documentID)
-                .collection("Pages")
-                .document(widget.currentPageId)
-                .collection("Sections")
-                .document("not_sectioned")
-                .updateData({widget.taskId: FieldValue.delete()});
-          }
-
-          setState(() {
-            isSavedToOtherBook = true;
-          });
-
-          Future.delayed(Duration(seconds: 1), () {
-            try {
-              Navigator.of(context).pop();
-            } catch (e) {
-              print(e);
-            }
-          });
+              .updateData({widget.taskId: FieldValue.delete()});
         }
-      });
+
+        setState(() {
+          isSavedToOtherBook = true;
+        });
+
+        Future.delayed(Duration(seconds: 1), () {
+          try {
+            Navigator.of(context).pop();
+          } catch (e) {
+            print(e);
+          }
+        });
+      }
     }
   }
 }

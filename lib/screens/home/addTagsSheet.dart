@@ -37,6 +37,13 @@ class _AddTagsSheetState extends State<AddTagsSheet> {
   bool isEditingTags = false;
 
   @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
 

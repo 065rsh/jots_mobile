@@ -1139,7 +1139,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                     () => selectedPageIdToAddTask = widget.pages[i].documentID);
               },
               splashColor: Colors.transparent,
-              padding: EdgeInsets.only(right: 15, top: 3, bottom: 5),
+              padding: EdgeInsets.only(right: 18, top: 3, bottom: 5),
               child: Text(
                 i == 0 ? "None" : widget.pages[i].data["page_name"],
                 style: TextStyle(

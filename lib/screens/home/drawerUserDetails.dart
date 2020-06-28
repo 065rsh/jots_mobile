@@ -22,6 +22,13 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
   bool isEditingUser = false;
 
   @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
 
@@ -175,7 +182,7 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
     }
   }
 
-  Future getUserPhoto() async {
+  getUserPhoto() async {
     try {
       final image = await ImagePicker().getImage(
         source: ImageSource.gallery,

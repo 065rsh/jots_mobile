@@ -358,8 +358,6 @@ class _EditPageSheetState extends State<EditPageSheet> {
   }
 
   addNewPage() async {
-    print("newPageName: " + newPageName ?? "IS NULL");
-
     DocumentReference newPageRef = await pageColRef.add({
       "page_name": newPageName.trim(),
       "creation_date": DateTime.now(),
@@ -397,11 +395,13 @@ class _EditPageSheetState extends State<EditPageSheet> {
   }
 
   deletePage() {
+    final themeX = Theme.of(context);
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return AlertDialog(
+            backgroundColor: themeX.dialogBackgroundColor,
             title: Text(
               "Delete \"" + widget.initialPageName + "\"?",
               style: TextStyle(
@@ -411,7 +411,7 @@ class _EditPageSheetState extends State<EditPageSheet> {
             content: Text(
               "You cannot recover this page once deleted.",
               style: TextStyle(
-                color: Theme.of(context).textTheme.headline2.color,
+                color: Theme.of(context).textTheme.bodyText2.color,
               ),
             ),
             actions: [

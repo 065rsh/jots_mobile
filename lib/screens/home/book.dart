@@ -60,6 +60,13 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
   int defaultSortByInt = 0;
 
   @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
 

@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/screens/home/taskItem.dart';
-import 'package:jots_mobile/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'editPageSheet.dart';
 
@@ -42,6 +41,13 @@ class _PageItemState extends State<PageItem>
 
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
 
   @override
   void initState() {
@@ -189,7 +195,6 @@ class _PageItemState extends State<PageItem>
               : Container(
                   height: 5,
                 ),
-
           // # Page tasks list
           showTasks
               ? Container(

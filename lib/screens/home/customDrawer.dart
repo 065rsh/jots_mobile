@@ -40,6 +40,13 @@ class _CustomDrawerState extends State<CustomDrawer> {
   bool _darkTheme = true;
 
   @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
 

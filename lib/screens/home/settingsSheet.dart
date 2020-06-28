@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jots_mobile/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,6 +15,13 @@ class SettingsSheet extends StatefulWidget {
 
 class _SettingsSheetState extends State<SettingsSheet> {
   bool isDarkThemeEnable;
+
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
 
   @override
   void initState() {
@@ -50,68 +58,98 @@ class _SettingsSheetState extends State<SettingsSheet> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: themex.dividerColor.withAlpha(10)),
-              ),
-            ),
             padding: EdgeInsets.only(left: 15, top: 20, bottom: 15),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Icon(
-                  Icons.settings,
-                  color: themex.textTheme.headline1.color,
-                  size: 22,
-                ),
-                Container(
-                  margin: EdgeInsets.only(left: 6),
-                  child: Text(
-                    "Settings",
-                    style: TextStyle(
+                Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.settings,
                       color: themex.textTheme.headline1.color,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 2,
+                      size: 22,
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(left: 10),
+                      child: Text(
+                        "Settings • ",
+                        style: TextStyle(
+                          color: themex.textTheme.headline1.color,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      height: 25,
+                      alignment: Alignment.center,
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: themeblue.withAlpha(30),
+                        borderRadius: BorderRadius.circular(5),
+                        border: Border.all(color: themeblue),
+                      ),
+                      child: Text(
+                        isDarkThemeEnabled ? "DARK" : "LIGHT",
+                        style: TextStyle(
+                          color: themeblue,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                ButtonTheme(
+                  minWidth: 0,
+                  padding: EdgeInsets.only(right: 20),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  child: FlatButton(
+                    onPressed: () {
+                      onThemeChanged(!isDarkThemeEnable, themeNotifier);
+                      setState(() {
+                        isDarkThemeEnable = !isDarkThemeEnable;
+                      });
+                    },
+                    child: SvgPicture.asset(
+                      "assets/vectors/" +
+                          (isDarkThemeEnabled ? "Dark" : "Light") +
+                          "ThemeSwitchIcon.svg",
+                      width: 70,
                     ),
                   ),
-                ),
+                )
               ],
             ),
           ),
           // # Divider
           Container(
             color: themex.dividerColor,
-            // width: 350,
             height: 1,
           ),
-          // # Change theme button
+          // # Feedback container
           Container(
-            margin: EdgeInsets.only(top: 10, bottom: 40),
-            child: FlatButton(
-              onPressed: () {
-                onThemeChanged(!isDarkThemeEnable, themeNotifier);
-                setState(() {
-                  isDarkThemeEnable = !isDarkThemeEnable;
-                });
-              },
-              child: Row(
-                children: <Widget>[
-                  Text(
-                    "App theme  •  ",
-                    style: TextStyle(
-                      color: themex.textTheme.headline1.color,
-                    ),
+            margin: EdgeInsets.only(left: 20, top: 20, bottom: 20),
+            decoration: BoxDecoration(
+              color: lightDarkColor.withAlpha(30),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: ButtonTheme(
+              minWidth: 0,
+              height: 0,
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              child: FlatButton(
+                onPressed: () {},
+                child: Text(
+                  "Give us feedback",
+                  style: TextStyle(
+                    color: themex.textTheme.bodyText2.color,
                   ),
-                  Text(
-                    isDarkThemeEnabled ? "DARK" : "LIGHT",
-                    style: TextStyle(
-                      color: themeblue,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
