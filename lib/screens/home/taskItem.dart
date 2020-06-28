@@ -251,11 +251,10 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
     );
   }
 
-  _deleteTask() {
+  _deleteTask() async {
     Map<String, dynamic> map = {widget.taskId: FieldValue.delete()};
 
-    taskAnimationController.fling(velocity: -10);
-    widget.sectionRef.updateData(map);
+    await widget.sectionRef.updateData(map);
   }
 
   _onTaskLeftDragUpdate(details, maxTaskXOffset) {

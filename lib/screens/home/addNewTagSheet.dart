@@ -59,11 +59,6 @@ class _AddNewTagSheetState extends State<AddNewTagSheet> {
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final themeX = Theme.of(context);
     bool canSubmitTag = isTagNameValid &&

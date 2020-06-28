@@ -50,6 +50,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
   int taskPriority = 0;
   bool isTaskValid = false;
   bool closeSheetAfterCreatingTask = true;
+  bool isCreatingTask = false;
   bool showAddNotes = false;
   bool showSelectDate = false;
   String selectedPageIdToAddTask;
@@ -261,9 +262,10 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                     autofocus: isNewTask && !showAddNotes,
                                     controller: taskNoteController,
                                     keyboardType: TextInputType.multiline,
+                                    minLines: 1,
+                                    maxLines: 8,
                                     textCapitalization:
                                         TextCapitalization.sentences,
-                                    maxLines: null,
                                     onChanged: (text) {
                                       setState(() => taskNote = text);
                                     },
@@ -520,6 +522,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
+                                // # Note & Due date icon buttons
                                 Container(
                                   width: 60,
                                   child: Row(
@@ -575,15 +578,20 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                                 ),
                                 Row(
                                   children: <Widget>[
+                                    // # Create task button
                                     ButtonTheme(
                                       minWidth: 0,
                                       padding: EdgeInsets.all(0),
                                       materialTapTargetSize:
                                           MaterialTapTargetSize.shrinkWrap,
                                       child: FlatButton(
-                                        onPressed: () {
-                                          if (isTaskValid) {
-                                            _createNewTask();
+                                        onPressed: () async {
+                                          if (isTaskValid && !isCreatingTask) {
+                                            setState(() {
+                                              isCreatingTask = true;
+                                            });
+
+                                            await _createNewTask();
                                           }
                                         },
                                         child: Text(
@@ -1255,6 +1263,10 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
             dateWithDefaultTime, taskName.trim(), taskNote);
       }
     }
+
+    setState(() {
+      isCreatingTask = false;
+    });
 
     if (closeSheetAfterCreatingTask) {
       try {

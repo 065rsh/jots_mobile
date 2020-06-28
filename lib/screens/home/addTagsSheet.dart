@@ -228,9 +228,9 @@ class _AddTagsSheetState extends State<AddTagsSheet> {
                   alignment: Alignment.center,
                   padding: EdgeInsets.only(
                     top: 20,
-                    right: 50,
-                    bottom: 20,
-                    left: 50,
+                    right: 40,
+                    bottom: 15,
+                    left: 40,
                   ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.only(
@@ -293,6 +293,7 @@ class _AddTagsSheetState extends State<AddTagsSheet> {
     if (allTagsKeys.length != 0) {
       allTagsKeys.forEach((tagId) {
         bool isThisTagSelected = _selectedTagsList.contains(tagId);
+        Color tagColor = tagsColorArr[widget.allTags[tagId]["color"]];
 
         allTagsList.add(
           ButtonTheme(
@@ -330,12 +331,13 @@ class _AddTagsSheetState extends State<AddTagsSheet> {
                 margin: EdgeInsets.only(right: 10),
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: Colors.transparent,
-                    width: 0.5,
+                    color: isThisTagSelected
+                        ? tagColor.withAlpha(950)
+                        : Colors.transparent,
+                    width: 1,
                   ),
                   color: isThisTagSelected
-                      ? tagsColorArr[widget.allTags[tagId]["color"]]
-                          .withAlpha(30)
+                      ? tagColor.withAlpha(30)
                       : themex.hintColor.withAlpha(20),
                   borderRadius: BorderRadius.circular(5),
                 ),
