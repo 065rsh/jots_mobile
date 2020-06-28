@@ -97,7 +97,7 @@ class _PageItemState extends State<PageItem>
         left: 15,
         right: 15,
         bottom: widget.pageIndex == widget.pages.length - 1
-            ? 100
+            ? 140
             : showPageHeader ? 5 : 0,
       ),
       padding: EdgeInsets.only(
@@ -109,10 +109,8 @@ class _PageItemState extends State<PageItem>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
-          width: 0.3,
-          color: showPageHeader
-              ? lightDarkColor.withAlpha(100)
-              : Colors.transparent,
+          width: 1,
+          color: showPageHeader ? themex.dividerColor : Colors.transparent,
         ),
       ),
       child: Column(
@@ -135,7 +133,7 @@ class _PageItemState extends State<PageItem>
                             color: showTasks
                                 ? themex.dividerColor
                                 : Colors.transparent,
-                            width: 0.5,
+                            width: 1,
                           ),
                         ),
                       ),

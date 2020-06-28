@@ -16,7 +16,7 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
   FocusNode displayNameFocusNode = new FocusNode();
 
   FirebaseUser user;
-  var userPhoto;
+  File userPhoto;
 
   String newDisplayNameText;
   bool isEditingUser = false;
@@ -81,7 +81,7 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
                             width: 60,
                             height: 60,
                             decoration: BoxDecoration(
-                              color: Colors.black.withAlpha(30),
+                              color: Colors.black.withAlpha(50),
                             ),
                             child: FlatButton(
                               onPressed: () => getUserPhoto(),
@@ -177,10 +177,16 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
 
   Future getUserPhoto() async {
     try {
-      var image = await ImagePicker().getImage(
+      final image = await ImagePicker().getImage(
         source: ImageSource.gallery,
         maxHeight: 200,
       );
+
+      if (image == null) {
+        return;
+      }
+
+      setState(() => userPhoto = File(image.path));
 
       StorageReference storageReference = FirebaseStorage.instance
           .ref()
@@ -197,8 +203,6 @@ class _DrawerUserDetailsState extends State<DrawerUserDetails> {
           });
         });
       });
-
-      setState(() => userPhoto = image);
     } catch (e) {
       Scaffold.of(context).showSnackBar(
         SnackBar(

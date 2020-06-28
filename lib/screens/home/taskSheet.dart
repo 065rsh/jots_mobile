@@ -48,18 +48,25 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
   FocusNode taskNoteFN = new FocusNode();
 
   int taskPriority = 0;
-  bool isTaskValid = false;
   bool closeSheetAfterCreatingTask = true;
+  bool isTaskValid = false;
   bool isCreatingTask = false;
   bool showAddNotes = false;
   bool showSelectDate = false;
+  DateTime dueDate;
+  DateTime selectedDate;
+  List books = [];
+  List taskTagChips;
   String selectedPageIdToAddTask;
   String taskName;
   String taskNote;
-  DateTime dueDate;
-  DateTime selectedDate;
-  List taskTagChips;
-  List books = [];
+
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
 
   @override
   void initState() {
@@ -217,7 +224,7 @@ class _TaskSheetState extends State<TaskSheet> with TickerProviderStateMixin {
                         },
                         maxLength: 100,
                         style: TextStyle(
-                          color: themeX.textTheme.headline2.color,
+                          color: themeX.textTheme.bodyText1.color,
                           fontSize: 22,
                           height: 1.3,
                           fontWeight: FontWeight.w500,

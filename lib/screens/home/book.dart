@@ -708,6 +708,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
                             onHorizontalDragEnd: (details) =>
                                 _onDrawerDragEnd(details),
                             onTap: () {
+                              FocusScope.of(context)
+                                  .requestFocus(new FocusNode());
                               widget.toggleDrawer(false);
                             })
                         : Container(),
@@ -852,6 +854,8 @@ class _BookState extends State<Book> with TickerProviderStateMixin {
   }
 
   _onDrawerDragEnd(details) {
+    FocusScope.of(context).requestFocus(new FocusNode());
+
     double dragVelocity = details.velocity.pixelsPerSecond.dx;
 
     if (dragVelocity.abs() >= 365.0 &&

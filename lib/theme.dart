@@ -80,7 +80,7 @@ final darkTheme = ThemeData(
   brightness: Brightness.light,
   primaryColor: Colors.black,
   backgroundColor: Color(0xFF111111),
-  dividerColor: Color(0xFF222222),
+  dividerColor: Color(0xFF1B1B1B),
   hintColor: Color(0xFF555555),
   dialogBackgroundColor: Color(0xFF111111),
   dialogTheme: DialogTheme(
@@ -97,8 +97,9 @@ final darkTheme = ThemeData(
     headline3: TextStyle(
       color: Color(0xFF999999),
     ),
+    // # task name color
     bodyText1: TextStyle(
-      color: Color(0xFFEEEEEE),
+      color: Color(0xFFCCCCCC),
     ),
     bodyText2: TextStyle(
       color: Color(0xFFDDDDDD),
@@ -110,7 +111,7 @@ final lightTheme = ThemeData(
   primaryColor: Colors.white,
   brightness: Brightness.dark,
   backgroundColor: Color(0xFFF5F5F5),
-  dividerColor: Color(0xFFEEEEEE),
+  dividerColor: Color(0xFFF2F2F2),
   hintColor: Color(0xFFBBBBBB),
   dialogBackgroundColor: Colors.white,
   dialogTheme: DialogTheme(
@@ -127,7 +128,7 @@ final lightTheme = ThemeData(
     headline3: TextStyle(
       color: Color(0xFF777777),
     ),
-    // task name color
+    // # task name color
     bodyText1: TextStyle(
       color: Color(0xFF333333),
     ),

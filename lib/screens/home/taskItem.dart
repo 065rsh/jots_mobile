@@ -56,22 +56,24 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final themex = Theme.of(context);
-    final maxTaskXOffset = widget.showPageHeader ? -95 : -70;
+    final maxTaskXOffset = widget.showPageHeader ? -60 : -30;
     bool doesTaskHaveNote = widget.task["note"].length > 0;
     bool showDateAndPriorityRow =
         widget.task["due_date"] != "" || widget.task["priority"] != 0;
     bool showTagsRow = widget.task["tag_ids"].length != 0;
 
-    return Container(
-      margin: EdgeInsets.only(bottom: 15),
-      child: Stack(
-        children: <Widget>[
-          // # Complete task
-          GestureDetector(
-            onHorizontalDragUpdate: (details) =>
-                _onTaskLeftDragUpdate(details, maxTaskXOffset),
-            onHorizontalDragEnd: (details) => _onTaskDragEnd(details),
-            child: Row(
+    return GestureDetector(
+      onHorizontalDragUpdate: (details) =>
+          _onTaskLeftDragUpdate(details, maxTaskXOffset),
+      onHorizontalDragEnd: (details) => _onTaskDragEnd(details),
+      onTap: _openEditTaskSheet,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 20),
+        color: Colors.transparent,
+        child: Stack(
+          children: <Widget>[
+            // # Complete task
+            Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 // # task checkbox
@@ -93,6 +95,7 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
                             color: widget.task["is_checked"]
                                 ? themeblue
                                 : lightDarkColor.withAlpha(900),
+                            width: 1,
                           ),
                           borderRadius: BorderRadius.all(
                             Radius.circular(10),
@@ -116,10 +119,10 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
                 Expanded(
                   child: Container(
                     alignment: Alignment.centerLeft,
-                    child: FlatButton(
+                    child: ButtonTheme(
+                      height: 0,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       padding: EdgeInsets.all(0),
-                      onPressed: _openEditTaskSheet,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
@@ -154,7 +157,7 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
                           // # due date and priority
                           showDateAndPriorityRow
                               ? Container(
-                                  margin: EdgeInsets.only(top: 5),
+                                  margin: EdgeInsets.only(top: 4),
                                   child: Row(
                                     children: <Widget>[
                                       // # formatted due date
@@ -197,7 +200,7 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
                           // # Tags chips
                           showTagsRow
                               ? Container(
-                                  margin: EdgeInsets.only(top: 7, bottom: 5),
+                                  margin: EdgeInsets.only(top: 6, bottom: 5),
                                   child: Wrap(
                                     runSpacing: 5,
                                     spacing: 7,
@@ -212,41 +215,40 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
                 ),
               ],
             ),
-          ),
-          // # Delete button animation builder
-          AnimatedBuilder(
-            animation: taskAnimationController,
-            builder: (context, builderWidget) {
-              double slideX = maxTaskXOffset * taskAnimationController.value;
-
-              // # Delete button
-              return Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: themex.primaryColor,
-                  border: Border.all(
-                    color: warningColor,
+            // # Delete button animation builder
+            AnimatedBuilder(
+              animation: taskAnimationController,
+              builder: (context, builderWidget) {
+                double slideX = maxTaskXOffset * taskAnimationController.value;
+                // # Delete button
+                return Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: themex.primaryColor,
+                    border: Border.all(
+                      color: warningColor,
+                    ),
+                    borderRadius: BorderRadius.circular(5),
                   ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                margin: EdgeInsets.only(
-                  left: MediaQuery.of(context).size.width - 10 + slideX,
-                ),
-                child: FlatButton(
-                  onPressed: _deleteTask,
-                  splashColor: Colors.transparent,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  padding: EdgeInsets.all(0),
-                  child: SvgPicture.asset(
-                    "assets/vectors/DeleteIcon.svg",
-                    width: 17 * taskAnimationController.value,
+                  margin: EdgeInsets.only(
+                    left: MediaQuery.of(context).size.width - 30 + slideX,
                   ),
-                ),
-              );
-            },
-          ),
-        ],
+                  child: FlatButton(
+                    onPressed: _deleteTask,
+                    splashColor: Colors.transparent,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    padding: EdgeInsets.all(0),
+                    child: SvgPicture.asset(
+                      "assets/vectors/DeleteIcon.svg",
+                      width: 15,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -263,6 +265,7 @@ class _TaskItemState extends State<TaskItem> with TickerProviderStateMixin {
   }
 
   _onTaskDragEnd(details) {
+    print("YO");
     if (taskAnimationController.value > 0.5)
       taskAnimationController.fling(velocity: 10);
     else

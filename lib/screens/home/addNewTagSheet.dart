@@ -18,7 +18,6 @@ class AddNewTagSheet extends StatefulWidget {
 }
 
 class _AddNewTagSheetState extends State<AddNewTagSheet> {
-  bool isTagNameValid = false;
   bool isAddingNewTag = false;
   bool tagAlreadyExists = false;
   int selectedColor = 0;
@@ -61,7 +60,7 @@ class _AddNewTagSheetState extends State<AddNewTagSheet> {
   @override
   Widget build(BuildContext context) {
     final themeX = Theme.of(context);
-    bool canSubmitTag = isTagNameValid &&
+    bool canSubmitTag = tagName.length > 0 &&
         (initialTagName != tagName || initialTagColor != selectedColor);
 
     return GestureDetector(
@@ -123,7 +122,6 @@ class _AddNewTagSheetState extends State<AddNewTagSheet> {
                         textCapitalization: TextCapitalization.sentences,
                         onChanged: (value) => setState(() {
                           tagName = value;
-                          isTagNameValid = tagName.length > 0;
                         }),
                         style: TextStyle(
                           color: themeX.textTheme.headline1.color,
@@ -237,7 +235,7 @@ class _AddNewTagSheetState extends State<AddNewTagSheet> {
                               MaterialTapTargetSize.shrinkWrap,
                           child: FlatButton(
                             onPressed: () async {
-                              if (tagAlreadyExists) {
+                              if (tagAlreadyExists && isAddingNewTag) {
                                 showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
@@ -292,13 +290,9 @@ class _AddNewTagSheetState extends State<AddNewTagSheet> {
                             child: Text(
                               isAddingNewTag ? "Create" : "Edit",
                               style: TextStyle(
-                                color: widget.tagId == null
-                                    ? (canSubmitTag
-                                        ? themeblue
-                                        : lightDarkColor.withAlpha(80))
-                                    : (checkIfTagChanged()
-                                        ? themeblue
-                                        : lightDarkColor.withAlpha(80)),
+                                color: canSubmitTag
+                                    ? themeblue
+                                    : lightDarkColor.withAlpha(80),
                                 fontSize: 20,
                               ),
                             ),
